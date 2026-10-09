@@ -27,6 +27,7 @@
 |---|---|---|---|---|
 | Home (hero) | `4608-23740` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4608-23740&m=dev | 2026-10-09 | ✅ [sections/hero.md](sections/hero.md): 13 фреймів 1440×750, з них 5 Home (3 стани hero + 2 початок Intro) і 8 Preloader(4..11) |
 | Intro | `4608-23742` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4608-23742&m=dev | 2026-10-09 | ✅ [sections/intro.md](sections/intro.md): фрейм `869:18299` 1440×3810, один статичний стан, без SVG-шляху, UI-слайдера й відео |
+| Intro: UI-слайдер | `4609-22242` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4609-22242&m=dev | 2026-10-09 | ⬜ субагент → дописати в sections/intro.md (розділ «UI-слайдер») |
 | Interactive | — | TODO: користувач додасть | | |
 | Techniques | — | TODO | | |
 | Lessons | — | TODO | | |
