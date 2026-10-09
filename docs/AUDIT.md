@@ -98,3 +98,77 @@ MOUSE_SECOND_CLICK 3, SCROLL_INTO_VIEW 2, SCROLL_OUT_OF_VIEW 2, PAGE_START 1.
 8. 8 lesson-секцій — ручні копії без компонента; `order` як текст.
 9. `name-in-list` з жорстким 62-символьним лімітом замість CSS-обрізання.
 10. Картинки CMS з іншого сайту.
+
+## Lighthouse лайву — базова точка (2026-10-09, сесія 4)
+
+Lighthouse 12.8.2 з CLI (`npx lighthouse@12`), headless Google Chrome, по 3
+прогони на кожен режим. В таблиці медіана, повні звіти медіанних прогонів
+лежать у `reference/lighthouse/live-{desktop,mobile}-2026-10-09.json.gz`
+(відкриваються в https://googlechrome.github.io/lighthouse/viewer/).
+Desktop — `--preset=desktop` (RTT 40 мс, 10 Мбіт/с, CPU ×1). Mobile — дефолт
+(Moto G Power, RTT 150 мс, ~1.6 Мбіт/с, CPU ×4). Обидва з simulate-тротлінгом.
+
+| | Desktop | Mobile |
+|---|---|---|
+| **Performance** (3 прогони) | **94** (90 / 95 / 94) | **93** (93 / 94 / 93) |
+| Accessibility | 86 | 86 |
+| Best Practices | 78 | 79 |
+| SEO | 100 | 100 |
+| FCP | 0.6 с | 1.9 с |
+| LCP | 1.1 с | 2.2 с |
+| TBT | 0 мс | 27 мс |
+| CLS | 0 | 0.012 |
+| Speed Index | 2.1 с | 5.4 с |
+| TTI | 1.1 с | 7.0 с |
+| Вага сторінки | 6.9 MB, 132 запити | 6.8 MB, 128 запитів |
+| DOM | 3 087 елементів | 3 087 |
+| Main thread / JS bootup | 1.0 с / 0.4 с | 3.9 с / 1.9 с |
+
+**Чому високий бал оманливий.** LCP-елемент — текст hero
+`section#hero .text-wrap .p1`. Lighthouse рахує його, щойно він з'являється в
+DOM під прелоадером, а прелоадер триває 9 с на мобайлі й 15 с на десктопі
+(лічильник іде на таймері, див. recordings.md). Lighthouse цього не бачить.
+Реальна «перша корисна взаємодія» = кінець прелоадера. Тому порівнювати
+копію з лайвом треба і за Lighthouse, і за часом до кінця прелоадера на записі.
+
+**Вага за типами (desktop):** Media 4.9 MB · Image 1.1 MB · Script 0.5 MB ·
+Font 179 KB · XHR (Lottie JSON) 145 KB · CSS 19 KB · HTML 31 KB.
+
+**Найважче на старті, хоча воно далеко під фолдом:**
+
+| KB | Що | Де |
+|---|---|---|
+| 1 881 | `slider/optimise/3_House_og_VP9.webm` | UI-слайдер Intro |
+| 1 139 | `examples/example-1.mp4` | урок easing, «Implementation examples» |
+| 580 | `slider/optimise/2_Game-hevc_VP9.webm` | UI-слайдер Intro |
+| 386–547 | `examples/tablet/example-1-tablet.mp4` (**двічі**) | те саме, tablet-версія |
+| 261 | `Lessons/lesson-6/dimension_VP9.webm` | урок dimension |
+| 168–232 | `examples/mobile/example-1-mobile.mp4` | те саме, mobile-версія |
+| 176 | gtag.js | GA4 |
+| 168 | webflow.js (IX2) | — |
+| 115 + 106 | PNG `1_CAR_CURVE_DEMO_FULL`, `1_CAR_EASING_COMPARISON` | урок easing |
+| 60 | `not_real_time.json` (Lottie) | Interactive |
+
+Головні висновки для перезбірки:
+1. **Відео грузяться одразу, і всі три версії разом (desktop, tablet, mobile).**
+   Це ~4.9 MB на першому завантаженні. У перезбірці: `preload="none"` + постер,
+   підвантаження через IntersectionObserver, одна версія на брейкпоінт
+   (`<source media>` або вибір у JS). Виграш ~4.5 MB.
+2. **webflow.js (IX2) — найдорожчий скрипт на мобайлі:** 2.1 с виконання, з
+   них 1.4 с скриптинг. Причини: 1 545 вузлів і багато IX2-тригерів. Перехід на
+   IX3 + один модуль GSAP має прибрати більшу частину.
+3. Рендер блокує CSS Webflow, але це неминуче: на мобайлі 0.9 с, на десктопі 0.3 с.
+4. Картинки: PNG → WebP/AVIF дає ~630 KB економії (`modern-image-formats`).
+   У 31 ресурсу короткий кеш, найбільше на `cdn.zajno.com`, ~3.5 MB.
+   Перевірити, чи CDN студії віддає `Cache-Control`.
+5. Легасі: jQuery 3.5.1 (Webflow), 137 KB невикористаного JS, пасивних
+   слухачів скролу немає (`uses-passive-event-listeners`). Це Lenis/script.v33.
+6. **Accessibility 86:** у `<html>` немає `lang`, у 7 посилань (mobile) немає
+   імені (іконки соцмереж/бургер), порушено порядок заголовків (4), 2 контрасти.
+   Виправити в перезбірці, бо візуально це нічого не міняє.
+7. **Best Practices 78:** 7 сторонніх cookies (Twitter pixel, GA), issues у
+   DevTools.
+
+Цілі для копії: Performance ≥ лайву (93/94). Вага на старті < 2 MB, на мобайлі
+TTI < 4 с, JS bootup < 1 с, Accessibility ≥ 95. Час прелоадера — 1:1 з лайвом
+(це дизайн, а не продуктивність).
