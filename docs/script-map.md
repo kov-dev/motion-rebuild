@@ -10,9 +10,9 @@
 | Блок | Що робить | Секція | Куди в перезбірці |
 |---|---|---|---|
 | A | Детект mobile/Firefox, scrollTo(0,0) через 100 мс, Lenis (десктоп) або `normalizeScroll` (мобайл), `scrollerProxy` на body | глобально | **Код**: Lenis пінований, інтеграція без scrollerProxy, `matchMedia` замість одноразового `innerWidth` |
-| B | Idle 4 с (`ifvisible`) → нескінченне похитування `.ui-slide` ±1.5% | Introduction (UI-слайдер) | **Код** (3 рядки), `ifvisible` замінити на власний idle-таймер або `Observer` |
+| B | Idle 4 с (`ifvisible`) → нескінченне похитування `.ui-slide` ±1.5% | Introduction (UI-слайдер) | ✅ `initUiIdle()` (сесія 11): власний таймер, лише коли слайдер у в'юпорті |
 | C | Кулька hero → падіння → MotionPath по SVG (`#vrtx*`) у 4 сегменти, кожен відкриває рядок інтро-тексту; на десктопі фінальний bounce у перший слайд | Hero + Introduction | **Код** (MotionPath, обчислення координат) |
-| D | 2 × `.ui`: pin, трек їде вліво, слайди розширюються 25→75vw, відео відкривається `clip-path: circle()`, передача кульки `.ui-ball` між блоками | Introduction (UI-слайдер) | **Код** (найскладніший блок, ~350 рядків) |
+| D | 2 × `.ui`: pin, трек їде вліво, слайди розширюються 25→75vw, відео відкривається `clip-path: circle()`, передача кульки `.ui-ball` між блоками | Introduction (UI-слайдер) | ✅ `initUi()` (сесія 11), intro.md «UI-слайдер у коді» |
 | E | Resources: pin + 3 фази (стрілки → трек → списки), синхронізація табів хедера; hover на айтемах — стек із 3 картинок з поворотом (jQuery) | Resources | pin/scrub — **код**; hover-стек — **код** (є стан, jQuery прибрати); `active` на першому айтемі — **CSS/клас у Designer** |
 | F | Matter.js: 35 куль у невидимій круглій клітці з 32 статичних пегів, відштовхування від курсора, drag, гравітація за напрямком скролу, звук зіткнень через Web Audio з панорамою | Interactive («Real-time» картка) | **Код**, окремий модуль `sphere.js`, lazy-init при першому вході |
 | G | `.height-section.is-interactive`: pin + горизонтальний зсув на `scrollWidth − vw`; тригер `once` → `initSphere()` | Interactive | **Код** (або IX3 scroll-scrub, якщо зсув задати в vw — перевірити) |

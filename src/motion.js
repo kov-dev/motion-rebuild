@@ -257,11 +257,15 @@ function heroBallRest(ball) {
   return { x: c.x + dx, y: c.y + dy };
 }
 
+// Width of a ui panel before the slider touches it (CSS: 25vw, ≤991 100vw).
+const panelRestWidth = () => (innerWidth >= 992 ? 0.25 : 1) * innerWidth;
+
 // Natural (unpinned, untransformed) centre of an element inside a ui block, in document space.
-function uiNaturalCentre(el, block) {
+// `w` overrides the element width (a panel may be mid-tween during a refresh).
+function uiNaturalCentre(el, block, w = el.offsetWidth) {
   const anchor = block.parentElement.classList.contains('pin-spacer') ? block.parentElement : block;
   const a = anchor.getBoundingClientRect();
-  let x = el.offsetWidth / 2;
+  let x = w / 2;
   let y = el.offsetHeight / 2;
   for (let n = el; n && n !== block; n = n.offsetParent) {
     x += n.offsetLeft;
@@ -315,13 +319,18 @@ export function initIntro() {
       if (ctx.conditions.reduce) {
         // No travel: texts are visible, the ball hands over as soon as Intro starts.
         texts.forEach((t, i) => setText(i, true));
-        ScrollTrigger.create({
+        const st = ScrollTrigger.create({
           trigger: scene,
           start: 'top center',
           onEnter: () => handOver(true),
           onLeaveBack: () => handOver(false),
         });
-        return;
+        const resync = () => {
+          handed = null;
+          handOver(st.scroll() >= st.start);
+        };
+        ScrollTrigger.addEventListener('refresh', resync);
+        return () => ScrollTrigger.removeEventListener('refresh', resync);
       }
 
       // Path geometry in the ball's translate space, recomputed on every refresh.
@@ -336,7 +345,7 @@ export function initIntro() {
         return { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f };
       };
       const land = () => {
-        const target = uiNaturalCentre(q('ui-slide', block), block);
+        const target = uiNaturalCentre(q('ui-slide', block), block, panelRestWidth());
         const rest = heroBallRest(ball);
         return { x: target.x - rest.x, y: target.y - rest.y };
       };
@@ -361,12 +370,21 @@ export function initIntro() {
           scrub: 1,
           invalidateOnRefresh: true,
         },
-        onUpdate: () => {
-          const t = tl.time();
-          marks.forEach((m, i) => setText(i, t >= m));
-          handOver(tl.progress() === 1);
-        },
+        onUpdate: () => sync(),
       });
+      const sync = () => {
+        const t = tl.time();
+        marks.forEach((m, i) => setText(i, t >= m));
+        handOver(tl.progress() === 1);
+      };
+      // ScrollTrigger.refresh() reverts the inline styles of matchMedia animations to measure and restores them
+      // afterwards, which can undo state sets made during it: drop the caches and re-apply after every refresh.
+      const resync = () => {
+        shown.fill(null);
+        handed = null;
+        sync();
+      };
+      ScrollTrigger.addEventListener('refresh', resync);
 
       // Drop from the Hero axis to the path start (live: 0.033·vw + path top on desktop).
       tl.fromTo(ball, { x: 0, y: 0 }, { x: () => at(0).x, y: () => at(0).y, duration: drop })
@@ -382,6 +400,7 @@ export function initIntro() {
       }
 
       return () => {
+        ScrollTrigger.removeEventListener('refresh', resync);
         handOver(false);
         gsap.set(ball, { clearProps: 'x,y' });
       };
@@ -412,13 +431,340 @@ function initIntroClouds(scene) {
   );
 }
 
+/* ---------- ui slider (Intro, script.v33 blocks B and D) ---------- */
+
+const CLIP_FULL = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
+const CLIP_GONE = 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)';
+
+// Centre of an element relative to its ui block, without the element's own GSAP x/y.
+function blockRelCentre(el, block) {
+  const r = el.getBoundingClientRect();
+  const b = block.getBoundingClientRect();
+  return {
+    x: r.left + r.width / 2 - b.left - gsap.getProperty(el, 'x'),
+    y: r.top + r.height / 2 - b.top - gsap.getProperty(el, 'y'),
+  };
+}
+
+// Document-space top-left of a ui block as laid out in the flow (its pin-spacer while pinned).
+function blockOrigin(block) {
+  const anchor = block.parentElement.classList.contains('pin-spacer') ? block.parentElement : block;
+  const a = anchor.getBoundingClientRect();
+  return { x: a.left + scrollX, y: a.top + scrollY };
+}
+
+/**
+ * Pinned horizontal slider of the Intro: every [data-motion=ui] block pins in DOM order, its rail slides left
+ * panel by panel, panels grow 25→75vw and open with a circular clip-path, the video fades in and plays.
+ * Between blocks the ui-ball drops from one block into the first panel of the next.
+ * Timeline units are the live ones (8 per panel); the live per-panel timelines are merged into one per block.
+ */
+export function initUi() {
+  const blocks = qa('ui');
+  if (!blocks.length) return;
+  const heroSticky = q('hero-ball-sticky');
+  const heroAxis = q('hero-ball-wrap');
+  const finalPanel = qa('ui-slide', blocks[blocks.length - 1]).pop();
+
+  gsap.matchMedia().add(
+    {
+      wide: '(min-width: 992px)',
+      narrow: '(max-width: 991px)',
+      touch: '(hover: none) and (pointer: coarse)',
+      reduce: '(prefers-reduced-motion: reduce)',
+    },
+    ({ conditions: c }) => {
+      const wide = c.wide;
+      // Touch screens scroll faster: the live site tripled the pin there and used a slower schedule
+      // (+2 units before each panel). Narrow mouse windows take that schedule too: on the live site they
+      // mixed both and the rail drifted out of sync with the panels.
+      const slow = c.touch || !wide;
+      const k = c.reduce ? 0 : 1;
+      const vw = () => innerWidth;
+      // One rail step: the active panel width.
+      const step = () => (wide ? 0.75 : 1) * vw();
+
+      // Videos are preload="none" (the live site autoplayed all six at load): buffer one panel ahead instead.
+      const warm = (panel) => {
+        const video = q('ui-video', panel);
+        if (!video || video.preload === 'auto') return;
+        video.preload = 'auto';
+        if (video.readyState === 0 && video.networkState !== video.NETWORK_LOADING) video.load();
+      };
+
+      const open = new Map();
+      const setPanel = (panel, on) => {
+        if (open.get(panel) === on) return;
+        open.set(panel, on);
+        const video = q('ui-video', panel);
+        if (on) {
+          // 'auto', not true: true would also kill the scrubbed width tweens of the panel.
+          gsap.to(panel, { clipPath: `circle(${Math.max(vw(), innerHeight)}px at 50% 50%)`, duration: 0.7 * k, ease: 'none', overwrite: 'auto' });
+          if (!video) return;
+          video.currentTime = 0;
+          gsap.to(video, {
+            opacity: 1,
+            delay: 0.1 * k,
+            duration: 0.6 * k,
+            ease: 'none',
+            overwrite: true,
+            onComplete: () => video.play().catch(() => {}),
+          });
+        } else {
+          gsap.to(panel, {
+            clipPath: `circle(${0.09 * remPx()}px at 50% 50%)`,
+            duration: 0.7 * k,
+            ease: 'none',
+            overwrite: 'auto',
+            onComplete: () => gsap.set(panel, { clearProps: 'clipPath' }), // back to the rem-based CSS dot
+          });
+          if (!video) return;
+          gsap.to(video, { opacity: 0, duration: 0.7 * k, ease: 'none', overwrite: true, onComplete: () => video.pause() });
+        }
+      };
+      // End state of a panel at once, nothing restarted (after a refresh; an open panel also takes the new radius).
+      const settle = (panel, on) => {
+        open.set(panel, on);
+        const video = q('ui-video', panel);
+        gsap.killTweensOf(panel, 'clipPath');
+        if (on) gsap.set(panel, { clipPath: `circle(${Math.max(vw(), innerHeight)}px at 50% 50%)` });
+        else gsap.set(panel, { clearProps: 'clipPath' });
+        if (!video) return;
+        gsap.killTweensOf(video);
+        gsap.set(video, { opacity: on ? 1 : 0 });
+        if (!on) video.pause();
+        else if (video.paused) video.play().catch(() => {});
+      };
+
+      // ScrollTrigger.refresh() reverts the inline styles of matchMedia animations to measure and restores them
+      // afterwards, which can undo state sets made during it: every block re-applies its states after a refresh.
+      const resyncs = [];
+      const onRefresh = () => resyncs.forEach((f) => f());
+      ScrollTrigger.addEventListener('refresh', onRefresh);
+
+      blocks.forEach((block, j) => {
+        const track = q('ui-track', block);
+        const heading = q('ui-text', block);
+        const panels = qa('ui-slide', block);
+        const n = panels.length;
+        if (!track || !n) return;
+        panels.forEach((p) => open.set(p, false));
+
+        // Live: vw·k + vw·n·k + 0.5·vw·n + 0.25·vw, ×3 on touch screens.
+        const pinLength = () => {
+          const w = vw();
+          const kk = wide ? 0.75 : 1;
+          return (w * kk + w * n * kk + 0.5 * w * n + 0.25 * w) * (c.touch ? 3 : 1);
+        };
+        // Rail position after `s` steps. Narrow: the live rail went −100vw while the panel row went from
+        // margin −100vw to 0 (no visible move); here the margin stays and the rail is one step behind.
+        const railX = (s) => () => -(wide ? s : s - 1) * step();
+
+        const windows = [];
+        const tl = gsap.timeline({
+          defaults: { ease: 'none', immediateRender: false },
+          scrollTrigger: {
+            trigger: block,
+            pin: true,
+            anticipatePin: 1,
+            start: 'top top',
+            end: () => `+=${pinLength()}`,
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+          onUpdate: () => sync(setPanel),
+        });
+        const sync = (apply) => {
+          const t = tl.time();
+          windows.forEach(([r0, r1], i) => {
+            if (t > r0 - 8) warm(panels[i]);
+            apply(panels[i], t > r0 && (t < r1 || panels[i] === finalPanel));
+          });
+        };
+        resyncs.push(() => sync((panel, on) => (open.get(panel) === on ? settle(panel, on) : setPanel(panel, on))));
+        // The first video starts buffering one viewport before the pin.
+        ScrollTrigger.create({ trigger: block, start: 'top bottom', onEnter: () => warm(panels[0]) });
+
+        // Step 0: the rail brings the first panel in (narrow: the heading wipes out downwards instead).
+        if (wide) tl.fromTo(track, { x: 0 }, { x: railX(1), duration: 4 }, 0);
+        else if (heading) {
+          gsap.set(heading, { y: 0, yPercent: 50 }); // the CSS translateY(50%), kept relative
+          tl.fromTo(heading, { yPercent: 50, clipPath: CLIP_FULL }, { yPercent: -50, clipPath: CLIP_GONE, duration: 4 }, 0);
+        }
+
+        // Middle panels: one step each, then a hold while the panel is open.
+        let t = 4 + (slow ? 6 : 4);
+        let s = 1;
+        for (let i = 1; i < n - 1; i++, s++, t += 8) tl.fromTo(track, { x: railX(s) }, { x: railX(s + 1), duration: 4 }, t);
+        // Last panel: wide holds, then the rail shifts by the 25vw strip; narrow moves one step, then holds.
+        const last = s;
+        if (wide) {
+          t += slow ? 8 : 12;
+          tl.fromTo(track, { x: railX(last) }, { x: () => railX(last)() - 0.25 * vw(), duration: 4 }, t);
+          t += 4;
+        } else {
+          tl.fromTo(track, { x: railX(last) }, { x: railX(last + 1), duration: 4 }, t);
+          t += 12;
+        }
+        const total = t;
+        tl.set({}, {}, total);
+
+        // Panels: grow at 8·i (+2 slow), open for 4 units (the wide last one for 8), the one before last
+        // folds back to 25vw, the last one widens to the full viewport.
+        panels.forEach((panel, i) => {
+          const start = 8 * i + (slow ? 2 : 0);
+          const r0 = start + 4;
+          const r1 = r0 + (i === n - 1 && !slow ? 8 : 4);
+          windows.push([r0, r1]);
+          if (!wide) return;
+          tl.fromTo(panel, { width: () => 0.25 * vw() }, { width: () => 0.75 * vw(), duration: 4 }, start);
+          if (i === n - 2) tl.fromTo(panel, { width: () => 0.75 * vw() }, { width: () => 0.25 * vw(), duration: 4 }, r1);
+          if (i === n - 1) tl.fromTo(panel, { width: () => 0.75 * vw() }, { width: vw, duration: 4 }, r1);
+        });
+
+        // The Hero ball can still be landing (intro scrub lags ~1 s): keep it on the first panel. The pin
+        // scrolls the page by pinLength linearly, so one tween replaces the live per-frame "manual sticky".
+        if (j === 0) {
+          if (heroSticky) tl.fromTo(heroSticky, { y: 0 }, { y: () => -pinLength(), duration: total }, 0);
+          if (heroAxis && wide) {
+            gsap.set(heroAxis, { y: 0, yPercent: 50 }); // keep the CSS translateY(50%) relative
+            tl.fromTo(heroAxis, { x: 0 }, { x: () => -0.5 * vw(), duration: 4 }, 0);
+          }
+        }
+
+        // Hand-over to the next block: from the pin end until the next block pins (one block height later).
+        const next = blocks[j + 1];
+        if (!next) return;
+        const dot = q('ui-ball', block);
+        const nextLanding = q('ui-landing', next);
+        let mode = null;
+        const handState = (p) => {
+          const m = p <= 0 ? 0 : p >= 1 ? 2 : 1;
+          if (m === mode) return;
+          mode = m;
+          gsap.set(track, { opacity: m === 0 ? 1 : 0 }); // the dot replaces the last panel's dot
+          if (dot) gsap.set(dot, { opacity: m === 1 ? 1 : 0 });
+          if (nextLanding) gsap.set(nextLanding, { opacity: m === 2 ? 1 : 0 });
+        };
+
+        const ho = gsap.timeline({
+          defaults: { ease: 'none', immediateRender: false },
+          scrollTrigger: {
+            trigger: block,
+            start: () => tl.scrollTrigger.end,
+            end: () => tl.scrollTrigger.end + block.offsetHeight,
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+          onUpdate: () => handState(ho.progress()),
+        });
+        resyncs.push(() => {
+          mode = null;
+          handState(ho.progress());
+        });
+        if (!dot) return;
+        gsap.set(dot, { x: 0, y: 0, xPercent: 50, yPercent: -50 }); // the CSS centring, kept relative
+
+        // Offset from the dot to the centre of the next block's first panel, both as laid out in the flow
+        // (this block where its pin releases it).
+        const target = () => {
+          const from = blockRelCentre(dot, block);
+          const o = blockOrigin(block);
+          o.y += tl.scrollTrigger.end - tl.scrollTrigger.start;
+          const to = uiNaturalCentre(q('ui-slide', next), next, panelRestWidth());
+          return { x: to.x - o.x - from.x, y: to.y - o.y - from.y };
+        };
+        if (wide) {
+          // Live: drop near the viewport bottom (½vh + the space under the heading + one ball), then bounce
+          // up into the panel while drifting right. The live bounce ended 7 px low and snapped; here it ends centred.
+          const drop = () => innerHeight / 2 + (innerHeight - (heading?.offsetHeight || 0)) / 2 + dot.offsetHeight;
+          ho.fromTo(dot, { y: 0 }, { y: drop, duration: 0.45 })
+            .fromTo(dot, { x: 0 }, { x: () => target().x, duration: 0.7 })
+            .fromTo(dot, { y: drop }, { y: () => target().y, duration: 0.7, ease: 'bounceSmall' }, '<');
+        } else {
+          // Narrow: the dot holds the viewport centre while the next block scrolls up under it.
+          ho.fromTo(dot, { y: 0 }, { y: () => target().y, duration: 1 });
+        }
+      });
+
+      return () => {
+        ScrollTrigger.removeEventListener('refresh', onRefresh);
+        open.forEach((on, panel) => {
+          gsap.set(panel, { clearProps: 'clipPath,width' });
+          const video = q('ui-video', panel);
+          if (video) {
+            gsap.set(video, { opacity: 0 }); // the embed starts at inline opacity 0
+            video.pause();
+          }
+        });
+        blocks.forEach((block) => {
+          gsap.set(els(q('ui-track', block), q('ui-text', block), q('ui-ball', block)), { clearProps: 'transform,clipPath,opacity' });
+          const landing = q('ui-landing', block);
+          if (landing && block !== blocks[0]) gsap.set(landing, { clearProps: 'opacity' });
+        });
+        gsap.set(els(heroSticky, heroAxis), { clearProps: 'transform' });
+      };
+    }
+  );
+
+  initUiIdle(blocks);
+}
+
+// Idle hint (live block B): after 4 s without input the panels sway ±1.5 %, any input stops them.
+// Own timer instead of ifvisible; runs only while a slider block is on screen.
+function initUiIdle(blocks) {
+  const panels = blocks.flatMap((b) => qa('ui-slide', b));
+  if (!panels.length) return;
+  gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+    const sway = gsap
+      .timeline({ repeat: -1, paused: true, defaults: { duration: 0.4, ease: 'none' } })
+      .to(panels, { xPercent: -1.5 })
+      .to(panels, { xPercent: 0 })
+      .to(panels, { xPercent: 1.5 })
+      .to(panels, { xPercent: 0 });
+    const inView = new Set();
+    const io = new IntersectionObserver((entries) =>
+      entries.forEach((e) => (e.isIntersecting ? inView.add(e.target) : inView.delete(e.target)))
+    );
+    blocks.forEach((b) => io.observe(b));
+
+    let timer = 0;
+    let idle = false;
+    const sleep = () => {
+      if (document.hidden || !inView.size) return;
+      idle = true;
+      sway.restart();
+    };
+    const wake = () => {
+      clearTimeout(timer);
+      if (idle) {
+        idle = false;
+        sway.pause(0.8); // 0.8 s into the loop the panels are back at 0
+      }
+      timer = setTimeout(sleep, 4000);
+    };
+    const events = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll', 'visibilitychange'];
+    events.forEach((e) => addEventListener(e, wake, { passive: true }));
+    wake();
+
+    return () => {
+      clearTimeout(timer);
+      io.disconnect();
+      events.forEach((e) => removeEventListener(e, wake));
+      gsap.set(panels, { clearProps: 'transform' });
+    };
+  });
+}
+
 /* ---------- boot ---------- */
 
 async function init() {
   await initPreloader();
+  // Created in DOM order, so every trigger below a pin already knows its spacer.
   initHero();
   initIntro();
-  // Next passes: initUi(), initInteractive(), … created in DOM order, then one refresh.
+  initUi();
+  // Next passes: initInteractive(), … then one refresh.
   ScrollTrigger.refresh();
 }
 
