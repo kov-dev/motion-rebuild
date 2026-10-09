@@ -54,7 +54,8 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 | `.ball-divider.is-left/right` | `hero-divider` + `data-side` |
 | `.embed-path*`, `#vrtx*` | `intro-path` + `data-bp="desktop|tablet|mobile"` — на `<path>`, ✅ у копії (сесія 9) |
 | `.anim-shape.is-*` | `intro-text` + `data-step="0..3"` — на рухомому тексті, ✅ у копії (сесія 9) |
-| `.ui` / `.ui-track` / `.ui-slide` / `.ui-text` / `.ui-ball` | `ui` / `ui-track` / `ui-slide` / `ui-text` / `ui-ball` + `ui-slides` (ряд панелей), `ui-video` (на `<video>`) — ✅ у копії (сесія 9) |
+| `.ui` / `.ui-track` / `.ui-slide` / `.ui-text` / `.ui-ball` | `ui` / `ui-track` / `ui-slide` / `ui-text` / `ui-ball` + `ui-slides` (ряд панелей), `ui-video` (на `<video>`) — ✅ у копії (сесія 9); `ui-landing` на тілі першої панелі блоку (`.section-slide-wrap` першого слайда) — ✅ (сесія 10) |
+| `.div-2` / `.bg-list-item.is-first/second/third` (IX2 a-127/a-156) | `intro-art` / `intro-cloud` (+ `data-layer="back"` на середній) — ✅ у копії (сесія 10) |
 | `.is-introduction` / `.intro-wrap` | `intro` (на `intro-scene`) — ✅ у копії (сесія 9) |
 | `.height-section.is-interactive` | `interactive-track` |
 | `#canvas` | `sphere` |

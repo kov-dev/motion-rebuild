@@ -58,7 +58,7 @@
 |---|---|---|---|---|---|
 | Preloader | ✅ | ✅ [preloader.md](docs/sections/preloader.md) | ✅ зібрано, знімки фаз (2026-10-09) | 🟨 `initPreloader()` написано й прогнано на staging-розмітці, у Webflow не підключено | ⬜ |
 | Hero | ✅ | ✅ | ✅ `section-hero` (2026-10-09), звірено з лайвом 1–2 px, знімок Designer (сесія 9); старий Hero ще на сторінці | ✅ вхід — `initPreloader()`, вихід ліній/кільця — `initHero()` (сесія 9, прогнано на staging-розмітці); у Webflow не підключено | ⬜ |
-| Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ✅ `section-intro` зі сценою, шляхами й UI-слайдером (сесія 9), звірено з лайвом Δ 0–1 px; старий Intro ще на сторінці | 🟨 план `initIntro()` / `initUi()` у [intro.md](docs/sections/intro.md) «План анімації» | ⬜ |
+| Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ✅ `section-intro` зі сценою, шляхами й UI-слайдером (сесія 9), звірено з лайвом Δ 0–1 px; старий Intro ще на сторінці | 🟨 ✅ `initIntro()` (кулька по шляху, тексти, посадка) + хмари кодом — звірено з лайвом Δ ≤ 1 px на 3 смугах (сесія 10); ⬜ `initUi()` (pin слайдера) | 🟨 на staging-розмітці з фікстурою; у Webflow код не підключено |
 | Interactive | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Techniques | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Lessons ×8 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |

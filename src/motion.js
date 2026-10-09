@@ -1,6 +1,6 @@
 /*
   motion.js — the single animation module of the Motion rebuild.
-  Canonical source: src/motion.js. Not connected to Webflow yet (stage 3: preloader + hero exit).
+  Canonical source: src/motion.js. Not connected to Webflow yet (stage 3: preloader, hero exit, intro).
 
   Rules (CONVENTIONS.md):
   - DOM is bound only through data-motion="<role>" attributes, never through classes.
@@ -13,8 +13,13 @@
 import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/+esm';
 import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/CustomEase/+esm';
 import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger/+esm';
+import { MotionPathPlugin } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/MotionPathPlugin/+esm';
 
-gsap.registerPlugin(CustomEase, ScrollTrigger);
+gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin);
+
+// Landing eases of the live site (script.v33 block C), used by intro and ui.
+CustomEase.create('bounce', 'M0,0 C0.05222,-0.59802 0.31828,-1.38625 0.55039,0 0.65208,-0.78892 0.94566,-0.58262 1,1');
+CustomEase.create('bounceSmall', 'M0,0,C0.052,-0.598,0.246,-0.72,0.336,0,0.498,-0.502,0.792,-0.482,1,1');
 
 /* ---------- helpers ---------- */
 
@@ -222,12 +227,198 @@ export function initHero() {
   });
 }
 
+/* ---------- intro ---------- */
+
+// Path progress (0..1) where the pill texts 1–3 open; the 4th opens at the path end. Live values per band.
+const INTRO_STOPS = {
+  desktop: [0.1477, 0.43367, 0.61329, 1],
+  tablet: [0.12336, 0.37553, 0.53228, 1],
+  mobile: [0.13847, 0.348, 0.5061, 1],
+};
+
+// Document-space centre of a box.
+const centre = (r) => ({ x: r.left + r.width / 2 + scrollX, y: r.top + r.height / 2 + scrollY });
+
+// Where the Hero ball rests with no own transform once Hero has scrolled past: the sticky box is then
+// released at the bottom of its section. Layout-based, so it does not depend on the current scroll
+// (the live site aligned the path at load time, while the sticky box was somewhere else).
+function heroBallRest(ball) {
+  const sticky = q('hero-ball-sticky');
+  const wrap = q('hero-ball-wrap');
+  const c = centre(ball.getBoundingClientRect());
+  let dx = -gsap.getProperty(ball, 'x') - (wrap ? gsap.getProperty(wrap, 'x') : 0);
+  let dy = -gsap.getProperty(ball, 'y');
+  if (sticky) {
+    const host = sticky.parentElement;
+    const stickyY = gsap.getProperty(sticky, 'y');
+    const bottom = host.getBoundingClientRect().bottom - parseFloat(getComputedStyle(host).paddingBottom);
+    dy += bottom - (sticky.getBoundingClientRect().bottom - stickyY) - stickyY;
+  }
+  return { x: c.x + dx, y: c.y + dy };
+}
+
+// Natural (unpinned, untransformed) centre of an element inside a ui block, in document space.
+function uiNaturalCentre(el, block) {
+  const anchor = block.parentElement.classList.contains('pin-spacer') ? block.parentElement : block;
+  const a = anchor.getBoundingClientRect();
+  let x = el.offsetWidth / 2;
+  let y = el.offsetHeight / 2;
+  for (let n = el; n && n !== block; n = n.offsetParent) {
+    x += n.offsetLeft;
+    y += n.offsetTop;
+  }
+  return { x: a.left + scrollX + x, y: a.top + scrollY + y };
+}
+
+/**
+ * The Hero ball drops into Intro, rolls along the SVG path and opens the four pill texts, then lands
+ * in the first UI panel (script.v33 block C). The pill clouds get the IX2 parallax of the live site.
+ */
+export function initIntro() {
+  const scene = q('intro');
+  const ball = q('hero-ball');
+  if (!scene || !ball) return;
+  const texts = qa('intro-text', scene).sort((a, b) => a.dataset.step - b.dataset.step);
+  const block = q('ui');
+  const landing = block && q('ui-landing', block);
+
+  // Pill texts and the ball hand-over follow the timeline position, so jumps and refreshes stay consistent.
+  const shown = texts.map(() => null);
+  const setText = (i, on) => {
+    if (shown[i] === on) return;
+    shown[i] = on;
+    gsap.to(texts[i], { yPercent: on ? 0 : 100, overwrite: true });
+  };
+  let handed = null;
+  const handOver = (on) => {
+    if (handed === on) return;
+    handed = on;
+    gsap.set(ball, { visibility: on ? 'hidden' : '' }); // opacity belongs to the preloader entrance
+    if (landing) gsap.set(landing, { opacity: on ? 1 : 0 });
+  };
+
+  initIntroClouds(scene);
+
+  const mm = gsap.matchMedia();
+  mm.add(
+    {
+      desktop: '(min-width: 992px)',
+      tablet: '(min-width: 480px) and (max-width: 991px)',
+      mobile: '(max-width: 479px)',
+      reduce: '(prefers-reduced-motion: reduce)',
+    },
+    (ctx) => {
+      const b = ctx.conditions.desktop ? 'desktop' : ctx.conditions.tablet ? 'tablet' : 'mobile';
+      const path = scene.querySelector(`[data-motion="intro-path"][data-bp="${b}"]`);
+      if (!path) return;
+
+      if (ctx.conditions.reduce) {
+        // No travel: texts are visible, the ball hands over as soon as Intro starts.
+        texts.forEach((t, i) => setText(i, true));
+        ScrollTrigger.create({
+          trigger: scene,
+          start: 'top center',
+          onEnter: () => handOver(true),
+          onLeaveBack: () => handOver(false),
+        });
+        return;
+      }
+
+      // Path geometry in the ball's translate space, recomputed on every refresh.
+      const toBall = () => {
+        const m = path.getScreenCTM();
+        const rest = heroBallRest(ball);
+        return { a: m.a, b: m.b, c: m.c, d: m.d, e: m.e + scrollX - rest.x, f: m.f + scrollY - rest.y };
+      };
+      const at = (t) => {
+        const m = toBall();
+        const p = path.getPointAtLength(t * path.getTotalLength());
+        return { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f };
+      };
+      const land = () => {
+        const target = uiNaturalCentre(q('ui-slide', block), block);
+        const rest = heroBallRest(ball);
+        return { x: target.x - rest.x, y: target.y - rest.y };
+      };
+      const segment = (start, end) => () => ({ path: path.getAttribute('d'), matrix: toBall(), start, end });
+
+      const stops = INTRO_STOPS[b];
+      const drop = b === 'desktop' ? 4 : 8;
+      // Timeline positions where text i opens: end of the drop, then the first three stops.
+      const marks = [drop, drop + 7, drop + 25, drop + 39];
+
+      gsap.set(texts, { yPercent: 100 });
+      shown.fill(false);
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'none', immediateRender: false },
+        scrollTrigger: {
+          trigger: scene,
+          start: 'top center',
+          // Ends exactly where the first UI block pins (desktop: half the heading below the scene).
+          endTrigger: block || scene,
+          end: block ? 'top top' : 'bottom center',
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
+        onUpdate: () => {
+          const t = tl.time();
+          marks.forEach((m, i) => setText(i, t >= m));
+          handOver(tl.progress() === 1);
+        },
+      });
+
+      // Drop from the Hero axis to the path start (live: 0.033·vw + path top on desktop).
+      tl.fromTo(ball, { x: 0, y: 0 }, { x: () => at(0).x, y: () => at(0).y, duration: drop })
+        .to(ball, { motionPath: segment(0, stops[0]), duration: 7 })
+        .to(ball, { motionPath: segment(stops[0], stops[1]), duration: 18 })
+        .to(ball, { motionPath: segment(stops[1], stops[2]), duration: 14 })
+        .to(ball, { motionPath: segment(stops[2], stops[3]), duration: 27 });
+
+      // Desktop: bounce down into the centre of the first panel while drifting right.
+      if (b === 'desktop' && block) {
+        tl.fromTo(ball, { y: () => at(1).y }, { y: () => land().y, duration: 8, ease: 'bounce' })
+          .fromTo(ball, { x: () => at(1).x }, { x: () => land().x, duration: 8 }, '<');
+      }
+
+      return () => {
+        handOver(false);
+        gsap.set(ball, { clearProps: 'x,y' });
+      };
+    }
+  );
+}
+
+// Bottom clouds settle while the art leaves the viewport: 78→100 % of its pass (IX2 a-127 / a-156).
+// The back cloud stops short (1.3rem / 0.8rem); ≤767 starts lower by 2rem instead of 3rem.
+function initIntroClouds(scene) {
+  const art = q('intro-art', scene);
+  const clouds = qa('intro-cloud', scene);
+  if (!art || !clouds.length) return;
+  gsap.matchMedia().add(
+    // Every band is listed: matchMedia() skips the callback when no condition matches.
+    { small: '(max-width: 767px)', large: '(min-width: 768px)', reduce: '(prefers-reduced-motion: reduce)' },
+    ({ conditions: c }) => {
+      if (c.reduce) return;
+      const from = () => (c.small ? 2 : 3) * remPx();
+      const to = (el) => () => (el.dataset.layer === 'back' ? (c.small ? 0.8 : 1.3) * remPx() : 0);
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: art, start: 'top bottom', end: 'bottom top', scrub: 1, invalidateOnRefresh: true },
+      });
+      // The leading 0–78 gap is part of the timeline, so the clouds hold their start offset until then.
+      clouds.forEach((el) => tl.fromTo(el, { y: from }, { y: to(el), duration: 22 }, 78));
+    }
+  );
+}
+
 /* ---------- boot ---------- */
 
 async function init() {
   await initPreloader();
   initHero();
-  // Next passes: initIntro(), initInteractive(), … created in DOM order, then one refresh.
+  initIntro();
+  // Next passes: initUi(), initInteractive(), … created in DOM order, then one refresh.
   ScrollTrigger.refresh();
 }
 

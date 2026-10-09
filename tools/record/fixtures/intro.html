@@ -1,7 +1,8 @@
 <!doctype html>
 <!-- Local mirror of the new section-intro (session 9). Class values copied from the Webflow copy
      (read back via MCP), staging CSS supplies fonts, variables and the old text styles.
-     Used by tools/record/intro-compare.mjs until the copy is republished. -->
+     Used by tools/record/intro-compare.mjs and intro-run.mjs.
+     Session 10: + roles intro-art, intro-cloud (data-layer=back), ui-landing. -->
 <html>
 <head>
 <meta charset="utf-8">
@@ -101,9 +102,9 @@ body { margin: 0; background: #0c0b0b; }
 <body>
 <section class="section-intro" data-motion="theme" data-theme="dark">
   <div class="intro-scene" data-motion="intro">
-    <div class="intro-art" aria-hidden="true">
+    <div class="intro-art" data-motion="intro-art" aria-hidden="true">
       <div class="intro-illustration"></div>
-      <div class="intro-clouds"><div class="intro-cloud is-left"></div><div class="intro-cloud is-right"></div><div class="intro-cloud is-middle"></div></div>
+      <div class="intro-clouds"><div class="intro-cloud is-left" data-motion="intro-cloud"></div><div class="intro-cloud is-right" data-motion="intro-cloud"></div><div class="intro-cloud is-middle" data-motion="intro-cloud" data-layer="back"></div></div>
       <div class="intro-smoke"></div>
       <div class="intro-shape is-also"><div class="intro-shape-mask"><div class="text-shape" data-motion="intro-text" data-step="0">It also</div></div></div>
       <div class="intro-shape is-controls"><div class="intro-shape-mask"><div class="text-shape" data-motion="intro-text" data-step="1">controls</div></div></div>
@@ -119,7 +120,7 @@ body { margin: 0; background: #0c0b0b; }
       <div class="ui-rail" data-motion="ui-track">
         <div class="ui-heading" data-motion="ui-text"><h2 class="ui-title">UI/UX animation captures the mood of a brand or product and conveys it to a target audience</h2></div>
         <div class="ui-slides" data-motion="ui-slides">
-          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body is-first"><div class="ui-media"><div class="ui-video w-embed"><!--#video-1--></div></div><div class="ui-caption"><p class="body-sm">Here, animation gives a pumping vibe to a fitness website.</p></div></div></div>
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body is-first" data-motion="ui-landing"><div class="ui-media"><div class="ui-video w-embed"><!--#video-1--></div></div><div class="ui-caption"><p class="body-sm">Here, animation gives a pumping vibe to a fitness website.</p></div></div></div>
           <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-2--></div></div><div class="ui-caption"><p class="body-sm">It can also take game apps to the next level...</p></div></div></div>
           <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-3--></div></div><div class="ui-caption"><p class="body-sm">An architect's studio can convey its brand with a suite of complementary animation techniques.</p></div></div></div>
         </div>
@@ -130,7 +131,7 @@ body { margin: 0; background: #0c0b0b; }
       <div class="ui-rail" data-motion="ui-track">
         <div class="ui-heading" data-motion="ui-text"><h2 class="ui-title">Animation encourages interaction by enticing users to explore</h2></div>
         <div class="ui-slides" data-motion="ui-slides">
-          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body is-first"><div class="ui-media"><div class="ui-video w-embed"><!--#video-4--></div></div><div class="ui-caption"><p class="body-sm">Animation lets us hint at how to use sliders and other navigation elements.</p></div></div></div>
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body is-first" data-motion="ui-landing"><div class="ui-media"><div class="ui-video w-embed"><!--#video-4--></div></div><div class="ui-caption"><p class="body-sm">Animation lets us hint at how to use sliders and other navigation elements.</p></div></div></div>
           <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-5--></div></div><div class="ui-caption"><p class="body-sm">Animation guides the eye from one key visual element to the next.</p></div></div></div>
           <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-6--></div></div><div class="ui-caption"><p class="body-sm">Animation unpacks all the visual information that the user sees on the screen.</p></div></div></div>
         </div>
