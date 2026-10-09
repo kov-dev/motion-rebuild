@@ -20,6 +20,9 @@
 | Копія: Styleguide | `6ac8e84728488a6bd334f2e9` |
 | Копія: CMS templates | Lessons `6ac8e84728488a6bd334f2e7`, Resources `6ac8e84728488a6bd334f2e8`, Courses `6ac8e84728488a6bd334f2e6` |
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
+| Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
+| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанс — перший у Body Styleguide |
+| Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
 | Аналітика (перенести) | GA4 `G-CP1VPL4VKN` (Site settings → Integrations), Twitter pixel `twq('config','ocd0n')` у site head |
 | OG image | `642fed24bb99285affd212e5_Og image.png` (Home → Open Graph) |
@@ -148,7 +151,10 @@
 
 ## Класи (нові) — чернетка етапу 2 (сесія 5, 2026-10-09)
 
-**Статус: чернетка, у копії нічого не створено.** Імена — за WEBFLOW-BASE §2–4 і
+**Статус (сесія 6):** Variables (`core` / `semantic` / `type`) і 11 текстових стилів +
+`.body-sm.is-strong` **створено в копії й звірено**. Також створено службові `code-embed`
+(`display: none`, WEBFLOW-BASE §9.10), `sg-section` + `is-dark` (Styleguide). Структурні й базові
+класи нижче — ще чернетка, створюються в проходах секцій. Імена — за WEBFLOW-BASE §2–4 і
 STYLEGUIDE §3–6, значення — [docs/sections/design-system.md](docs/sections/design-system.md) §8
 (Figma) + [docs/styleguide-audit.md](docs/styleguide-audit.md) (лайв). Figma і лайв збігаються
 майже повністю. Де ні — береться лайв (рішення «візуально 1:1»). Колекції закладаються повністю,
@@ -179,8 +185,11 @@ STYLEGUIDE §3–6, значення — [docs/sections/design-system.md](docs/s
 Секції лайву `nav-light` / `nav-dark` стають режимом секції. Уроки фарбуються комбо `is-<урок>`
 прямо в `extra-lesson-*`. Це відступ від STYLEGUIDE §3.2 («компоненти — лише semantic»): 8
 режимів під 8 фонів не потрібні, текст на всіх уроках `neutral-1000`.
-⚠️ Перевірити на етапі 2, чи MCP вміє ставити режим колекції на клас. Якщо ні — комбо
-`is-dark` / `is-light` задають `bg` / `color` прямо з `core`.
+✅ **Перевірено (сесія 6): MCP ставить режим колекції на клас**, зокрема на комбо
+(`data_style_tool` → `set_style_variable_mode`, читання — `get_style_variable_modes`). На
+`.sg-section.is-dark` стоїть `semantic: dark`, і знімок показує інверсію. Отже секції отримують
+режим `dark` комбо-класом, а запасний варіант із літералами з `core` не потрібен. Режим можна
+ставити й по breakpoint/pseudo.
 
 **`type`** (desktop / tablet / mobile). Ім'я за desktop-px. Другий токен з тим самим
 розміром з'являється лише при іншій драбині смуг (STYLEGUIDE §4.7).
@@ -233,15 +242,26 @@ absolute-розкладкою.
 `.f-navigation-list`, `.f-label`) вирішуються в проході Navigation/Footer. У Figma там чотири
 різні драбини смуг, тож спершу зняти лайв.
 
-Шрифти: залити 3 woff2 PP Neue Machina + Magilio **під іменами вище** (без `Ppneuemachina-*`,
-WEBFLOW-BASE §2.3). 13 `.otf` не заливаємо.
+Шрифти (перевірено в сесії 6, `data_fonts_tool`): у копії **вже є 4 woff2 під правильними
+CSS-іменами**, заливати нічого не треба: `Pp-neuemachina-Plain` 400, `Pp-neuemachina-Inktrap`
+400 + 700, `Magilio-400` 400. Усі з `font-display: swap`. Plain є лише в 400, тож `is-strong` бере
+Inktrap 700. 13 `.otf` не заливаємо.
+
+**Як створено (сесія 6):** розмір — змінна `type`, сімейство — змінна `font-*`, вага — Number-змінна
+`weight-*` (`font-weight` її приймає). lh і ls — літералами. У кожному стилі `margin-top/bottom: 0`,
+щоб скинути дефолтні відступи тегів `h*`/`p` у Webflow. Відступи між текстами задає розкладка
+(`grid-row-gap`), а не текстовий стиль. `.body-sm.is-strong`: Inktrap 700, ls 0, на `medium` 0.16rem,
+на `tiny` 0.14rem / lh 1.57.
+
+**CSS-імена змінних** (для `src/` і ембедів): `--_core---neutral-0`, `--_semantic---bg`,
+`--_type---text-16` тощо, тобто `--_<колекція>---<змінна>`.
 
 ### Структура й базові класи
 
 | Клас | Тег | Роль | Замінює |
 |---|---|---|---|
 | `body` | body | шрифт `font-display`, `bg`/`foreground`. **Ставиться руками** (WEBFLOW-BASE §3.4) | `.body-wrap`, `.body` |
-| `styles-rem` | embed (компонент) | rem-правило 3 смуги + scrollbar + Lenis-CSS + noise `::before` + `video.is-*` | `main-css` (Home) + ембед Styleguide |
+| `styles-rem` | embed (компонент, клас `code-embed`) | ✅ створено: rem-правило 3 смуги + scrollbar + Lenis-CSS, канон [src/styles-rem.html](src/styles-rem.html). Noise `::before` і вибір `video.is-*` — у проході Lessons (прив'язані до блоків) | `main-css` (Home) + ембед Styleguide |
 | `site-nav` | nav | навбар (компонент) | `navigation w-nav` |
 | `section-preloader` · `section-hero` · `section-intro` · `section-interactive` · `section-techniques` · `section-lessons` | section | секції Home | `loader`, `section is-*` |
 | `section-lesson` + `is-easing` … `is-zoom` | section | урок (компонент з пропсами, ×8) | `section nav nav-color` + `.lesson.is-*` |
@@ -274,6 +294,44 @@ WEBFLOW-BASE §2.3). 13 `.otf` не заливаємо.
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-09 (сесія 6) — етап 2: Variables, текстові стилі, styles-rem
+
+- **Шрифти копії** — 4 woff2 уже під правильними іменами, заливка не потрібна (деталі в «Класи
+  (нові)»).
+- **Режим колекції на клас — працює** через MCP, зокрема на комбо. Рішення `semantic` light/dark
+  лишається як у чернетці, запасний варіант не потрібен.
+- **Variables створено й звірено читанням назад:** `core` (13 кольорів, 3 шрифти, 2 ваги, `radius-8`,
+  `radius-full` 9.99rem, `border-1` 1px), `semantic` (`bg` / `foreground` / `border`, аліаси на `core`,
+  режим `dark`), `type` (11 токенів, режими `tablet` і `mobile` з авто-прив'язкою до `medium` /
+  `tiny`). Усі значення збігаються з чернеткою. `White` / `Black` видалено (перед тим перевірено, що
+  в стилях немає жодного `var(`). ID — у таблиці вище.
+- **Текстові стилі:** `display-xl/lg`, `heading-xl/lg/md/sm`, `body-lg/md/sm`, `text-label`,
+  `text-shape` + `.body-sm.is-strong`, усі на змінних. Імена були вільні.
+- **`styles-rem`:** канон [src/styles-rem.html](src/styles-rem.html) → HtmlEmbed `code-embed` →
+  компонент `styles-rem` (System) першим у Body Styleguide. Код прочитано назад, збігається
+  байт у байт. На Home не вставлено: там поки живе `main-css`, заміна — у проході Hero. Site head
+  поки не чіпали (питання етапу 0 про site-level code на webflow.io).
+- **Styleguide копії:** додано блоки `sg-section` (типографіка, 12 зразків) і `sg-section is-dark`
+  (демо режиму) перед старим `styleguide-wrapper`. Знімки:
+  `reference/snapshots/2026-10-09-sg-typography.png`, `…-sg-dark-mode.png`. Шрифти, rem-шкала, Bold
+  700 і інверсія — як очікувалось. Tablet/mobile-режими `type` знімком не перевірити (знімок лише
+  desktop), тому перевірка — у Preview або на staging після дозволу на публікацію.
+- **Пастки MCP:**
+  1. `create_size_variable` з іменем `text-16` створив `text-16-2`, хоча дубля немає. Схоже, перевірку
+     унікальності плутає префікс `text-160`. Лікується `rename_variable` → `text-16`. Після
+     створення змінних завжди звіряти імена.
+  2. Нова колекція отримує режим `Base mode`, а перейменувати режим чи видалити колекцію через API
+     не можна. Тож `semantic` Base = light, `type` Base = desktop. Перейменувати руками за бажанням.
+  3. `designer_tool` (`switch_page`, `get_current_page`) двічі впав по таймауту, а data-інструменти
+     (builder, settings, components) і знімки працювали. Сторінку для збірки задає `pageId`,
+     перемикати Designer не обов'язково.
+  4. Код HtmlEmbed пишеться `data_element_settings_tool` → `set_settings`, ключ `code`
+     (`static_text`). Читання — `get_settings` / `query_settings`.
+- Старий ембед rem на Styleguide (`bddf9899…`, ті самі значення) лишено. Прибрати в проході
+  Styleguide разом зі старими `h2…p3-bold`.
+- Відповіді користувача знову не отримано: поля в промпті лишились шаблонними (хвиля 2 чистки
+  ассетів; прототип таймінгів hero). Статус без змін.
 
 ### 2026-10-09 (сесія 5) — UI-слайдер, Design system, чернетка класів
 

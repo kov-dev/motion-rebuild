@@ -1,0 +1,50 @@
+<!--
+  styles-rem — global CSS for the Motion rebuild.
+  Canonical source: src/styles-rem.html. Webflow holds a copy inside the
+  `styles-rem` component (HtmlEmbed, class `code-embed`), placed first in Body
+  on every page. Edit here first, then paste into Webflow and read it back.
+  Only rules that cannot live in Designer classes belong here.
+-->
+<style>
+  /* rem scale: 1rem = 100px of the layout width per band (1440 / 768 / 375).
+     Kept 1:1 with the live site: no upper clamp, bands switch at 991 / 479. */
+  html {
+    font-size: calc(10000vw / 1440);
+    scrollbar-width: none;
+  }
+  @media (max-width: 991px) {
+    html {
+      font-size: calc(10000vw / 768);
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+  @media (max-width: 479px) {
+    html {
+      font-size: calc(10000vw / 375);
+    }
+  }
+
+  /* Hidden scrollbar (live parity). WebKit needs the pseudo-element. */
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  /* Lenis base CSS (lenis 1.x dist/lenis.css). Re-sync when the version is pinned. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: clip;
+  }
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
+  }
+</style>
