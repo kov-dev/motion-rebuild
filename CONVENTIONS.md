@@ -56,7 +56,7 @@
   **пінити** (без `@latest`). Одна версія GSAP (зараз 3.10.4 + 3.11.4 упереміш).
   Хостинг на час розробки — GitHub користувача через jsDelivr
   (`cdn.jsdelivr.net/gh/<user>/<repo>@<tag>/…`), перед запуском — перенести на
-  CDN студії (Amazon). URL репо: `TODO:repo`.
+  CDN студії (Amazon). Репо: `https://github.com/kov-dev/motion-rebuild` (public, бо jsDelivr роздає лише публічні; після переїзду на CDN студії можна закрити). Репо = уся папка `Projects/Motion`, `reference/recordings/` не комітиться. Коміти робить агент наприкінці сесії.
 - **Lenis лишається.** Пінована версія, одна інтеграція зі ScrollTrigger
   (`lenis.on('scroll', ScrollTrigger.update)` + `gsap.ticker`), без
   `scrollerProxy`-костилів, `prefers-reduced-motion` вимикає smooth.
@@ -78,6 +78,10 @@
   `.hero_text`; користувач пам'ятає зміну кольору фону й великого тексту та
   `mix-blend-mode`. Деталі — після запису й дерева секції; кандидат на
   переробку без Splide.
+- **Без сторонніх слайдерів (2026-10-09, користувач).** На лайві Splide (hero)
+  і ще щось на кшталт Spline/Swiper — усе це прибираємо. Усі слайдери й
+  каруселі робимо на GSAP (Observer/Draggable + timeline) або IX3, щоб була
+  одна анімаційна бібліотека. Відкрите питання «Splide лишати?» закрито.
 - **`data-motion` ролі** (таблиця в docs/script-map.md) — внутрішнє рішення
   агента, від користувача нічого не потрібно.
 - **Одиниці:** на лайві вже rem-система (Splide `fixedWidth: "3.45rem"` =
