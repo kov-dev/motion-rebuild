@@ -105,7 +105,14 @@
   Hero на виході стискаються до кільця, як на лайві (у Figma — до країв).
   Вхід кільця й ліній після прелоадера розбираємо в проході Preloader.
   Ілюстрації Intro беремо з ассетів Webflow, Figma-SVG — лише для звірки.
-  ≤991 будуємо з лайву, бо у Figma лише 1440.
+  ≤991 будуємо з лайву. Уточнено в сесії 5: на дошці `Full design` фрейми 768/375 є,
+  але це звірка, а не еталон (див. нижче).
+- **Figma ↔ лайв (сесія 5, агент, карт-бланш):** за розбіжності береться лайв. Фрейми
+  768/375 з `Full design` — звірка й підказка для станів, яких не видно на записі. Конкретно:
+  UI-слайдер — слайди 75/25vw, розкриття з Ø18 (у Figma 66.7/33.3vw і Ø128). Блок 2 і ≤991
+  слайдера — з лайву. Bold 700, а не Figma Ultrabold. `anim-shape` 400, а не Light 300.
+  ls `.h3` −0.036em. `.p3-bold` mob .14/.22. Шкали відступів і колонок у Figma немає, тож
+  драбина STYLEGUIDE + літерали лайву.
 - **SEO/a11y без візуальних змін (сесія 4, агент):** на Home немає `<h1>`, у
   `<html>` немає `lang`, посилання-іконки без імені, порядок заголовків
   зламаний. У перезбірці виправляємо тегами й атрибутами, без зміни вигляду.
@@ -139,9 +146,159 @@
 колір навбара при скролі (`querySelectorAll(".nav")` у script.v33).
 Компонентів/символів на сторінці 0, усі 98 ембедів — HtmlEmbed.
 
-## Класи (нові) — `TODO` заповнюється під час збірки
+## Класи (нові) — чернетка етапу 2 (сесія 5, 2026-10-09)
+
+**Статус: чернетка, у копії нічого не створено.** Імена — за WEBFLOW-BASE §2–4 і
+STYLEGUIDE §3–6, значення — [docs/sections/design-system.md](docs/sections/design-system.md) §8
+(Figma) + [docs/styleguide-audit.md](docs/styleguide-audit.md) (лайв). Figma і лайв збігаються
+майже повністю. Де ні — береться лайв (рішення «візуально 1:1»). Колекції закладаються повністю,
+значення заливаються під секцію, яка перша їх використає (WEBFLOW-BASE §2). Числа нижче — px
+макета відповідної смуги; у Webflow це /100 rem.
+
+### Variables
+
+**`core`** (1 режим)
+
+| Змінна | Значення | Figma | Замінює на лайві |
+|---|---|---|---|
+| `neutral-0` | `#FDFCFA` | `White` | 42 літерали, `.white`-комбо |
+| `neutral-1000` | `#0C0B0B` | `BG` | 51 літерал |
+| `neutral-800` | `#3D3C3C` | — | `.progress-bar*` (4) |
+| `extra-lesson-easing` · `-delay` · `-fade` · `-morph` · `-masking` · `-dimension` · `-parallax` · `-zoom` | `#C8CFE8` · `#D2C8E8` · `#E4E8C8` · `#C8E8E8` · `#E8C8E5` · `#E8C8C8` · `#D6E8C8` · `#C2D5D7` | `Easing`, `Offset`, `Fade in Fade Out`, `Transfor-mation`, `Masking`, `Skale`, `Parallax`, `Zoom` | `.lesson.is-*`, `.breadcrumb-item.is-*`, стрілка easing. Імена за id уроку, не за Figma |
+| `extra-classic-easing` · `extra-classic-delay` | `#AAB8EB` · `#BDB1D7` | `Easing-Cl` · — | `classic-anim*` |
+| `font-display` | `Pp-neuemachina-Plain` | PP Neue Machina Plain | body, заголовки |
+| `font-body` | `Pp-neuemachina-Inktrap` | Inktrap | `p2`, навігація, футер |
+| `font-accent` | `Magilio-400` | Magilio | `.h2-secondary`, `.resources-student` |
+| `weight-regular` / `weight-bold` | 400 / 700 | Regular / Ultrabold 800 | лайв Bold 700 (woff2 800 немає) |
+| `radius-8` | 8 | картка слайда | картки UI-слайдера (6) |
+| `radius-full` | 999 | плашка r100, кулька | плашка Intro, кулька, кільце |
+| `border-1` | 1px (не rem) | лінії, пілюлі | `ball-divider`, кільце, рамки |
+
+**`semantic`** (light / dark), лише аліаси: `bg` = `neutral-0` / `neutral-1000`,
+`foreground` = `neutral-1000` / `neutral-0`, `border` = `neutral-1000` / `neutral-0`.
+Секції лайву `nav-light` / `nav-dark` стають режимом секції. Уроки фарбуються комбо `is-<урок>`
+прямо в `extra-lesson-*`. Це відступ від STYLEGUIDE §3.2 («компоненти — лише semantic»): 8
+режимів під 8 фонів не потрібні, текст на всіх уроках `neutral-1000`.
+⚠️ Перевірити на етапі 2, чи MCP вміє ставити режим колекції на клас. Якщо ні — комбо
+`is-dark` / `is-light` задають `bg` / `color` прямо з `core`.
+
+**`type`** (desktop / tablet / mobile). Ім'я за desktop-px. Другий токен з тим самим
+розміром з'являється лише при іншій драбині смуг (STYLEGUIDE §4.7).
+
+| Токен | 1440 / 768 / 375 | Стиль |
+|---|---|---|
+| `text-215` | 215 / 120 / 56 | `display-xl` (tab/mob — з Figma `H1`, звірити з `.list-item` лайву) |
+| `text-160` | 160 / 100 / 50 | `display-lg` |
+| `text-140` | 140 / 78 / 40 | `heading-xl` |
+| `text-115` | 115 / 64 / 36 | `heading-lg` |
+| `text-74` | 74 / 40 / 36 | `heading-md` |
+| `text-64` | 64 / 28 / 19 | `text-shape` (tab/mob з Figma `H4-c`, звірити з лайвом) |
+| `text-54` | 54 / 44 / 34 | `heading-sm` |
+| `text-28` | 28 / 24 / 22 | `body-lg` |
+| `text-18` | 18 / 14 / 14 | `body-md` |
+| `text-16` | 16 / 13 / 13 | `body-sm` |
+| `text-16-label` | 16 / 14 / 14 | `text-label` (Figma `Navigation`; лайв tab/mob зняти в проході Navigation) |
+
+Не створюємо: старі змінні `White` / `Black` (незв'язані, видалити з копії на етапі 2).
+`#000` (11 правил: фони під відео в `.lesson`, `.card-video*`, `.classic-anim*`) лишається
+літералом до проходу Lessons, там вирішити 1:1. Також не створюємо `#fff` (лише SG), разові
+rgba, Figma `H1-m`, `N2`, `GR` (на лайві 0–1 вживання → літерал). Шкали `space-*` / `container`
+у Figma немає. Беремо драбину STYLEGUIDE §5, а значення лайву поза нею пишемо літералами. Чи
+потрібен `container` узагалі, вирішується в проході Hero: секції Motion повноширинні, з
+absolute-розкладкою.
+
+### Текстові стилі (класи)
+
+Колір не мають (STYLEGUIDE §3.4). Leading — множником, tracking — `em`, обидва прямо в стилі
+(фіксовані пропорції). `UP` = uppercase.
+
+| Клас | Шрифт | Розмір | lh | ls | | Замінює |
+|---|---|---|---|---|---|---|
+| `display-xl` | display | `text-215` | 1.0 | −0.04em | UP | `.list-item` (Intro), `.scrolling-text.is-lessons`. Кандидат у `h1` |
+| `display-lg` | display | `text-160` | 1.06 | −0.04em | UP | `.h2` |
+| `heading-xl` | display | `text-140` | 1.03 | −0.036em | UP | `.h3`, `.h3.white` |
+| `heading-lg` | **accent** | `text-115` | 1.1 | −0.02em | | `.h2-secondary` |
+| `heading-md` | display | `text-74` | 1.08 | −0.04em | UP | `.h4`, `.label-1` |
+| `heading-sm` | display | `text-54` | 1.07 | 0 | UP | `.h5` |
+| `body-lg` | display | `text-28` | 1.57 | 0 | | `.p1` |
+| `body-md` | body | `text-18` | 1.78 | 0 | | `.p2`, `.slide-inner-label`, `.hero_wrap` |
+| `body-sm` | display | `text-16` | 1.5 | −0.02em | | `.p3` (51), `.btn-link` (25), `.resources-item__button` (14) |
+| `body-sm` + `is-strong` | body, 700 | 16 / **16** / 14 | 1.5 (mob 1.57) | 0 | | `.p3-bold`: підписи карток Interactive. Розмір tab/mob лишаємо як на лайві, тому комбо перевизначає й розмір |
+| `text-label` | body | `text-16-label` | 1.0 | −0.03em | | `.breadcrumb-item`, `.nav-toggle`, `.logo-text-sections`, `.resources-header__count` |
+| `text-shape` | body | `text-64` | 1.0 | −0.06em | | `.anim-shape` (4, Intro). Вага 400, як на лайві (Light 300 немає) |
+
+Поза стилями, літералом у класі блока: `ui-title` (2× `.h6`, заголовки блоків UI-слайдера,
+74/44/24, своя драбина, тож не `heading-md`), `resources-title` (1.95), `resources-student`
+(Magilio 34), `loader-counter` (14/24). Футер і меню (`F-1`/`F-2`/`F-3`, `.nav-absolute`,
+`.f-navigation-list`, `.f-label`) вирішуються в проході Navigation/Footer. У Figma там чотири
+різні драбини смуг, тож спершу зняти лайв.
+
+Шрифти: залити 3 woff2 PP Neue Machina + Magilio **під іменами вище** (без `Ppneuemachina-*`,
+WEBFLOW-BASE §2.3). 13 `.otf` не заливаємо.
+
+### Структура й базові класи
+
+| Клас | Тег | Роль | Замінює |
+|---|---|---|---|
+| `body` | body | шрифт `font-display`, `bg`/`foreground`. **Ставиться руками** (WEBFLOW-BASE §3.4) | `.body-wrap`, `.body` |
+| `styles-rem` | embed (компонент) | rem-правило 3 смуги + scrollbar + Lenis-CSS + noise `::before` + `video.is-*` | `main-css` (Home) + ембед Styleguide |
+| `site-nav` | nav | навбар (компонент) | `navigation w-nav` |
+| `section-preloader` · `section-hero` · `section-intro` · `section-interactive` · `section-techniques` · `section-lessons` | section | секції Home | `loader`, `section is-*` |
+| `section-lesson` + `is-easing` … `is-zoom` | section | урок (компонент з пропсами, ×8) | `section nav nav-color` + `.lesson.is-*` |
+| `section-resources` | section | Resources | `resources` |
+| `site-footer` | footer | футер (компонент) | `footer` |
+| `<block>-layout` | div | розкладка в секції, за потреби | — |
+| `ball` + `is-hero` / `is-intro` / `is-preloader` | div | кулька 18, `radius-full` | `anim-ball*` |
+| `ball-ring`, `ball-line` + `is-left` / `is-right` | div | кільце 106, лінії 1px | `anim-ball-border`, `ball-divider` |
+| `btn` + `is-secondary` | a / button | пілюлі Menu / Sound / лого: 44 h, padding 14/16, radius 26 літералом (не з драбини, лише цей клас), `border-1` | `nav-toggle`, `sound-icon-wrap` |
+| `btn` + `is-link` | a | текстова кнопка `body-sm`, підкреслення на hover | `btn-link` |
+| `menu-card` | a | картка меню (×10) | `lottie-card` |
+| `ui`, `ui-track`, `ui-slide`, `ui-card`, `ui-ball`, `ui-title`, `ui-text` | div | UI-слайдер Intro | `ui*`, `section-slide*` |
+
+Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
+`resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
+проході його секції, а не заздалегідь.
+
+**Стани й маркери:**
+
+- Колір секції — режим `semantic` (див. вище), а не комбо `.white` на кожному тексті.
+- JS-стани (`is-active`, `is-open`, `is-playing`) — комбо-маркери (WEBFLOW-BASE §10.3).
+- Стартові стани анімацій (`clip-path: circle(0.09rem)`, `opacity: 0`) — у класі елемента.
+- Прив'язка JS — лише `data-motion="<role>"` ([docs/script-map.md](docs/script-map.md)), тема
+  навбара — `data-motion="theme"` + `data-theme`. Класи для JS не використовуються.
+- Hover-и — станом Designer, не через ембед. Обводка картки — `box-shadow`, без зміни `border`.
+
+**Викидаємо:** дублі `.label-1`, `.slide-inner-label` і `.hero_wrap` як типографічні класи,
+`.h4-c`, `.h2-secondary.text-center`, `.p3.margin-top`, 24 мертві класи
+(styleguide-audit §5), автоімена (`text-block-3`, `div-2`, `div-block-4`, `margin-40`,
+`example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-09 (сесія 5) — UI-слайдер, Design system, чернетка класів
+
+- **UI-слайдер Intro** (`4609:22242`, субагент sonnet) — розділ «UI-слайдер» у
+  [docs/sections/intro.md](docs/sections/intro.md). 9 кадрів 1440×750, лише блок 1 (3 слайди з
+  6, мокапи замість відео). Слайд 960 + смуга 480, картка 700×425 r8, заголовок 74/80.
+  `clip-path` на лайві: `circle(0.09rem)` → `circle(max(vw,vh))` за 0.7 с, відео 0.6 с
+  із delay 0.1. Розкриття тільки GSAP + ScrollTrigger.
+- **Design system** (`1301:36378`) — [docs/sections/design-system.md](docs/sections/design-system.md).
+  3 стайлгайди (1440/768/375), 22 текстові стилі, 11 кольорових змінних. Лайв збігається з
+  Figma майже повністю, зокрема tab/mob. Розбіжності закрито рішенням «Figma ↔ лайв» вище.
+  Питання субагента в design-system §10 закрито ним же. Користувачу вони не потрібні.
+- **Full design** — огляд у [docs/FIGMA.md](docs/FIGMA.md). Це дошка з ~400 розрізнених фреймів,
+  а не цілісна Home. **Смуги 768/375 є** для Preloader, Intro, Interactive, Techniques,
+  Resources і Menu (таблиця node-id). Висновок сесії 4 «768/375 немає» стосувався лише секцій
+  користувача.
+- **Чернетка словника** — розділ «Класи (нові)» вище: Variables (`core` / `semantic` / `type`),
+  12 текстових стилів, структурні й базові класи. У копії нічого не створено.
+- Виправлено: UI-слайдер зі слайдами `section-slide*` живе в `#introduction` (`ui-wrap`).
+  Позначку «Interactive» у script-map (блоки B, D, числа pin) і main-css.md замінено.
+- Пастка: `.h4` і `.h6` на 1440 однакові (74/80), але драбини смуг різні (40/36 і 44/24),
+  тож одним стилем їх не звести. `.h6` — це лише заголовки UI-слайдера, і він стає класом
+  `ui-title`.
+- Відповіді користувача не отримано: поля у промпті сесії лишились шаблонними. Відкриті
+  питання 2 (прототип таймінгів hero) і хвиля 2 чистки ассетів — без змін.
 
 ### 2026-10-09 (сесія 4) — Figma Hero/Intro, Lighthouse, styleguide, ассети
 

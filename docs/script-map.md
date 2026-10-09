@@ -10,9 +10,9 @@
 | Блок | Що робить | Секція | Куди в перезбірці |
 |---|---|---|---|
 | A | Детект mobile/Firefox, scrollTo(0,0) через 100 мс, Lenis (десктоп) або `normalizeScroll` (мобайл), `scrollerProxy` на body | глобально | **Код**: Lenis пінований, інтеграція без scrollerProxy, `matchMedia` замість одноразового `innerWidth` |
-| B | Idle 4 с (`ifvisible`) → нескінченне похитування `.ui-slide` ±1.5% | Interactive | **Код** (3 рядки), `ifvisible` замінити на власний idle-таймер або `Observer` |
+| B | Idle 4 с (`ifvisible`) → нескінченне похитування `.ui-slide` ±1.5% | Introduction (UI-слайдер) | **Код** (3 рядки), `ifvisible` замінити на власний idle-таймер або `Observer` |
 | C | Кулька hero → падіння → MotionPath по SVG (`#vrtx*`) у 4 сегменти, кожен відкриває рядок інтро-тексту; на десктопі фінальний bounce у перший слайд | Hero + Introduction | **Код** (MotionPath, обчислення координат) |
-| D | 2 × `.ui`: pin, трек їде вліво, слайди розширюються 25→75vw, відео відкривається `clip-path: circle()`, передача кульки `.ui-ball` між блоками | Interactive | **Код** (найскладніший блок, ~350 рядків) |
+| D | 2 × `.ui`: pin, трек їде вліво, слайди розширюються 25→75vw, відео відкривається `clip-path: circle()`, передача кульки `.ui-ball` між блоками | Introduction (UI-слайдер) | **Код** (найскладніший блок, ~350 рядків) |
 | E | Resources: pin + 3 фази (стрілки → трек → списки), синхронізація табів хедера; hover на айтемах — стек із 3 картинок з поворотом (jQuery) | Resources | pin/scrub — **код**; hover-стек — **код** (є стан, jQuery прибрати); `active` на першому айтемі — **CSS/клас у Designer** |
 | F | Matter.js: 35 куль у невидимій круглій клітці з 32 статичних пегів, відштовхування від курсора, drag, гравітація за напрямком скролу, звук зіткнень через Web Audio з панорамою | Interactive («Real-time» картка) | **Код**, окремий модуль `sphere.js`, lazy-init при першому вході |
 | G | `.height-section.is-interactive`: pin + горизонтальний зсув на `scrollWidth − vw`; тригер `once` → `initSphere()` | Interactive | **Код** (або IX3 scroll-scrub, якщо зсув задати в vw — перевірити) |
@@ -70,7 +70,7 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 - Intro timeline: `scrub: 1`; тривалості сегментів 4(8 мобайл) / 7 / 18 / 14 / 27, десктоп + 8 + 8 (bounce + зсув).
   Зупинки шляху: desktop `[0.1477, 0.43367, 0.61329, 1]`, tablet `[0.12336, 0.37553, 0.53228, 1]`, mobile `[0.13847, 0.348, 0.5061, 1]`.
   CustomEase `bounce` і `bounceSmall` — рядки в src.js.
-- Interactive: довжина pin = `vw·k + vw·n·k + 0.5·vw·n + 0.25·vw` (k = 0.75 десктоп / 1 мобайл, n = слайдів, ×3 на мобайлі); слайди 25vw → 75vw → (передостанній) 25vw, останній 100vw; відео `clip-path circle(max(vw,vh)) ↔ circle(0.09rem)` по 0.7 с.
+- UI-слайдер Intro (блок D; на лайві це `#introduction`, не `#interactive`): довжина pin = `vw·k + vw·n·k + 0.5·vw·n + 0.25·vw` (k = 0.75 десктоп / 1 мобайл, n = слайдів, ×3 на мобайлі); слайди 25vw → 75vw → (передостанній) 25vw, останній 100vw; відео `clip-path circle(max(vw,vh)) ↔ circle(0.09rem)` по 0.7 с.
 - Resources: `scrub: 3`; стрілки `x = 0.84·vw` (0.78 на ≤479) зі stagger; стек картинок: поворот 0, −3, −6…, макс 3 штуки.
 - Sphere: 15 + 20 куль, радіус `size/15`, restitution 0.5, density 0.05, gravity scale 0.0025, gravity.x = −direction/2 при скролі; Windows 11 → `timeScale 0.35`; звук: максимум 2 голоси, cooldown 100–500 мс, detune `v²·600 − 600`, panner X за місцем зіткнення.
 - Nav: 0.4 с на всі переходи; лінія навбара `top+=1px`, лінія саунд-кнопки `bottom−90px`; кольори `#0C0B0B` / `#FDFCFA`.
