@@ -83,7 +83,7 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 4. **Неявні глобали** у сфері: `i, r, parts, pegCount, TAU, segment, angle2, x2, y2, cx2, cy2, rect, body, musicCollision, diff`. `diff` не використовується.
 5. **Дубль ключа `density`** (1e-5, потім 0.05) — працює 0.05.
 6. **`vw`/`vh` читаються один раз на load** — ресайз/поворот ламає всі обчислення (крім canvas). У новому коді — `gsap.matchMedia()` + `invalidateOnRefresh` + функції-обчислювачі.
-7. **Resources pin створюється ліниво** (`once` на `.is-lessons`), тому нав-тригери, створені раніше, не знають про pin-spacer і отримують ручні `startOffset/endOffset` з формулою `2·(scrollWidth − vw) + listsH` (на мобайлі ×2), яка ще й не збігається з реальною довжиною pin (`1.5·vw + (scrollWidth − vw) + listsH`). У новому коді створювати всі pin'и одразу, в порядку DOM — ScrollTrigger сам врахує spacer'и, офсети не потрібні.
+7. **Resources pin створюється ліниво** (`once` на `.is-lessons`), тому нав-тригери, створені раніше, не знають про pin-spacer і отримують ручні `startOffset/endOffset` з формулою `2·(scrollWidth − vw) + listsH` (на мобайлі ×2), яка ще й не збігається з реальною довжиною pin (`1.5·vw + (scrollWidth − vw) + listsH`). У новому коді створювати всі pin'и одразу, в порядку DOM — ScrollTrigger сам врахує spacer'и, офсети не потрібні. **Імовірно, саме це на мобайлі кидає скрол назад з Techniques у середину Intro (~6 700 px), див. [recordings.md](recordings.md#️-баг-лайву-стрибок-скролу-назад-на-мобайлі).**
 8. **Колір уроків через `getComputedStyle(breadcrumb)`** — колір секції береться з фону хлібної крихти. У новому коді — `data-theme-color` на секції або CSS-змінна.
 9. **Мертвий код**: блок H (`.section-slide-speed`), `.ui-path__circle`, вираз із Safari-regex, `diff`, порожній `onComplete: () => {}`.
 10. **Layout у JS**: `marginTop` для `.ui-wrap`, `height: vh` для `.ui-slide`, `width: 25vw`, `marginLeft: -100vw` — перенести в CSS (стартовий стан класом, бо IX3 не вміє Initial Appearance через API).
@@ -91,6 +91,7 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 12. **jQuery** лише у блоці E (hover-стек) і синхронізації табів — замінити на нативний DOM.
 13. `ifvisible` (3 KB, 2014 рік) заради одного idle-таймера — замінити на `Observer` або 10 рядків власного коду.
 14. `#link1` → `gsap.to(heroBall, {x: 0})` — хак для повернення на hero з меню; у новому коді — частина `navigate-to-top` логіки.
+15. **Нахил гравітації сфери за скролом на лайві мертвий** (знайдено 2026-10-09, сесія 3). Тригер `.is-interactive.wf-section` (src.js ~775) нічого не знаходить: Webflow перестав додавати клас `wf-section` до секцій, а сайт перепубліковано 2024-02. Через це вкладений ScrollTrigger з `gravity.x = −direction/2` не створюється, і кулі завжди падають вертикально. На записі `reference/recordings/desktop/04-interactive.mp4` сфера працює, але без нахилу. Пропозиція: у перезбірці відновити задуману поведінку (тригер `data-motion="interactive-track"`). Але це видима відмінність від лайву, тому рішення за користувачем.
 
 ## Що лишається в inline-скриптах Home (не в script.v33) — перенести в модуль
 

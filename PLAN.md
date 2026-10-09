@@ -8,7 +8,7 @@
 - [x] Користувач: Duplicate site у воркспейсі → копія `Motion rebuild` (2026-10-09)
 - [x] Користувач: переавторизувати Webflow MCP на оригінал + копію (2026-10-09)
 - [x] Агент: `list_sites` → ID копії в CONVENTIONS.md (2026-10-09)
-- [ ] Користувач: репо на GitHub для `src/` → URL у CONVENTIONS.md (`TODO:repo`)
+- [x] Користувач: репо на GitHub → `kov-dev/motion-rebuild` (2026-10-09)
 - [x] ~~Немініфікований `script.v33`~~ — не знайдено; розшифровано з мініфікованого → `reference/script.v33.src.js` (2026-10-09)
 - [ ] Перевірити: чи публікується site-level custom code на webflow.io без Site plan
       (якщо ні — на час розробки тримати код у page-level footer Home)
@@ -17,14 +17,14 @@
 
 Результат — `docs/AUDIT.md` (факти) + `docs/sections/<section>.md` (по секції).
 
-- [ ] Записати анімації лайву по секціях у Chrome → `reference/recordings/` (desktop + mobile)
-- [ ] Повне дерево Home по секціях (Designer IDs, класи, ембеди, Lottie, відео, IX2-тригери)
+- [x] Записати анімації лайву по секціях → `reference/recordings/` (desktop + mobile + меню), індекс [docs/recordings.md](docs/recordings.md) (2026-10-09). Лишилось: tablet 768, hover-стани Resources/карток, повільні кліпи pin-секцій — у проходах секцій
+- [x] Повне дерево Home по секціях → [docs/home-tree.md](docs/home-tree.md) (2026-10-09). Designer ID — лише верхній рівень і секції, глибші — TODO у проході секції
 - [x] Розібрати `script.v33`: карта функцій → секції → DOM-залежності → `docs/script-map.md` (2026-10-09)
-- [ ] Прочитати ембед `main-css` (rem-правило, глобальні стилі)
+- [x] Ембед `main-css` → `reference/main-css.css` + розбір [docs/main-css.md](docs/main-css.md) (2026-10-09)
 - [ ] Styleguide-сторінка: що там є, що з неї реально вживається
 - [ ] Ассети: список, вага, формати; кандидати на заміну (Lottie 681 KB `not_real_time`, 52 відео)
 - [ ] Lighthouse лайву (desktop/mobile) — базова точка для порівняння
-- [ ] Figma: субагент (sonnet) аналізує фрейми Home і Intro → `docs/sections/`
+- [ ] ⛔ Figma: субагент (sonnet) аналізує фрейми Hero і Intro → `docs/sections/` — **заблоковано: акаунт MCP не має доступу до файлу** (див. docs/FIGMA.md)
 
 ## Етап 2 — Фундамент у копії ⬜
 
@@ -44,8 +44,8 @@
 | Секція | Figma | Аналіз | Верстка | Анімація | Звірка |
 |---|---|---|---|---|---|
 | Preloader | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| Hero | ✅ є лінк | ⬜ | ⬜ | ⬜ | ⬜ |
-| Introduction | ✅ є лінк | ⬜ | ⬜ | ⬜ | ⬜ |
+| Hero | ⛔ лінк є, доступу немає | ⬜ | ⬜ | ⬜ | ⬜ |
+| Introduction | ⛔ лінк є, доступу немає | ⬜ | ⬜ | ⬜ | ⬜ |
 | Interactive | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Techniques | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Lessons ×8 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
@@ -80,6 +80,10 @@
 - [ ] Старий сайт — архів (не видаляти ≥1 місяць)
 
 ## Відкриті питання
+
+- Доступ Figma MCP до файлу `KJQjG15P2P3SkXwrJJxLOp` (див. docs/FIGMA.md).
+- Нахил гравітації сфери за скролом на лайві мертвий (script-map №15): відновлювати в перезбірці?
+- Стрибок скролу назад на мобайлі (docs/recordings.md): перевірити на реальному телефоні.
 
 - Хто й як деплоїть на Amazon CDN студії (доступ, процес)?
 - Site plan: купити на новий сайт і скасувати старий — хто узгоджує в студії?

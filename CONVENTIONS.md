@@ -60,8 +60,11 @@
 - **Lenis лишається.** Пінована версія, одна інтеграція зі ScrollTrigger
   (`lenis.on('scroll', ScrollTrigger.update)` + `gsap.ticker`), без
   `scrollerProxy`-костилів, `prefers-reduced-motion` вимикає smooth.
-- **Еталон анімацій:** агент сам записує кожну секцію лайву в Chrome
-  (`gif_creator`) у `reference/recordings/<section>.gif` на етапі аудиту.
+- **Еталон анімацій:** агент сам записує лайв відео через Playwright +
+  Google Chrome ([tools/record/](tools/record/)) у
+  `reference/recordings/<desktop|mobile>/<NN-section>.mp4` (не комітиться).
+  Індекс — [docs/recordings.md](docs/recordings.md). `gif_creator` — лише
+  для швидких ілюстрацій, коли розширення підключене.
 - **Figma:** макет нарізаний посекційно (дизайнер показував анімацію
   розкадровкою), цілісного фрейму сторінки немає. Користувач додає посилання
   на фрейми секцій по ходу. Аналіз — субагент на sonnet, результат у
@@ -74,10 +77,13 @@
   під смуги), лічильник, кулька `anim-ball.is-preloader` стрибає, плашка
   `ball-bg.is-preloader-left` міняє ширину. Робимо те саме GSAP/CSS без Lottie,
   звіряючи з записом. Вихідники After Effects не потрібні.
-- **Hero:** Splide-слайдер `splide2` зі слайдами-Lottie (Linear тощо) і свопом
-  `.hero_text`; користувач пам'ятає зміну кольору фону й великого тексту та
-  `mix-blend-mode`. Деталі — після запису й дерева секції; кандидат на
-  переробку без Splide.
+- **Hero (уточнено 2026-10-09, сесія 3):** сам Hero — це лише кулька на лінії
+  й два тексти, без Splide. Зміна кольору фону й великого тексту, яку пам'ятає
+  користувач, — це **фінал прелоадера**: слова MOTION / DESIGN / PRINCIPLES з
+  колом та інверсією чорне↔біле. У `main-css` `mix-blend-mode` немає, тож
+  інверсія, ймовірно, в Lottie або в IX2 (перевірити при проході прелоадера).
+  Splide `splide2` + своп `.hero_text` живуть в **уроці easing** (схеми
+  linear/ease/ease-in) і переробляються на GSAP у проході Lessons.
 - **Без сторонніх слайдерів (2026-10-09, користувач).** На лайві Splide (hero)
   і ще щось на кшталт Spline/Swiper — усе це прибираємо. Усі слайдери й
   каруселі робимо на GSAP (Observer/Draggable + timeline) або IX3, щоб була
@@ -90,24 +96,61 @@
 
 ## Карта Home (оригінал)
 
-| # | Секція | id | Клас-обгортка | Що всередині (коротко) |
-|---|---|---|---|---|
-| 0 | Preloader | — | `loader` → `loader-wrap`, `preloader_wrap` | Lottie кола (3 варіанти під смуги) + лічильник 0→100 (JS) |
-| 1 | Hero | `#hero` | `nav nav-dark` → `section is-hero` | Splide слайдер `splide2`, `anim-ball-wrap`, hero text swap |
-| 2 | Introduction | `#introduction` | `nav nav-dark` → `section is-introduction` | SVG-шлях `embed-path` (+`_tablet`, `_mobile`), MotionPath |
-| 3 | Interactive | `#interactive` | `nav nav-light` → `section is-interactive` | `ui-slider` / `ui-track` / `ui-ball` / `ui-slide` — повністю в коді |
-| 4 | Techniques | `#techniques` | `nav nav-dark` → `section is-techniques` | картки `lottie-card` з hover-Lottie (IX2) |
-| 5 | Lessons ×8 | `#easing #delay #fade #morph #masking #dimension #parallax #zoom` | `section is-lessons` → `nav nav-color` ×8 | кожен урок: текст + Lottie/відео приклади; `resources-clouds-list` в кінці |
-| 6 | Resources | `#resources` | `nav nav-light` → `resources` | CMS Courses/Resources, `resources-track`, overlay з IX2 scroll |
-| 7 | Footer | — | `nav nav-dark` → `footer` | хмари `footer-cloud-item` з IX2 scroll-progress |
-| — | Sound button | — | `fixed-bottom` → `sound-btn-wrap` | аудіо, ховається при скролі в footer (IX2) |
+Виправлено 2026-10-09 (сесія 3) за деревом [docs/home-tree.md](docs/home-tree.md)
+(1545 вузлів у body, Designer ID верхнього рівня) і записами лайву
+[reference/recordings/](reference/recordings/) (див. [docs/recordings.md](docs/recordings.md)).
+
+| # | Секція | id | Клас-обгортка | Що всередині (коротко) | Вузлів |
+|---|---|---|---|---|---|
+| — | Navigation | — | `navigation w-nav` | лого-очі, бургер `#menu-toggle`, меню з 10 hover-Lottie пунктами `lottie-card` у `nav-track` (горизонтальний скрол колесом), крихти `#breadcrumbs-wrap` | 109 (13 Lottie) |
+| 0 | Preloader | — | `loader` → `loader-wrap`, `preloader_wrap` | Lottie-кола (3 копії під смуги) + лічильник 0→100; далі слова MOTION / DESIGN / PRINCIPLES з колом та інверсією чорне↔біле | 18 (4 Lottie) |
+| 1 | Hero | `#hero` | `nav nav-dark` → `section is-hero` | `anim-ball-sticky` → `anim-ball-wrap` (кулька `#anim-ball`, лінії `ball-divider`, `anim-ball-border`), 2 тексти. **Без Splide, Lottie та IX2** | 14 |
+| 2 | Introduction | `#introduction` | `nav nav-dark` → `section is-introduction` | SVG-шлях `embed-path` (+`_tablet`, `_mobile`, `#vrtx*`), лінійні ілюстрації, підписи `anim-shape`; **UI-слайдер `ui-wrap` → 2× `.ui`** (`ui-track`/`ui-slide`/`ui-ball`, 6 відео, розкриття `clip-path: circle()`) | 98 (6 відео) |
+| 3 | Interactive | `#interactive` | `nav nav-light` → `section is-interactive` | заголовок, горизонтальний трек `height-section.is-interactive` з 3 `horizontal-item`, сфера Matter.js `#canvas`, Lottie `not_real_time` | 25 |
+| 4 | Techniques | `#techniques` | `nav nav-dark` → `section is-techniques` | три слова-плашки (INTERFACE / ANIMATION / …), 2 зірки, текст. **Карток немає** | 15 |
+| 5 | Lessons | `#lessons` → `#easing #delay #fade #morph #masking #dimension #parallax #zoom` | одна `section is-lessons` → 8× `section nav nav-color` + 4 хмари | урок: крихта з кольором, текст, Lottie/відео-приклади. **Splide `splide2` + `hero_text` — в уроці easing** (схеми linear/ease/ease-in). dimension: hero-відео замість Lottie, крихта `is-scale` | 799 (17 Lottie, 46 відео) |
+| 6 | Resources | `#resources` | `nav nav-light` → `resources` | 28 CMS-айтемів (Courses + Resources), `resources-track`, pin + 3 фази | 288 |
+| 7 | Footer | — | `nav nav-dark` → `footer` | хмари `footer-cloud-item` з IX2 scroll-progress | 115 |
+| — | Sound button | — | `fixed-bottom` → `sound-btn-wrap` | аудіо, ховається над футером (IX2) | 14 |
 
 Обгортки `nav nav-dark|nav-light|nav-color` — маркери для JS, що перемикає
 колір навбара при скролі (`querySelectorAll(".nav")` у script.v33).
+Компонентів/символів на сторінці 0, усі 98 ембедів — HtmlEmbed.
 
 ## Класи (нові) — `TODO` заповнюється під час збірки
 
 ## Журнал
+
+### 2026-10-09 (сесія 3) — аудит: записи лайву, дерево Home, main-css
+
+- **Записи лайву** — `reference/recordings/{desktop,mobile}/` (15 кліпів по
+  секціях + аркуші кадрів + `timeline.json`), меню — `desktop/16-nav-menu`.
+  Індекс і опис — [docs/recordings.md](docs/recordings.md). Chrome-розширення
+  не було підключене, тому записано **Playwright + Google Chrome**: справжнє
+  відео з реальним таймінгом замість `gif_creator`. Це тепер стандарт еталона.
+  Скрипти в [tools/record/](tools/record/).
+- **Дерево Home** — [docs/home-tree.md](docs/home-tree.md) (субагент, read-only:
+  HTML + MCP `get_all_elements`). 1545 вузлів, компонентів 0, 98 HtmlEmbed.
+  **Карту Home вище переписано:** Splide живе в уроці easing, а не в Hero;
+  UI-слайдер (`ui-wrap`) — в Introduction, а не в Interactive; `lottie-card` —
+  це 10 карток меню навігації, а не Techniques; Lessons — одна секція з 8
+  вкладеними; Navigation (109 вузлів, 13 Lottie) додано в карту.
+- **main-css** — `reference/main-css.css` + [docs/main-css.md](docs/main-css.md).
+  rem-правило збігається з базою (6.9444vw / 13.0208vw ≤991 / 26.6667vw ≤479),
+  але без верхньої межі (на 1920 1rem = 133px) і зі стрибками на 991/479.
+  `mix-blend-mode` немає; хаки `overflow-y: overlay`, `scrollbar-height`, Lenis-CSS.
+- **Знахідки:** (1) зміна фону й великого тексту, яку пам'ятає користувач, —
+  це фінал прелоадера (MOTION / DESIGN / PRINCIPLES з інверсією), а не hero;
+  (2) нахил гравітації сфери за скролом на лайві мертвий — тригер
+  `.is-interactive.wf-section`, а Webflow більше не ставить `wf-section`
+  (script-map №15, питання користувачу); (3) на мобайлі скрол стрибає з
+  Techniques назад у середину Intro (~6 700 px), імовірно через лінивий pin
+  Resources (script-map №7).
+- **Figma заблокована:** акаунт Figma MCP не має доступу до `Motion (DEV)`
+  («you don't have edit access»). `docs/sections/hero.md` / `intro.md` не
+  створено. Потрібен доступ від користувача.
+- Пастка: швидко після старту `load` на мобайлі — 1.3 с, але прелоадер іде ~9 с
+  (лічильник на таймері, не на завантаженні).
 
 ### 2026-10-09 (сесія 2) — ID копії, розшифровка скрипта
 

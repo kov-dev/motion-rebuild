@@ -1,0 +1,203 @@
+/* Source: verbatim content of the <style> inside embed `div.main-css.w-embed` (first child of <body>) of Webflow Home,
+   captured from reference/live-home-2026-10-09.html. It is the only <style> embed in the page HTML. */
+
+    html {
+        font-size: 6.94444vw;
+        overflow-y: overlay;
+    }
+    ::-webkit-scrollbar {
+        height: 0;
+        width: 0;
+        -webkit-appearance: none;
+    }
+    * {
+        scrollbar-height: 0;
+    }
+    .lenis.lenis-smooth {
+        scroll-behavior: auto;
+    }
+    html.lenis {
+        height: auto;
+    }
+    .lenis.lenis-stopped {
+        overflow: hidden;
+    }
+    .card-link:hover .btn-link,
+    .logo-text-sections:hover,
+    .nav-toggle:hover .toggle-label,
+    .splide__slide.is-active .slide-inner-label {
+        text-decoration: underline;
+    }
+    .w-nav-menu {
+        display: flex !important;
+    }
+    .section.is-techniques {
+        overflow-x: clip;
+        overflow-y: visible !important;
+    }
+    .a-lesson-item_overflow-hidden,
+    .card-video-item {
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+    }
+    .a-lesson-video video,
+    .card-video video {
+        width: 100%;
+        height: 100%;
+    }
+    .card-link {
+        transition: 0.3s linear;
+    }
+    .card-link:hover {
+        border: 0.02rem solid #0c0b0b;
+    }
+    .embed-path .anim-ball.is-intro,
+    .embed-path_mobile .anim-ball.is-intro,
+    .embed-path_tablet .anim-ball.is-intro {
+        position: absolute;
+        top: 3.3vw;
+        left: 35.7%;
+        -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        z-index: 2;
+    }
+    .section-slide {
+        -webkit-clip-path: circle(0.09rem at 50% 50%);
+        clip-path: circle(0.09rem at 50% 50%);
+    }
+    .section-slide-video video,
+    .section-slide:first-child .section-slide-wrap,
+    .splide__slide.is-active .slide-lottie.not-active {
+        opacity: 0;
+    }
+    .section-track {
+        width: max-content;
+    }
+    .overlay-bg,
+    .resources-overlay {
+        pointer-events: none;
+    }
+    .footer,
+    .resources-clouds-list {
+        overflow-y: visible;
+        overflow-x: clip;
+    }
+    .sound-icon-wrap.is-active {
+        background: #fdfcfa !important;
+        border: 1px solid #0c0b0b !important;
+        color: #0c0b0b !important;
+    }
+    .sound-btn-mute.is-active {
+        opacity: 1;
+    }
+    .classic-anim_wrap::before {
+        content: "";
+        z-index: 20;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("https://cdn.prod.website-files.com/6384fe1e68c38ac8097a7e47/64390f3192efb9924a5a07ec_Texture_01.png");
+        opacity: 0.2;
+        border-top-right-radius: 0.76rem;
+        border-top-left-radius: 0.76rem;
+        animation: 0.2s infinite noise;
+        pointer-events: none;
+    }
+    @keyframes noise {
+        0%,
+        100% {
+            background-position: 0 0;
+        }
+        10% {
+            background-position: -5% -10%;
+        }
+        20% {
+            background-position: -15% 5%;
+        }
+        30% {
+            background-position: 7% -25%;
+        }
+        40% {
+            background-position: 20% 25%;
+        }
+        50% {
+            background-position: -25% 10%;
+        }
+        60% {
+            background-position: 15% 5%;
+        }
+        70% {
+            background-position: 0 15%;
+        }
+        80% {
+            background-position: 25% 35%;
+        }
+        90% {
+            background-position: -10% 10%;
+        }
+    }
+    .nav-links-wrap,
+    .resources-track {
+        width: max-content !important;
+    }
+    .splide button:disabled {
+        background: #c8cfe8;
+        color: #0c0b0b;
+    }
+    .splide--draggable > .splide__track > .splide__list > .splide__slide {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    .splide__slide.is-active .slide-lottie.active {
+        display: block;
+        opacity: 1;
+    }
+    video.is-mobile,
+    video.is-tablet {
+        display: none;
+    }
+    @media (max-width: 991px) {
+        html {
+            font-size: 13.0208333vw;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .embed-path .anim-ball.is-intro,
+        .embed-path_mobile .anim-ball.is-intro,
+        .embed-path_tablet .anim-ball.is-intro {
+            top: 0;
+            left: 35.5%;
+            -webkit-transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+        .ui-text {
+            margin-top: 0.18rem;
+            align-self: center;
+            transform: translateY(50%);
+        }
+        video.is-tablet {
+            display: block;
+        }
+        .classic-anim_wrap::before,
+        video.is-desktop,
+        video.is-mobile {
+            display: none;
+        }
+    }
+    @media (max-width: 479px) {
+        html {
+            font-size: 26.66666vw;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .classic-anim_wrap::before,
+        video.is-desktop,
+        video.is-tablet {
+            display: none;
+        }
+        video.is-mobile {
+            display: block;
+        }
+    }
+
