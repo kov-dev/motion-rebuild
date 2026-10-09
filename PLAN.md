@@ -38,12 +38,13 @@
 - [x] Текстові стилі (11 + `.body-sm.is-strong`) створено на змінних (2026-10-09)
 - [x] MCP ставить режим колекції на клас/комбо — так (2026-10-09)
 - [x] Ембед-компонент `styles-rem` (`src/styles-rem.html`), інстанс на Styleguide, знімок (2026-10-09)
+- [x] Інстанс `styles-rem` на Home — першим у Body (2026-10-09). Старий `main-css` прибрати в проході Hero
 - [ ] Перевірити tablet/mobile-режими `type` у Preview або на staging (потрібен дозвіл на публікацію копії)
 - [ ] Структурні й базові класи (`btn`, `ball*`, `section-*` …) — у проходах секцій, не наперед
 - [ ] Компоненти: navbar, footer, lesson-section (8 уроків → 1 компонент з пропсами), lottie-card
 - [ ] Каркас `src/`: `motion.js` (ES-module), `motion.css`, збірка/мініфікація, версія в імені
 
-## Етап 3 — Секції (кожна окремим проходом) ⬜
+## Етап 3 — Секції (кожна окремим проходом) 🟨
 
 Порядок: Preloader → Hero → Introduction → Interactive → Techniques → Lessons (×8 через компонент) → Resources → Footer → Sound.
 
@@ -52,7 +53,7 @@
 
 | Секція | Figma | Аналіз | Верстка | Анімація | Звірка |
 |---|---|---|---|---|---|
-| Preloader | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Preloader | ✅ | ✅ [preloader.md](docs/sections/preloader.md) | 🟨 зібрано без анімації (2026-10-09), знімок не зроблено | 🟨 план у preloader.md, коду немає | ⬜ |
 | Hero | ✅ | ✅ | ⬜ | ⬜ | ⬜ |
 | Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ⬜ | ⬜ | ⬜ |
 | Interactive | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |

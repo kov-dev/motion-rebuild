@@ -57,6 +57,8 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 | `.ui` / `.ui-track` / `.ui-slide` / `.ui-text` / `.ui-ball` | `ui` / `ui-track` / `ui-slide` / `ui-text` / `ui-ball` |
 | `.height-section.is-interactive` | `interactive-track` |
 | `#canvas` | `sphere` |
+| `.loader*`, `.preloader_*`, `*.is-preloader*` (IX2 + Lottie, не script.v33) | `preloader`, `preloader-loader`, `preloader-bounce-ball`, `preloader-bounce-shadow`, `preloader-counter`, `preloader-scene`, `preloader-step`, `preloader-disc`, `preloader-word` (сесія 7, docs/sections/preloader.md) |
+| `.text-wrap.is-hero` | `hero-text` (вхід після прелоадера) |
 | `.resources*` | `resources`, `resources-track`, `resources-arrow`, `resources-lists`, `resources-list`, `resources-header-item`, `resources-item`, `resources-image` |
 | `.nav.nav-*`, `.nav-inner` | `theme` + `data-theme="dark|light|color"` (+ `data-color-index` для уроків) |
 | nav-елементи | `nav-logo`, `nav-toggle`, `nav-menu`, `nav-track`, `nav-link`, `breadcrumbs`, `breadcrumb` |

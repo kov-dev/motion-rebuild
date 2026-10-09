@@ -21,7 +21,9 @@
 | Копія: CMS templates | Lessons `6ac8e84728488a6bd334f2e7`, Resources `6ac8e84728488a6bd334f2e8`, Courses `6ac8e84728488a6bd334f2e6` |
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
-| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанс — перший у Body Styleguide |
+| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) |
+| Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
 | Аналітика (перенести) | GA4 `G-CP1VPL4VKN` (Site settings → Integrations), Twitter pixel `twq('config','ocd0n')` у site head |
@@ -76,15 +78,26 @@
   нелогічно, переписуємо без узгодження; узгоджуємо лише видимі дизайн-зміни.
   Користувач сам майже нічого не пам'ятає з оригінальної збірки (робилась
   довго, багато разів перероблялась) — джерело правди це лайв + записи.
-- **Прелоадер — переробити з Lottie на код.** На лайві: Lottie-кола (3 копії
-  під смуги), лічильник, кулька `anim-ball.is-preloader` стрибає, плашка
-  `ball-bg.is-preloader-left` міняє ширину. Робимо те саме GSAP/CSS без Lottie,
-  звіряючи з записом. Вихідники After Effects не потрібні.
+- **Прелоадер — переробити з Lottie на код.** На лайві: Lottie-кулька над
+  лічильником, потім Lottie-кола (3 копії під смуги) зі словами MOTION / DESIGN /
+  PRINCIPLES, фінал — дубль Hero (кільце, кулька, лінія `ball-divider.is-preloader-left`
+  розкривається; `ball-bg` прозорий і статичний — уточнено в сесії 7). Робимо GSAP/CSS
+  без Lottie, звіряючи з записом. Вихідники After Effects не потрібні. Розбір і план —
+  [docs/sections/preloader.md](docs/sections/preloader.md).
+- **Прелоадер — рішення агента (сесія 7, карт-бланш):** (1) таймінг 1:1 з лайвом
+  (5.0 + 3.23 + 1.7 = 9.93 с), лише фаза 1 чекає `document.fonts.ready`; (2) скрол під
+  прелоадером блокується (`lenis.stop()`), на лайві він можливий; (3) інверсія — дубль
+  слова всередині шару-диска з `clip-path: circle()`, кольори режимами `semantic`;
+  (4) розмір слів — cover-формула лайву (`max(2.15rem, 28.7vh)` / `max(1.23rem, 12vh)` /
+  `0.5rem`), а не фіксований `display-xl`; (5) **фаза 3 анімує справжні елементи Hero**,
+  дубля Hero в прелоадері немає (без шва .8→1 і стрибка); (6) гейт `html.is-preloading`
+  у page-level head: без JS прелоадера немає, у Designer секція — звичайний блок 100vh;
+  стартові стани фази 2 — у гейті, а не в класах (виняток з правила нижче).
 - **Hero (уточнено 2026-10-09, сесія 3):** сам Hero — це лише кулька на лінії
   й два тексти, без Splide. Зміна кольору фону й великого тексту, яку пам'ятає
   користувач, — це **фінал прелоадера**: слова MOTION / DESIGN / PRINCIPLES з
-  колом та інверсією чорне↔біле. У `main-css` `mix-blend-mode` немає, тож
-  інверсія, ймовірно, в Lottie або в IX2 (перевірити при проході прелоадера).
+  колом та інверсією чорне↔біле. Інверсія зроблена в Lottie дублем слова під
+  track matte кола (сесія 7, docs/sections/preloader.md), не `mix-blend-mode`.
   Splide `splide2` + своп `.hero_text` живуть в **уроці easing** (схеми
   linear/ease/ease-in) і переробляються на GSAP у проході Lessons.
 - **Без сторонніх слайдерів (2026-10-09, користувач).** На лайві Splide (hero)
@@ -275,6 +288,12 @@ Inktrap 700. 13 `.otf` не заливаємо.
 | `menu-card` | a | картка меню (×10) | `lottie-card` |
 | `ui`, `ui-track`, `ui-slide`, `ui-card`, `ui-ball`, `ui-title`, `ui-text` | div | UI-слайдер Intro | `ui*`, `section-slide*` |
 
+**Прелоадер (створено, сесія 7):** `section-preloader`, `preloader-scene`, `preloader-step`
+(+ `is-dark`), `preloader-disc` (+ `is-light`), `preloader-word`, `preloader-loader`,
+`preloader-bounce`, `preloader-bounce-ball`, `preloader-bounce-shadow`, `preloader-counter`.
+Значення й дерево — docs/sections/preloader.md «Збірка в копії». `section-preloader` — `div` з
+`aria-hidden="true"`, а не `<section>`: це декоративний оверлей без змісту.
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
 `resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
@@ -294,6 +313,35 @@ Inktrap 700. 13 `.otf` не заливаємо.
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-09 (сесія 7) — етап 3, прохід Preloader: аналіз, збірка, план анімації
+
+- **Аналіз** (субагент sonnet) — [docs/sections/preloader.md](docs/sections/preloader.md): Figma
+  (сторінка Preloader — лише фаза лічильника; слова — `Preloader(4..11)` і `Full design` 768/375),
+  записи (desktop T0 ≈ 6.85 с запису, mobile ≈ 0.4 с), IX2 `a-161` (PAGE_START, 5 груп), 4 Lottie
+  JSON розібрано пошарово. Прелоадер лайву фіктивний за часом: 9.93 с від PAGE_START, не залежить
+  від `load`. `script.v33` прелоадера не чіпає, Lenis не зупиняє.
+- **Інверсія** — у Lottie: кожне слово двічі, дубль протилежного кольору з track matte = копія кола.
+  Кола — еліпси Ø25 зі scale 0 → ~95×, ease `(.65,0,.833,.833)`. Літери — шейпи, у нас текст.
+- **Виправлено помилку в CONVENTIONS:** плашка `ball-bg.is-preloader-left` прозора й статична,
+  ширину міняє лінія `ball-divider.is-preloader-left`. `.trigger` (IX2 клік) мертвий: елемента немає.
+  `.loader` на ≤991 має фіксовані 768px — баг лайву, не переносимо.
+- **Збірка в копії:** інстанс `styles-rem` першим у Body Home, за ним `section-preloader` з 17
+  елементами (дерево й класи — в preloader.md). 10 нових класів + 2 комбо, кольори режимами
+  `semantic` (`base` / `dark`), без літералів кольору. Старі `main-css` і `loader` поки на місці
+  (дубль rem-правила з тими самими значеннями нешкідливий). Видаляються в проході анімації.
+- **План анімації** — розділ «План анімації» в preloader.md: гейт `html.is-preloading` + failsafe
+  6 с, 3 фази з тривалостями по 3 смугах, ролі `data-motion`, reduced-motion, фаза 3 = вхід
+  справжнього Hero. Рішення — у «Рішення по проєкту» вище.
+- **Пастки MCP:**
+  1. `font-size: max(var(--_type---text-215), 28.7vh)` через `create_style` зберігся як **гола змінна**
+     `text-215`, `max()` мовчки викинуто. Літерал `max(2.15rem, 28.7vh)` зберігається. CSS-функції зі
+     змінними всередині через API не писати, завжди читати назад.
+  2. `element_snapshot_tool` двічі впав (порожній статус, потім таймаут), а data-інструменти
+     працювали. Візуальної звірки секції ще немає: зробити на початку наступного проходу з відкритим
+     Designer на Home.
+- Відповіді користувача знову не отримано: поля в промпті (хвиля 2 чистки ассетів, дозвіл на
+  публікацію копії, прототип таймінгів hero) лишились шаблонними. Статус без змін.
 
 ### 2026-10-09 (сесія 6) — етап 2: Variables, текстові стилі, styles-rem
 

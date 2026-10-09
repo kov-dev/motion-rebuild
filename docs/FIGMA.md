@@ -18,7 +18,7 @@
 `2425:1985` European Design Awards · `1301:33520` **Preloader** · `1301:33919` **1. Home** ·
 `675:11687` **Full design** · `2125:31570` Codepen · `1966:38869` Card · `1790:27751` TRASH.
 Сторінка `Design system` розібрана: [sections/design-system.md](sections/design-system.md) (токени для етапу 2).
-`Full design` — огляд нижче (розрізнені фрейми, не цілісна сторінка). `Preloader` ще не розібрана — у проході Preloader.
+`Full design` — огляд нижче (розрізнені фрейми, не цілісна сторінка). `Preloader` розібрана: [sections/preloader.md](sections/preloader.md).
 
 ## Сторінка Full design (огляд, 2026-10-09)
 
@@ -66,5 +66,5 @@ node-id у таблиці — перший/репрезентативний; п�
 | Lessons | — | TODO | | |
 | Resources | — | TODO | | |
 | Footer | — | TODO | | |
-| Preloader | `4608-23740` (Preloader(4..11)) + сторінка `1301:33520` | — | 2026-10-09 | ⬜ розібрати в проході Preloader |
+| Preloader | `4608-23740` (Preloader(4..11)) + сторінка `1301:33520` | — | 2026-10-09 | ✅ [sections/preloader.md](sections/preloader.md): сторінка Preloader — лише фаза лічильника (3 стани × 3 смуги); слова — Preloader(4..11) + Full design 768/375; кадри `1057:46616`, `1063:29105`, `1063:29726` з назвою «Preloader» — це Intro |
 | Styleguide | — | TODO (якщо є) | | |
