@@ -264,11 +264,18 @@ div.section-preloader            data-motion="preloader" aria-hidden="true"   se
 
 **Розмір слів — рішення агента:** лайв масштабує Lottie за cover, тож кегль ≈ 310·max(vw/2086, vh/1080) на desktop = `max(14.86vw, 28.7vh)`; 14.86vw ≈ 2.15rem (= токен `text-215`). Tablet: 123·max(vw/768, vh/1024) = `max(16vw, 12vh)`, 16vw ≈ 1.23rem. Mobile: ≈13.3vw = 0.5rem (лайв 50 px, Figma 56 — береться лайв), vh-частина на телефонах не спрацьовує. На 1440×750 слово = 215, на 1440×900 = 258, як на лайві. Токен `display-xl` не використано, бо в ньому фіксований розмір.
 
-**Не перевірено знімком:** `element_snapshot_tool` двічі впав (порожній статус, потім таймаут). Структуру, класи, атрибути й режими звірено читанням назад. Знімок — на початку наступного проходу (Designer відкритий на Home копії з Bridge App).
+**Знімок (сесія 8).** Designer: фаза 1 (`reference/snapshots/2026-10-09-preloader-phase1.png`) — кулька, тінь, «0»
+на місцях. Далі міст Designer почав таймаутити, тож кроки слів знято з staging через Playwright із прихованим старим
+`.loader` ([tools/record/preloader-shots.mjs](../../tools/record/preloader-shots.mjs)), 4 вʼюпорти × 5 станів →
+`reference/snapshots/preloader/`. Крок 3 — біле PRINCIPLES на чорному, кроки 1–2 з інверсією правильні.
+Типографіка: кегль 215.25 / 258.3 / 123 / 50 px (1440×750 / 1440×900 / 768×1024 / 375×812), ширини слів на 1440×750
+871 / 810 / 1262 проти Figma 879 / 818 / 1269 (різниця — один трекінг). Лічильник 14 / 24, `bottom` 32 у всіх смугах.
+Вертикально слово стоїть по центру рядка, тобто капітель ≈24 px вище центру. Це не помилка: на лайві слова не
+зупиняються, а проходять через центр.
 
 ## План анімації (код, GSAP, без Lottie)
 
-Канон — `src/motion.js` (функція `initPreloader()`) + `src/preloader.css` (page-level head Home). Одна версія GSAP + CustomEase, пінована. Числа — з таймлайну лайву вище, T0 = старт модуля.
+Канон — `src/motion.js` (функція `initPreloader()`) + `src/preloader-gate.js` + `src/preloader.css` (page-level head Home: спершу script із gate, потім style). **Каркас написано й прогнано (сесія 8)**, див. журнал CONVENTIONS. Одна версія GSAP + CustomEase, пінована. Числа — з таймлайну лайву вище, T0 = старт модуля.
 
 ### Гейт і стартові стани (`src/preloader.css` + inline-скрипт у head)
 

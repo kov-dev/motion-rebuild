@@ -22,7 +22,7 @@
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
 | Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) |
-| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
@@ -93,6 +93,12 @@
   дубля Hero в прелоадері немає (без шва .8→1 і стрибка); (6) гейт `html.is-preloading`
   у page-level head: без JS прелоадера немає, у Designer секція — звичайний блок 100vh;
   стартові стани фази 2 — у гейті, а не в класах (виняток з правила нижче).
+- **Hero і `main-css` (сесія 8, агент):** (1) спільного `container` немає, ширини тримає кожен блок; (2) `h1` = великий
+  текст hero; (3) старий `main-css` на Home **лишається**: `styles-rem` покриває лише rem, scrollbar і Lenis, а в
+  `main-css` ще живуть стилі старих секцій (`section-slide*` clip-path, `is-techniques` overflow, шум
+  `classic-anim_wrap::before`, `video.is-*`, hover-и, звук, Splide). Прибирається правило за правилом у проходах цих
+  секцій, ембед видаляється з останнім; (4) старий Hero і старий `loader` лишаються до підключення `motion.js`, бо
+  на staging їх тягне `script.v33`.
 - **Hero (уточнено 2026-10-09, сесія 3):** сам Hero — це лише кулька на лінії
   й два тексти, без Splide. Зміна кольору фону й великого тексту, яку пам'ятає
   користувач, — це **фінал прелоадера**: слова MOTION / DESIGN / PRINCIPLES з
@@ -294,6 +300,11 @@ Inktrap 700. 13 `.otf` не заливаємо.
 Значення й дерево — docs/sections/preloader.md «Збірка в копії». `section-preloader` — `div` з
 `aria-hidden="true"`, а не `<section>`: це декоративний оверлей без змісту.
 
+**Hero (створено, сесія 8):** `section-hero` (режим `dark`), `hero-sticky`, `hero-plate`, `hero-axis`, `hero-lead`,
+`hero-text`, `hero-statement`; спільні `ball` (+ `is-hero`), `ball-ring`, `ball-line` (+ `is-left` / `is-right`,
+лише `transform-origin`). Імена `hero-title` / `hero-content` / `hero-animation` / `hero-visual` зайняті старими
+класами копії, їх не чіпаємо. Дерево й значення — docs/sections/hero.md «Збірка в копії».
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
 `resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
@@ -313,6 +324,39 @@ Inktrap 700. 13 `.otf` не заливаємо.
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-09 (сесія 8) — знімок прелоадера, збірка Hero, каркас motion.js
+
+- **Знімок прелоадера.** Designer (Bridge App) зняв фазу 1, потім **увесь міст Designer почав таймаутити**
+  (`element_snapshot_tool`, `designer_tool` — 6 таймаутів підряд), а data-інструменти працювали. `preloader-loader`
+  ховали й повернули (`set_visibility` true, підтверджено). Кроки слів звірено на staging через Playwright,
+  числа й знімки — у preloader.md «Збірка в копії». Типографіка збігається з Figma і cover-формулою.
+- **Staging копії вже опубліковано:** `Last Published: Fri Oct 09 2026 17:53:42 GMT`, і там є `section-preloader`.
+  Агент не публікував, у журналі сесії 7 цього немає, тобто публікував користувач. Нагадування: GA4 `G-CP1VPL4VKN`
+  на копії пише в продакшн-аналітику (див. «старт»).
+- **Hero зібрано** — `section-hero` у `main` копії, 7 нових класів + `ball` / `ball-ring` / `ball-line` з комбо, ролі
+  `data-motion` для фази 3 прелоадера, `h1`. Звірка з лайвом: 1–2 px у трьох смугах (hero.md «Збірка в копії»).
+  Рішення по `container`, `h1`, `main-css` — у «Рішення по проєкту».
+- **Текстові стилі виправлено по смугах:** `heading-xl` medium lh 1.13 / ls −0.03em, tiny lh 1.1; `body-lg` tiny
+  lh 1.45. У сесії 6 стилі звіряли лише по desktop. **Решту стилів (`display-*`, `heading-lg/md/sm`, `body-md/sm`)
+  треба так само звірити з tablet/mobile лайву** в проходах секцій, де вони вперше з'являються.
+- **Каркас коду:** [src/motion.js](src/motion.js) (GSAP 3.13.0 + CustomEase з jsDelivr ESM, піновано; `initPreloader()`
+  повністю за планом, `initHero()` — заглушка до Intro), [src/preloader-gate.js](src/preloader-gate.js),
+  [src/preloader.css](src/preloader.css). До Webflow не підключено. **Прогнано** на розмітці staging (гейт вставлено в
+  HTML у Playwright, [tools/record/preloader-run.mjs](tools/record/preloader-run.mjs)): фаза 1 (відскок, лічильник
+  0→100 за 4 с), фаза 2 (диски з інверсією, три слова), фаза 3, клас знято. Кадр 6.4 с —
+  `reference/snapshots/2026-10-09-preloader-run-6.4s.png`.
+- **Пастки:**
+  1. CSS для `<style>` у head не може містити в коментарях теги: `</style>` у коментарі закриває елемент, і решта CSS
+     друкується на сторінці. Тому гейт-скрипт винесено в окремий `src/preloader-gate.js`.
+  2. `gsap.set([null, …])` кидає `Cannot read properties of null (reading '_gsap')` (один `null` дає лише warning).
+     У `motion.js` цілі збираються через `els()`, який відкидає відсутні елементи.
+  3. Playwright `addInitScript` виконується до появи `<html>`, тож клас на `documentElement` так не поставити. Гейт
+     вставляти в HTML через `page.route`.
+  4. Designer-міст може «вмерти» посеред сесії, коли data-інструменти ще живі. Візуальну звірку тоді робити локально
+     (CSS staging + значення класів) або на staging.
+- Відкриті питання знову без відповіді: у промпті сесії поля (хвиля 2 ассетів, дозвіл на публікацію, прототип hero)
+  лишились шаблонними.
 
 ### 2026-10-09 (сесія 7) — етап 3, прохід Preloader: аналіз, збірка, план анімації
 

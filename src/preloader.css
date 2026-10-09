@@ -1,0 +1,41 @@
+/*
+  preloader.css — gate and start states for the Home preloader.
+  Canonical source: src/preloader.css. Webflow holds a copy in the Home page-level
+  head (page custom code is not executed in the Designer, so there the section stays
+  a plain 100vh block that can be edited). Not connected to Webflow yet.
+
+  Home head = a script element with src/preloader-gate.js (first), then a style
+  element with this file. Never put HTML tags inside this comment: a closing style
+  tag here would end the style element early and print the rest of the CSS as text.
+
+  Without JS the preloader never shows. Phase 2 start states live here (not in the
+  Designer classes) so the words and discs stay visible in the Designer; nothing
+  flashes because the opaque preloader-loader covers phase 2 until JS starts.
+*/
+
+.section-preloader {
+  display: none;
+}
+
+html.is-preloading {
+  overflow: hidden;
+}
+
+html.is-preloading .section-preloader {
+  display: block;
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  z-index: 1000;
+}
+
+html.is-preloading [data-motion="preloader-disc"] {
+  clip-path: circle(0px at 50% 50%);
+}
+
+html.is-preloading [data-motion="preloader-word"] {
+  transform: translateY(100vh);
+}
+
+/* Hero start states for phase 3 are set by gsap.set() in initPreloader() while the
+   overlay still covers the page, so they are not duplicated here. */

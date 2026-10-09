@@ -66,3 +66,48 @@
 1. Лінії при виході з Hero: стискати до кільця (як на лайві) чи до країв (як у Figma `28300`)? За замовчуванням — як лайв.
 2. Чи є прототип/Smart Animate у Figma для переходів 1→2→3 з таймінгами? Зараз беремо таймінги лайву (1s/0.5s).
 3. Анімація входу кільця й ліній після прелоадера — розбирати в проході Preloader (мій варіант) чи в Hero?
+
+---
+
+## Збірка в копії (сесія 8, 2026-10-09, головна сесія)
+
+Home копії, `main` → **`section-hero`** (`1e2ce484-6c13-e35c-cb6f-99262c1d94e1`) першим дитям, перед старим
+`nav nav-dark` → `section#hero.is-hero`. Старий Hero поки лишається: на staging його ще тягне `script.v33`
+(`#hero .anim-ball-wrap`, `#anim-ball`, MotionPath в Intro). Видаляється разом із підключенням `motion.js`,
+тоді ж `id="hero"` переходить на нову секцію (дубль id зараз неможливий).
+
+```
+section.section-hero          data-motion="theme" data-theme="dark"   semantic: dark (на класі)
+├─ div.hero-sticky            data-motion="hero-ball-sticky"   sticky top −20vh, h 50vh, flex end
+│  ├─ div.hero-plate                                          чорна плашка 30vh над кільцем (abs, bottom .53/.37rem)
+│  └─ div.hero-axis           data-motion="hero-ball-wrap"     flex center, translateY(50%) → вісь на 50vh
+│     ├─ div.ball-line.is-left   data-motion="hero-divider" data-side="left"   origin 100% 50%
+│     ├─ div.ball-ring           data-motion="hero-ball-border"                1.06 / tiny .74rem
+│     ├─ div.ball.is-hero        data-motion="hero-ball"                       .18rem, abs, z 2
+│     └─ div.ball-line.is-right  data-motion="hero-divider" data-side="right"  origin 0% 50%
+├─ div.hero-lead                                              h 100vh, margin-top −50vh, flex end, center
+│  └─ div.hero-text           data-motion="hero-text"          8.48 / 5.28 / 3.14rem × 50vh
+│     └─ p.body-lg            «UI/UX animation emphasizes…»
+└─ div.hero-statement                                         margin-top 3.18rem, padding 0 1.33/.56/.24rem, bottom 2/–/1rem
+   └─ h1.heading-xl           «Good animation also makes…»
+```
+
+**Рішення (агент, карт-бланш):**
+- **`container` не потрібен.** Hero, як і решта Motion, повноширинний; ширини текстів задані rem-ширинами блоків
+  (`hero-text`) і падінгами (`hero-statement`), а не спільною сіткою. Загальний `container` не створюємо, кожен блок
+  тримає свої ширини. Переглянути, лише якщо в Lessons/Resources з'явиться спільна сітка.
+- **`h1` = великий текст hero** («Good animation also makes…»). Він перший великий заголовок на сторінці, слова
+  прелоадера `aria-hidden`. Вигляд не змінився (`heading-xl`, margin 0).
+- **Плашка — дитина `hero-sticky`, а не `hero-axis`** (на лайві `ball-bg` у wrap з `position: static`, тож рахувалась
+  від sticky). Значення ті самі, `bottom` = половина кільця.
+- **Кольори — режимом `semantic: dark` на `section-hero`**: кулька й лінії `foreground`, кільце й плашка `bg`,
+  обвідка `border`. Літералів кольору немає. Обгортка `nav nav-dark` більше не потрібна: тема навбара —
+  `data-motion="theme"` + `data-theme`.
+- **Виправлено текстові стилі за лайвом** (смуги, які в сесії 6 не звірили): `heading-xl` medium lh **1.13**,
+  ls **−0.03em** (tiny успадковує), tiny lh **1.1**; `body-lg` tiny lh **1.45**.
+
+**Звірка.** Знімок Designer не вдався (міст таймаутить, див. журнал), тому розкладку звірено так: локальна сторінка
+з CSS staging + значення нових класів проти лайву, Playwright 1440×900 / 768×1024 / 375×812
+([tools/record/hero-compare.mjs](../../tools/record/hero-compare.mjs)). Кільце, кулька, лінії, P1 і h1 збігаються
+до 1–2 px (h1 1440: 1154 проти 1152, бо lh 1.03 замість 1.0286). Знімки:
+`reference/snapshots/2026-10-09-hero-{1440,375}-live-vs-new.png`. Знімок самої секції в Designer — коли оживе міст.
