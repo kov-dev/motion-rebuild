@@ -10,7 +10,7 @@
 - [x] Агент: `list_sites` → ID копії в CONVENTIONS.md (2026-10-09)
 - [x] Користувач: репо на GitHub → `kov-dev/motion-rebuild` (2026-10-09)
 - [x] ~~Немініфікований `script.v33`~~ — не знайдено; розшифровано з мініфікованого → `reference/script.v33.src.js` (2026-10-09)
-- [x] Копію опубліковано на staging (2026-10-09 17:53 UTC, не агентом; дозволу на подальші публікації агентом немає)
+- [x] Копію опубліковано на staging (2026-10-09 17:53 і ще раз 18:16 UTC, не агентом; дозволу на подальші публікації агентом немає)
 - [ ] Перевірити: чи публікується site-level custom code на webflow.io без Site plan
       (якщо ні — на час розробки тримати код у page-level footer Home)
 
@@ -45,7 +45,7 @@
 - [ ] Компоненти: navbar, footer, lesson-section (8 уроків → 1 компонент з пропсами), lottie-card
 - [x] Каркас `src/motion.js` (ES-module, GSAP 3.13.0 піновано) + `preloader-gate.js` + `preloader.css` (2026-10-09)
 - [ ] Збірка/мініфікація, версія в імені, підключення до Webflow (jsDelivr) — разом із видаленням старих `loader` і Hero
-- [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl і body-lg виправлено в сесії 8)
+- [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl, body-lg — сесія 8; text-shape, body-sm — сесія 9; лишились display-xl/lg, heading-lg/md/sm, body-md, text-label)
 
 ## Етап 3 — Секції (кожна окремим проходом) 🟨
 
@@ -57,8 +57,8 @@
 | Секція | Figma | Аналіз | Верстка | Анімація | Звірка |
 |---|---|---|---|---|---|
 | Preloader | ✅ | ✅ [preloader.md](docs/sections/preloader.md) | ✅ зібрано, знімки фаз (2026-10-09) | 🟨 `initPreloader()` написано й прогнано на staging-розмітці, у Webflow не підключено | ⬜ |
-| Hero | ✅ | ✅ | ✅ `section-hero` (2026-10-09), звірено з лайвом 1–2 px; старий Hero ще на сторінці | 🟨 вхід — у `initPreloader()`; вихід ліній — у проході Intro | ⬜ |
-| Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ⬜ | ⬜ | ⬜ |
+| Hero | ✅ | ✅ | ✅ `section-hero` (2026-10-09), звірено з лайвом 1–2 px, знімок Designer (сесія 9); старий Hero ще на сторінці | ✅ вхід — `initPreloader()`, вихід ліній/кільця — `initHero()` (сесія 9, прогнано на staging-розмітці); у Webflow не підключено | ⬜ |
+| Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ✅ `section-intro` зі сценою, шляхами й UI-слайдером (сесія 9), звірено з лайвом Δ 0–1 px; старий Intro ще на сторінці | 🟨 план `initIntro()` / `initUi()` у [intro.md](docs/sections/intro.md) «План анімації» | ⬜ |
 | Interactive | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Techniques | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Lessons ×8 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |

@@ -111,3 +111,7 @@ section.section-hero          data-motion="theme" data-theme="dark"   semantic: 
 ([tools/record/hero-compare.mjs](../../tools/record/hero-compare.mjs)). Кільце, кулька, лінії, P1 і h1 збігаються
 до 1–2 px (h1 1440: 1154 проти 1152, бо lh 1.03 замість 1.0286). Знімки:
 `reference/snapshots/2026-10-09-hero-{1440,375}-live-vs-new.png`. Знімок самої секції в Designer — коли оживе міст.
+
+**Сесія 9:** знімок Designer вдався (`reference/snapshots/2026-10-09-hero-designer.png`). Лінії й обводки на ньому
+товсті, але це артефакт рендеру знімка: на staging лінія 1 px, кільце 106, кулька 18. Вихід ліній і кільця при вході
+Intro — `initHero()` у `src/motion.js` (числа вище, деталі в intro.md «План анімації»).

@@ -165,3 +165,104 @@
 ### Питання до користувача
 1. Чи потрібен макет блоку 2 (слайди 4–6, заголовок «Animation encourages interaction…») і мобільні/планшетні стани, чи робимо за лайвом та масштабом від 1440?
 2. Ширина слайда 66.7vw (Figma 960/480) чи 75vw/25vw (лайв)? Рекомендація: лайв (75/25), Figma — як ескіз.
+
+## Збірка в копії (сесія 9, 2026-10-09, головна сесія)
+
+Home копії, `main` → **`section-intro`** (`d320b4f4-8f76-79fa-a9ef-f7d30f54e19d`) одразу після `section-hero`, перед
+старими Hero й Introduction. Старий `#introduction` лишається, поки на staging його тягне `script.v33`. `id` секції
+поки не ставимо (дубль `introduction` неможливий), він переходить разом із підключенням `motion.js`.
+
+```
+section.section-intro          data-motion="theme" data-theme="dark"     semantic: dark (на класі)
+├─ div.intro-scene             data-motion="intro"      relative; тригер Intro для initHero/initIntro
+│  ├─ div.intro-art            aria-hidden              relative, margin-bottom −30.81 / −19.08 / −11.54rem
+│  │  ├─ div.intro-illustration                         100% × 32.7 / 20.59 / 12.45rem, фон path_main_* (3 SVG)
+│  │  ├─ div.intro-clouds                               abs bottom 0 / −.72rem
+│  │  │  └─ div.intro-cloud + is-left / is-right / is-middle    фони cloud_1/2/3 (+_tablet, _mobile, Footer_Cloud-3_mobile)
+│  │  ├─ div.intro-smoke                                фон smoke.svg
+│  │  └─ div.intro-shape + is-also / is-controls / is-your / is-attention   semantic: base (біла пігулка)
+│  │     └─ div.intro-shape-mask (overflow hidden)
+│  │        └─ div.text-shape  data-motion="intro-text" data-step="0..3"   «It also» / «controls» / «your» / «attention»
+│  ├─ HtmlEmbed.intro-path                  ┐ невидимий SVG-шлях, задає висоту сцени (5.03 × 34.98rem)
+│  ├─ HtmlEmbed.intro-path.is-tablet        │ path[data-motion="intro-path"][data-bp="desktop|tablet|mobile"]
+│  └─ HtmlEmbed.intro-path.is-mobile        ┘ канон src/intro/path-{desktop,tablet,mobile}.html
+└─ div.ui-stage                                         margin-top calc(1.6rem − 50vh) / −50vh, overflow hidden
+   └─ div.ui-block ×2          data-motion="ui"         relative, 100% × max 100vh (pin)
+      ├─ div.ui-rail           data-motion="ui-track"   flex, max-content, align center / flex-start
+      │  ├─ div.ui-heading     data-motion="ui-text"    75vw, pl .32rem / 100vw центр, translateY(50%)
+      │  │  └─ h2.ui-title                              74/80, 44/54, 24/32, uppercase (літерали)
+      │  └─ div.ui-slides      data-motion="ui-slides"  flex / margin-left −100vw
+      │     └─ div.ui-panel ×3 data-motion="ui-slide"   25vw / 100vw, clip-path circle(.09rem)
+      │        └─ div.ui-panel-body (+ is-first: opacity 0)   100vh, flex column, gap .4rem, semantic: base
+      │           ├─ div.ui-media > HtmlEmbed.ui-video        4.25 / 2.01rem; <video data-motion="ui-video">
+      │           └─ div.ui-caption > p.body-sm               6.4rem / auto / px .4rem
+      └─ div.ui-dot            data-motion="ui-ball"    лише в першому блоці, opacity 0
+```
+
+**Рішення (агент, карт-бланш):**
+- **Імена `ui-*` інші, ніж у чернетці** (`ui-stage`, `ui-block`, `ui-rail`, `ui-heading`, `ui-slides`, `ui-panel`,
+  `ui-panel-body`, `ui-media`, `ui-video`, `ui-caption`, `ui-dot`). Причина: `ui`, `ui-wrap`, `ui-track`, `ui-text`,
+  `ui-ball`, combo `ui-slide` / `ui-slider` уже є в копії, і `script.v33` на staging шукає їх селекторами. Перейменування
+  в чернеткові імена можливе після видалення старої секції, але не обов'язкове.
+- **`ui-track` + `section-track` злиті в `ui-rail`**, `ui-text` + `text-wrap.is-animation` — у `ui-heading`, `bg-wrap` +
+  `bg-list` — в `intro-clouds`. Розкладка та сама (перевірено).
+- **JS-розкладку лайву перенесено в CSS** (script-map баг 10): `ui-wrap` marginTop (+½ висоти заголовка = 1.6rem на
+  десктопі), слайди 25vw, `ui-slider` margin-left −100vw на ≤991. Стартові стани — у класах: `clip-path` панелей,
+  `opacity 0` першої панелі блоку і кульки.
+- **Тексти пігулок видимі без JS і в Designer**: стан `y: 100%` ставить `initIntro()` (`gsap.set`), а не клас. Секція
+  під першим екраном, тож блимання немає. Виняток з правила «стартові стани — у класі», як і гейт прелоадера.
+- **SVG-шляхи без `id="vrtx*"`**: `getElementById` старого скрипта знайшов би наш шлях першим у DOM. Прив'язка — лише
+  `data-motion` + `data-bp`. `stroke="currentColor"`, `opacity: 0` інлайн, як на лайві.
+- **Відео**: `preload="none"`, без `autoplay` (на лайві `autoplay="false"` вмикав автоплей), `width`/`height` — реальні
+  пропорції (1406×856, слайд 2 — портрет 468×938), `opacity: 0` інлайн. Джерела 1:1 з лайвом (`cdn.zajno.com`), пари
+  `.mov`/`.webm` лишаються до перекодування на етапі 5. Канон — `src/intro/ui-videos.html`.
+- **Заголовки слайдера — `h2`** (після `h1` у Hero), вигляд не змінився.
+- **Текстові стилі виправлено за лайвом:** `text-shape` → шрифт `font-display` (Plain, як на лайві; Inktrap був з
+  Figma), ls `−0.007rem` (−0.7px у всіх смугах, як на лайві; було −0.06em з Figma); `body-sm` lh medium **1.85**
+  (24/13), tiny **1.385** (18/13); `body-sm.is-strong` medium lh **1.5**, щоб не успадкувати 1.85.
+
+**Звірка.** Staging без нової секції (публікувати не можна), тож як у Hero: локальна фікстура
+[tools/record/fixtures/intro.html](../../tools/record/fixtures/intro.html) (CSS staging + значення класів, прочитані
+назад) проти лайву, [tools/record/intro-compare.mjs](../../tools/record/intro-compare.mjs), 1440 / 768 / 375. Сцена,
+пігулки, шлях, заголовок, панель, підпис — Δ 0–1 px. Очікувані розбіжності: висота секції (pin-spacer'и лайву), тексти
+пігулок (на лайві стартовий `y: 100%`), хмари (на лайві стартовий стан паралаксу IX2, +3rem / +2rem), ширина відео до
+`loadedmetadata` на лайві (300 px — фолбек браузера; після метаданих 698×425 / 330×201, як у нас). Знімки:
+`reference/snapshots/2026-10-09-intro-{1440,768,375}-live-vs-new.png`.
+
+## План анімації (сесія 9) — `initIntro()`
+
+Усе в коді (MotionPath і pin із обчисленнями — не IX3). Числа з script-map блок C/D і IX2 `a-127`/`a-156`.
+
+**1. Вихід Hero** — ✅ `initHero()` у `src/motion.js`: точковий ScrollTrigger на `[data-motion=intro]`,
+`start = end = top−(висота hero-axis) center`; вниз лінії `scaleX 0` 1 с → кільце `scale 0` 0.5 с; вгору навпаки;
+ease за замовчуванням (power1.out), `overwrite: true`. Прогнано на розмітці staging з фікстурою
+([tools/record/hero-exit-run.mjs](../../tools/record/hero-exit-run.mjs)).
+
+**2. Кулька по шляху (MotionPath)** — `initIntro()`:
+- Плагін `MotionPathPlugin` з того ж `gsap@3.13.0` (піновано). Кулька — `[data-motion=hero-ball]` (у Hero); `align: path`
+  переносить її в координати шляху незалежно від DOM.
+- Шлях — `path[data-motion=intro-path][data-bp=band()]`, бокс — його `<svg>`-обгортка (`intro-path`). Зупинки:
+  desktop `[0.1477, 0.43367, 0.61329, 1]`, tablet `[0.12336, 0.37553, 0.53228, 1]`, mobile `[0.13847, 0.348, 0.5061, 1]`.
+- Тексти: `gsap.set([data-motion=intro-text], { yPercent: 100 })` на старті; кінець сегмента i → `yPercent: 0` текст
+  `data-step=i`, зворотний хід — назад до 100 (`overwrite: true`), як на лайві.
+- Таймлайн: `scrollTrigger { trigger: intro, start: 'top center', end: desktop ? 'bottom+=<½ ui-heading> center' :
+  'bottom center', scrub: 1, invalidateOnRefresh: true }`, `ease: 'none'`. Сегменти: падіння `y += dropY` (4 / 8 моб),
+  далі шлях 7 / 18 / 14 / 27 (`curviness: 2`, `alignOrigin [.5,.5]`). `dropY` = desktop `0.033·vw + pathTop`, інакше
+  `pathTop` (`pathTop` = `offsetTop` боксу шляху в `intro-scene`).
+- Desktop: + 8 од. bounce (`CustomEase bounce` з src.js) `y += landY` і одночасно `x += landX` у центр першої
+  `ui-panel`. Усі `landX/landY/dropY` — функції (баг 6 лайву: числа читались раз на load).
+- Передача: `onComplete` ховає кульку Hero й показує `ui-panel-body.is-first` першого блоку; `onReverseComplete` навпаки.
+- Скидання sticky Hero (`hero-ball-sticky y 0`, `hero-ball-wrap y 50%`) на вході/виході — як `resetHeroBallSticky`.
+
+**3. UI-слайдер (блок D)** — окремий прохід `initUi()` після MotionPath: pin на кожен `ui-block` у порядку DOM (баг 7),
+довжина `vw·k + vw·n·k + 0.5·vw·n + 0.25·vw` (k .75 / 1, ×3 моб), трек `x −75vw / −100vw`, панелі 25→75vw з
+`clip-path circle(.09rem → max(vw,vh))` 0.7 с і відео `opacity` 0.6 с + `play()/pause()`, кулька `ui-dot` між блоками
+(`bounceSmall`). «Ручний sticky» кульки Hero в `onUpdate` лайву (новий `gsap.to` на кожен кадр) замінити одним
+`gsap.quickSetter` або `ScrollTrigger` з `scrub`. Idle-похитування (блок B): власний таймер 4 с замість `ifvisible`.
+
+**4. Хмари (паралакс IX2)** — `intro-cloud` `y` від `+3rem` (tiny `+2rem`) до `0` (середня — до `1.3rem` / `0.8rem`) на
+відрізку 78→100 % проходу `intro-art` через в'юпорт (IX2 «scrolling in view», smoothing 80). Без обчислень, тож **IX3**
+(scroll scrub) або 1 рядок ScrollTrigger у `initIntro()` — вирішити в проході анімації; на користь коду — одна система
+з MotionPath.
+
+**5. Reduced motion:** кулька одразу в кінці шляху, тексти видимі, хмари без руху, pin слайдера лишається (контент).

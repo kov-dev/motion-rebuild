@@ -1,6 +1,6 @@
 /*
   motion.js — the single animation module of the Motion rebuild.
-  Canonical source: src/motion.js. Not connected to Webflow yet (stage 3 skeleton).
+  Canonical source: src/motion.js. Not connected to Webflow yet (stage 3: preloader + hero exit).
 
   Rules (CONVENTIONS.md):
   - DOM is bound only through data-motion="<role>" attributes, never through classes.
@@ -12,8 +12,9 @@
 // Pinned: re-check the latest 3.x before stage 4 and bump in one place.
 import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/+esm';
 import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/CustomEase/+esm';
+import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger/+esm';
 
-gsap.registerPlugin(CustomEase);
+gsap.registerPlugin(CustomEase, ScrollTrigger);
 
 /* ---------- helpers ---------- */
 
@@ -190,10 +191,35 @@ export async function initPreloader({ lenis = null } = {}) {
 
 /* ---------- hero ---------- */
 
-// Exit of the lines and ring when Intro enters (docs/sections/hero.md) needs
-// ScrollTrigger and the Intro section; it is written in the Intro pass.
+// Exit of the lines and ring when Intro enters (docs/sections/hero.md, script.v33 block C).
+// One point trigger: Intro top minus the axis height reaches the viewport centre.
+// Down: lines collapse towards the ring (1 s), then the ring shrinks (0.5 s); up: reverse order.
+// Eases are GSAP defaults (power1.out), as on the live site.
 export function initHero() {
-  if (!q('hero-ball-sticky')) return;
+  const axis = q('hero-ball-wrap');
+  const intro = q('intro');
+  if (!axis || !intro) return;
+  const lines = els(qa('hero-divider'));
+  const ring = els(q('hero-ball-border'));
+  const k = reducedMotion() ? 0 : 1;
+
+  const collapse = () =>
+    gsap.timeline({ defaults: { overwrite: true } })
+      .to(lines, { scaleX: 0, duration: 1 * k })
+      .to(ring, { scale: 0, duration: 0.5 * k });
+  const expand = () =>
+    gsap.timeline({ defaults: { overwrite: true } })
+      .to(ring, { scale: 1, duration: 0.5 * k })
+      .to(lines, { scaleX: 1, duration: 1 * k });
+
+  const point = () => `top-=${axis.offsetHeight} center`;
+  ScrollTrigger.create({
+    trigger: intro,
+    start: point,
+    end: point,
+    onEnter: collapse,
+    onLeaveBack: expand,
+  });
 }
 
 /* ---------- boot ---------- */
@@ -201,7 +227,8 @@ export function initHero() {
 async function init() {
   await initPreloader();
   initHero();
-  // Next passes: initIntro(), initInteractive(), … then ScrollTrigger.refresh().
+  // Next passes: initIntro(), initInteractive(), … created in DOM order, then one refresh.
+  ScrollTrigger.refresh();
 }
 
 init();

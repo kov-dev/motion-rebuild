@@ -22,7 +22,7 @@
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
 | Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) |
-| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
@@ -99,6 +99,11 @@
   `classic-anim_wrap::before`, `video.is-*`, hover-и, звук, Splide). Прибирається правило за правилом у проходах цих
   секцій, ембед видаляється з останнім; (4) старий Hero і старий `loader` лишаються до підключення `motion.js`, бо
   на staging їх тягне `script.v33`.
+- **Intro (сесія 9, агент):** (1) нові класи не можуть повторювати старі імена, які читає `script.v33` (`ui`, `ui-*`,
+  `anim-*`, `embed-path*`), і нові ембеди не мають старих `id` (`vrtx*`): інакше staging зламається ще до підключення
+  `motion.js`; (2) JS-розкладку лайву (marginTop, ширини слайдів) перенесено в CSS; (3) стартовий `y: 100%` текстів
+  пігулок ставить код, а не клас (секція нижче першого екрана; без JS тексти видимі); (4) ілюстрації — фонові SVG з
+  ассетів копії, як на лайві, по одному на смугу; (5) відео — `preload="none"`, без `autoplay`, реальні пропорції.
 - **Hero (уточнено 2026-10-09, сесія 3):** сам Hero — це лише кулька на лінії
   й два тексти, без Splide. Зміна кольору фону й великого тексту, яку пам'ятає
   користувач, — це **фінал прелоадера**: слова MOTION / DESIGN / PRINCIPLES з
@@ -250,10 +255,10 @@ absolute-розкладкою.
 | `heading-sm` | display | `text-54` | 1.07 | 0 | UP | `.h5` |
 | `body-lg` | display | `text-28` | 1.57 | 0 | | `.p1` |
 | `body-md` | body | `text-18` | 1.78 | 0 | | `.p2`, `.slide-inner-label`, `.hero_wrap` |
-| `body-sm` | display | `text-16` | 1.5 | −0.02em | | `.p3` (51), `.btn-link` (25), `.resources-item__button` (14) |
+| `body-sm` | display | `text-16` | 1.5 (tab **1.85**, mob **1.385**) | −0.02em | | `.p3` (51), `.btn-link` (25), `.resources-item__button` (14). lh tab/mob — з `.p3` лайву (сесія 9); `btn-link` / `resources-item__button` звірити у своїх проходах |
 | `body-sm` + `is-strong` | body, 700 | 16 / **16** / 14 | 1.5 (mob 1.57) | 0 | | `.p3-bold`: підписи карток Interactive. Розмір tab/mob лишаємо як на лайві, тому комбо перевизначає й розмір |
 | `text-label` | body | `text-16-label` | 1.0 | −0.03em | | `.breadcrumb-item`, `.nav-toggle`, `.logo-text-sections`, `.resources-header__count` |
-| `text-shape` | body | `text-64` | 1.0 | −0.06em | | `.anim-shape` (4, Intro). Вага 400, як на лайві (Light 300 немає) |
+| `text-shape` | **display** | `text-64` | 1.0 | **−0.007rem** | | `.anim-shape` (4, Intro). Вага 400, як на лайві (Light 300 немає). Сесія 9: шрифт і ls — з лайву (було Inktrap / −0.06em з Figma) |
 
 Поза стилями, літералом у класі блока: `ui-title` (2× `.h6`, заголовки блоків UI-слайдера,
 74/44/24, своя драбина, тож не `heading-md`), `resources-title` (1.95), `resources-student`
@@ -292,7 +297,7 @@ Inktrap 700. 13 `.otf` не заливаємо.
 | `btn` + `is-secondary` | a / button | пілюлі Menu / Sound / лого: 44 h, padding 14/16, radius 26 літералом (не з драбини, лише цей клас), `border-1` | `nav-toggle`, `sound-icon-wrap` |
 | `btn` + `is-link` | a | текстова кнопка `body-sm`, підкреслення на hover | `btn-link` |
 | `menu-card` | a | картка меню (×10) | `lottie-card` |
-| `ui`, `ui-track`, `ui-slide`, `ui-card`, `ui-ball`, `ui-title`, `ui-text` | div | UI-слайдер Intro | `ui*`, `section-slide*` |
+| ~~`ui`, `ui-track`, `ui-slide`, `ui-card`, `ui-ball`, `ui-text`~~ → `ui-stage`, `ui-block`, `ui-rail`, `ui-heading`, `ui-title`, `ui-slides`, `ui-panel`, `ui-panel-body`, `ui-media`, `ui-video`, `ui-caption`, `ui-dot` | div / h2 | UI-слайдер Intro (сесія 9: старі імена зайняті класами, які читає `script.v33`) | `ui*`, `section-slide*` |
 
 **Прелоадер (створено, сесія 7):** `section-preloader`, `preloader-scene`, `preloader-step`
 (+ `is-dark`), `preloader-disc` (+ `is-light`), `preloader-word`, `preloader-loader`,
@@ -304,6 +309,12 @@ Inktrap 700. 13 `.otf` не заливаємо.
 `hero-text`, `hero-statement`; спільні `ball` (+ `is-hero`), `ball-ring`, `ball-line` (+ `is-left` / `is-right`,
 лише `transform-origin`). Імена `hero-title` / `hero-content` / `hero-animation` / `hero-visual` зайняті старими
 класами копії, їх не чіпаємо. Дерево й значення — docs/sections/hero.md «Збірка в копії».
+
+**Intro (створено, сесія 9):** `section-intro` (режим `dark`), `intro-scene`, `intro-art`, `intro-illustration`,
+`intro-clouds`, `intro-cloud` (+ `is-left` / `is-right` / `is-middle`), `intro-smoke`, `intro-shape` (режим `base`; +
+`is-also` / `is-controls` / `is-your` / `is-attention`), `intro-shape-mask`, `intro-path` (+ `is-tablet` / `is-mobile`);
+UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`. Фони ілюстрацій — `background-image: @img_<assetId>`
+(формат API для ассета). Дерево — docs/sections/intro.md «Збірка в копії».
 
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
 `resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
@@ -324,6 +335,36 @@ Inktrap 700. 13 `.otf` не заливаємо.
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-09 (сесія 9) — прохід Intro: збірка, звірка, вихід Hero
+
+- **Знімок Hero в Designer вдався** — `reference/snapshots/2026-10-09-hero-designer.png`. Лінії й обводки на ньому
+  товсті, але на staging лінія 1 px, кільце 106, кулька 18 (Playwright): це масштаб рендеру знімка, не стилі.
+- **Staging перепубліковано ще раз — 18:16 UTC** (`lastPublished 2026-10-09T18:16:42Z`, до того 17:53). Агент не
+  публікував. На staging є `section-hero`, нової Intro немає.
+- **Intro зібрано** — `section-intro` після `section-hero`: сцена з ілюстраціями (фони SVG по смугах), 4 пігулки з
+  текстами `intro-text` `data-step`, 3 невидимі SVG-шляхи `intro-path` `data-bp`, UI-слайдер (2 блоки × 3 панелі,
+  відео-ембеди, `ui-dot`). 22 нові класи + 10 комбо, режими `semantic` dark / base, без літералів кольору. Канон
+  ембедів — `src/intro/` (3 шляхи, 6 відео), прочитано назад, збігається. Дерево й рішення — intro.md «Збірка в копії».
+- **Звірка з лайвом** — фікстура + `tools/record/intro-compare.mjs`, 1440 / 768 / 375: Δ 0–1 px для всієї розкладки;
+  розбіжності лише в станах анімацій (деталі в intro.md). Знімки `reference/snapshots/2026-10-09-intro-*-live-vs-new.png`.
+- **Текстові стилі за лайвом:** `text-shape` → Plain + ls −0.007rem (Figma-значення Inktrap/−0.06em на лайві не
+  використовуються); `body-sm` lh tab 1.85 / mob 1.385, `is-strong` medium lh 1.5. Нові `ui-title` — літерали `.h6`.
+- **`initHero()`** — вихід ліній і кільця при вході Intro (ScrollTrigger з `gsap@3.13.0`, точковий тригер). Прогнано на
+  розмітці staging з фікстурою Intro (`tools/record/hero-exit-run.mjs`): вниз лінії → кільце, вгору навпаки, без помилок.
+  Також `ScrollTrigger.refresh()` у `init()` після всіх модулів.
+- **План `initIntro()`** (MotionPath, тексти, передача кульки в слайдер, хмари, reduced motion) — intro.md «План анімації».
+- **Знахідки:** (1) хмари Intro на лайві мають scroll-паралакс IX2 (`a-127` / `a-156`: +3rem / +2rem → 0, середня → 1.3 /
+  0.8rem), у сесії 3 його не помітили; (2) відео слайда 2 портретне (468×938); (3) на лайві `width`/`height="100%"` і
+  `preload="none"` дають фолбек 300 px до метаданих.
+- **Пастки:**
+  1. `background-image` через API — значення `@img_<assetId>` (так його й читає `query_styles`); URL з ассетів копії
+     брати зі старих класів копії, бо в бібліотеці багато тезок (`cloud_1_mobile.svg` ×4).
+  2. `calc(1.6rem - 50vh)` і `circle(0.09rem at 50% 50%)` літералами зберігаються (проблема лише зі змінними всередині).
+  3. Старі класи копії з тими ж іменами — пастка для staging: `script.v33` вибирає елементи за класами, тож перевіряти
+     імена через `query_styles` перед створенням (так зроблено з `ui-*`).
+- Відповідей користувача знову немає: поля в промпті (хто публікував staging і чи можна агенту публікувати копію, хвиля 2
+  ассетів, прототип таймінгів hero) лишились шаблонними.
 
 ### 2026-10-09 (сесія 8) — знімок прелоадера, збірка Hero, каркас motion.js
 

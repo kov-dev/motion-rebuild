@@ -52,9 +52,10 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 | `#anim-ball` | `hero-ball` |
 | `.anim-ball-sticky` / `.anim-ball-wrap` / `.anim-ball-border` | `hero-ball-sticky` / `hero-ball-wrap` / `hero-ball-border` |
 | `.ball-divider.is-left/right` | `hero-divider` + `data-side` |
-| `.embed-path*`, `#vrtx*` | `intro-path` + `data-bp="desktop|tablet|mobile"` |
-| `.anim-shape.is-*` | `intro-text` + `data-step="0..3"` |
-| `.ui` / `.ui-track` / `.ui-slide` / `.ui-text` / `.ui-ball` | `ui` / `ui-track` / `ui-slide` / `ui-text` / `ui-ball` |
+| `.embed-path*`, `#vrtx*` | `intro-path` + `data-bp="desktop|tablet|mobile"` — на `<path>`, ✅ у копії (сесія 9) |
+| `.anim-shape.is-*` | `intro-text` + `data-step="0..3"` — на рухомому тексті, ✅ у копії (сесія 9) |
+| `.ui` / `.ui-track` / `.ui-slide` / `.ui-text` / `.ui-ball` | `ui` / `ui-track` / `ui-slide` / `ui-text` / `ui-ball` + `ui-slides` (ряд панелей), `ui-video` (на `<video>`) — ✅ у копії (сесія 9) |
+| `.is-introduction` / `.intro-wrap` | `intro` (на `intro-scene`) — ✅ у копії (сесія 9) |
 | `.height-section.is-interactive` | `interactive-track` |
 | `#canvas` | `sphere` |
 | `.loader*`, `.preloader_*`, `*.is-preloader*` (IX2 + Lottie, не script.v33) | `preloader`, `preloader-loader`, `preloader-bounce-ball`, `preloader-bounce-shadow`, `preloader-counter`, `preloader-scene`, `preloader-step`, `preloader-disc`, `preloader-word` (сесія 7, docs/sections/preloader.md) |

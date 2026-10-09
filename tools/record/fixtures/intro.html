@@ -1,0 +1,142 @@
+<!doctype html>
+<!-- Local mirror of the new section-intro (session 9). Class values copied from the Webflow copy
+     (read back via MCP), staging CSS supplies fonts, variables and the old text styles.
+     Used by tools/record/intro-compare.mjs until the copy is republished. -->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/css/motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.shared.0ee4aac76.min.css">
+<style>
+html { font-size: calc(10000vw / 1440); }
+@media (max-width: 991px) { html { font-size: calc(10000vw / 768); } }
+@media (max-width: 479px) { html { font-size: calc(10000vw / 375); } }
+body { margin: 0; background: #0c0b0b; }
+
+/* text style fixes (session 9) */
+.text-shape { font-family: var(--_core---font-display); letter-spacing: -0.007rem; }
+@media (max-width: 991px) { .body-sm { line-height: 1.85; } .body-sm.is-strong { line-height: 1.5; } }
+@media (max-width: 479px) { .body-sm { line-height: 1.385; } }
+
+.section-intro { position: relative; background-color: var(--_semantic---bg); color: var(--_semantic---foreground);
+  --_semantic---bg: var(--_core---neutral-1000); --_semantic---foreground: var(--_core---neutral-0); --_semantic---border: var(--_core---neutral-0); }
+.intro-scene { position: relative; }
+.intro-art { position: relative; margin-bottom: -30.81rem; }
+.intro-illustration { width: 100%; height: 32.7rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f49d_path_mian_desktop.svg); background-position: 0 0; background-size: cover; }
+.intro-clouds { position: absolute; left: 0; right: 0; top: auto; bottom: 0; }
+.intro-cloud { position: relative; background-position: 0 0; background-size: cover; }
+.intro-cloud.is-left { z-index: 3; width: 7.21rem; height: 5.4rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f39e_cloud_1.svg); }
+.intro-cloud.is-right { position: absolute; right: 0; bottom: 0; z-index: 2; width: 7.92rem; height: 5.51rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3b4_cloud_2.svg); }
+.intro-cloud.is-middle { position: absolute; left: 3.44rem; bottom: 1.1rem; z-index: 1; width: 6.43rem; height: 2.92rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3a8_cloud_3.svg); }
+.intro-smoke { position: absolute; top: 9.31rem; right: 1.81rem; width: 3.84rem; height: 4rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f36f_smoke.svg); background-position: 50% 50%; background-size: cover; }
+.intro-shape { position: absolute; padding: 0.24rem 0.4rem; border-radius: var(--_core---radius-full); background-color: var(--_semantic---bg); color: var(--_semantic---foreground);
+  --_semantic---bg: var(--_core---neutral-0); --_semantic---foreground: var(--_core---neutral-1000); --_semantic---border: var(--_core---neutral-1000); }
+.intro-shape.is-also { top: 2.94rem; left: 5.27rem; }
+.intro-shape.is-controls { top: 9.53rem; right: 2.12rem; }
+.intro-shape.is-your { top: 17.11rem; left: 4.1rem; transform: rotate(30deg); }
+.intro-shape.is-attention { z-index: 1; top: 23.44rem; right: 1.56rem; }
+.intro-shape-mask { overflow: hidden; }
+.intro-path { position: relative; z-index: 1; display: block; width: 5.03rem; left: 5.42rem; }
+.intro-path.is-tablet, .intro-path.is-mobile { display: none; }
+
+.ui-stage { margin-top: calc(1.6rem - 50vh); overflow: hidden; }
+.ui-block { position: relative; z-index: 1; width: 100%; height: 100%; max-height: 100vh; }
+.ui-rail { position: relative; display: flex; width: max-content; align-items: center; }
+.ui-heading { width: 75vw; flex: 0 0 auto; padding-left: 0.32rem; text-align: left; }
+.ui-title { margin: 0; font-family: var(--_core---font-display); font-weight: var(--_core---weight-regular); font-size: 0.74rem; line-height: 0.8rem; letter-spacing: -0.04rem; text-transform: uppercase; }
+.ui-slides { display: flex; flex: 0 0 auto; }
+.ui-panel { position: relative; width: 25vw; overflow: hidden; clip-path: circle(0.09rem at 50% 50%); }
+.ui-panel-body { display: flex; height: 100vh; flex-direction: column; justify-content: center; align-items: center; gap: 0.4rem; background-color: var(--_semantic---bg); color: var(--_semantic---foreground);
+  --_semantic---bg: var(--_core---neutral-0); --_semantic---foreground: var(--_core---neutral-1000); --_semantic---border: var(--_core---neutral-1000); }
+.ui-panel-body.is-first { opacity: 0; }
+.ui-media { height: 4.25rem; }
+.ui-video { width: 100%; height: 100%; }
+.ui-caption { width: 6.4rem; text-align: center; }
+.ui-dot { position: absolute; top: 50%; right: 50%; width: 0.18rem; height: 0.18rem; border-radius: var(--_core---radius-full); background-color: var(--_semantic---foreground); opacity: 0; transform: translate(50%, -50%); }
+
+@media (max-width: 991px) {
+  .intro-art { margin-bottom: -19.08rem; }
+  .intro-illustration { height: 20.59rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f49e_path_main_tablet.svg); }
+  .intro-clouds { bottom: -0.72rem; }
+  .intro-cloud.is-left { width: 3rem; height: 2.91rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3b3_cloud_1_tablet.svg); }
+  .intro-cloud.is-right { top: -0.73rem; bottom: auto; width: 5.7rem; height: 4.18rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3b6_cloud_2_tablet.svg); }
+  .intro-cloud.is-middle { top: 0.21rem; bottom: auto; left: 1.85rem; width: 3.71rem; height: 1.72rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3b7_cloud_3_tablet.svg); }
+  .intro-smoke { top: 5.4rem; right: 1.1rem; width: 1.89rem; height: 2rem; background-size: contain; background-repeat: no-repeat; }
+  .intro-shape { padding: 0.16rem 0.24rem; }
+  .intro-shape.is-also { top: 1.98rem; left: auto; right: 3.34rem; }
+  .intro-shape.is-controls { top: 5.5rem; right: 1.3rem; }
+  .intro-shape.is-your { top: 10.52rem; left: 2.76rem; }
+  .intro-shape.is-attention { top: 13.53rem; right: 1.11rem; }
+  .intro-path { display: none; }
+  .intro-path.is-tablet { display: block; width: 2.87rem; left: 2.82rem; }
+  .ui-stage { margin-top: -50vh; }
+  .ui-rail { align-items: flex-start; }
+  .ui-heading { width: 100vw; margin-top: 0.18rem; padding-left: 1.1rem; padding-right: 1.1rem; text-align: center; align-self: center; transform: translate(0, 50%); }
+  .ui-title { font-size: 0.44rem; line-height: 0.54rem; letter-spacing: -0.018rem; }
+  .ui-slides { margin-left: -100vw; }
+  .ui-panel { width: 100vw; }
+  .ui-caption { width: auto; }
+}
+@media (max-width: 479px) {
+  .intro-art { margin-bottom: -11.54rem; }
+  .intro-illustration { height: 12.45rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f49f_path_main_mobile.svg); }
+  .intro-cloud.is-left { width: 1.94rem; height: 1.72rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3bd_cloud_1_mobile.svg); }
+  .intro-cloud.is-right { top: auto; bottom: -0.24rem; width: 3.04rem; height: 2.21rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3be_cloud_2_mobile.svg); }
+  .intro-cloud.is-middle { top: auto; bottom: 0.69rem; left: 0.67rem; width: 2.02rem; height: 0.92rem; background-image: url(https://s3.amazonaws.com/webflow-prod-assets/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f3d1_Footer_Cloud-3_mobile.svg); }
+  .intro-smoke { top: 3.69rem; right: 0.4rem; width: 1.12rem; height: 1.15rem; }
+  .intro-shape { padding: 0.08rem 0.12rem; }
+  .intro-shape.is-also { top: 1.2rem; left: 1.28rem; right: auto; }
+  .intro-shape.is-controls { top: 3.74rem; right: 0.51rem; padding-left: 0.1rem; padding-right: 0.1rem; }
+  .intro-shape.is-your { top: 6.03rem; left: 1.3rem; }
+  .intro-shape.is-attention { top: 8.18rem; right: 0.33rem; }
+  .intro-path.is-tablet { display: none; }
+  .intro-path.is-mobile { display: block; width: 1.64rem; left: 1.31rem; }
+  .ui-heading { padding-left: 0.22rem; padding-right: 0.22rem; }
+  .ui-title { font-size: 0.24rem; line-height: 0.32rem; letter-spacing: -0.001rem; }
+  .ui-media { height: 2.01rem; }
+  .ui-caption { padding-left: 0.4rem; padding-right: 0.4rem; }
+}
+</style>
+</head>
+<body>
+<section class="section-intro" data-motion="theme" data-theme="dark">
+  <div class="intro-scene" data-motion="intro">
+    <div class="intro-art" aria-hidden="true">
+      <div class="intro-illustration"></div>
+      <div class="intro-clouds"><div class="intro-cloud is-left"></div><div class="intro-cloud is-right"></div><div class="intro-cloud is-middle"></div></div>
+      <div class="intro-smoke"></div>
+      <div class="intro-shape is-also"><div class="intro-shape-mask"><div class="text-shape" data-motion="intro-text" data-step="0">It also</div></div></div>
+      <div class="intro-shape is-controls"><div class="intro-shape-mask"><div class="text-shape" data-motion="intro-text" data-step="1">controls</div></div></div>
+      <div class="intro-shape is-your"><div class="intro-shape-mask"><div class="text-shape" data-motion="intro-text" data-step="2">your</div></div></div>
+      <div class="intro-shape is-attention"><div class="intro-shape-mask"><div class="text-shape" data-motion="intro-text" data-step="3">attention</div></div></div>
+    </div>
+    <div class="intro-path w-embed"><!--#path-desktop--></div>
+    <div class="intro-path is-tablet w-embed"><!--#path-tablet--></div>
+    <div class="intro-path is-mobile w-embed"><!--#path-mobile--></div>
+  </div>
+  <div class="ui-stage">
+    <div class="ui-block" data-motion="ui">
+      <div class="ui-rail" data-motion="ui-track">
+        <div class="ui-heading" data-motion="ui-text"><h2 class="ui-title">UI/UX animation captures the mood of a brand or product and conveys it to a target audience</h2></div>
+        <div class="ui-slides" data-motion="ui-slides">
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body is-first"><div class="ui-media"><div class="ui-video w-embed"><!--#video-1--></div></div><div class="ui-caption"><p class="body-sm">Here, animation gives a pumping vibe to a fitness website.</p></div></div></div>
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-2--></div></div><div class="ui-caption"><p class="body-sm">It can also take game apps to the next level...</p></div></div></div>
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-3--></div></div><div class="ui-caption"><p class="body-sm">An architect's studio can convey its brand with a suite of complementary animation techniques.</p></div></div></div>
+        </div>
+      </div>
+      <div class="ui-dot" data-motion="ui-ball"></div>
+    </div>
+    <div class="ui-block" data-motion="ui">
+      <div class="ui-rail" data-motion="ui-track">
+        <div class="ui-heading" data-motion="ui-text"><h2 class="ui-title">Animation encourages interaction by enticing users to explore</h2></div>
+        <div class="ui-slides" data-motion="ui-slides">
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body is-first"><div class="ui-media"><div class="ui-video w-embed"><!--#video-4--></div></div><div class="ui-caption"><p class="body-sm">Animation lets us hint at how to use sliders and other navigation elements.</p></div></div></div>
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-5--></div></div><div class="ui-caption"><p class="body-sm">Animation guides the eye from one key visual element to the next.</p></div></div></div>
+          <div class="ui-panel" data-motion="ui-slide"><div class="ui-panel-body"><div class="ui-media"><div class="ui-video w-embed"><!--#video-6--></div></div><div class="ui-caption"><p class="body-sm">Animation unpacks all the visual information that the user sees on the screen.</p></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>
