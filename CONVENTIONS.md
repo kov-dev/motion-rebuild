@@ -22,7 +22,7 @@
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
 | Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) |
-| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
@@ -260,7 +260,7 @@ absolute-розкладкою.
 | Клас | Шрифт | Розмір | lh | ls | | Замінює |
 |---|---|---|---|---|---|---|
 | `display-xl` | display | `text-215` | 1.0 | −0.04em | UP | `.list-item` (Intro), `.scrolling-text.is-lessons`. Кандидат у `h1` |
-| `display-lg` | display | `text-160` | 1.06 | −0.04em | UP | `.h2` |
+| `display-lg` | display | `text-160` | 1.0625 (tab **1**, mob **1.1**) | −0.04em (tab **−0.064em**) | UP | `.h2`. lh/ls tab/mob — з лайву (сесія 13) |
 | `heading-xl` | display | `text-140` | 1.03 | −0.036em | UP | `.h3`, `.h3.white` |
 | `heading-lg` | **accent** | `text-115` | 1.1 | −0.02em | | `.h2-secondary` |
 | `heading-md` | display | `text-74` | 1.08 | −0.04em | UP | `.h4`, `.label-1` |
@@ -268,7 +268,7 @@ absolute-розкладкою.
 | `body-lg` | display | `text-28` | 1.57 | 0 | | `.p1` |
 | `body-md` | body | `text-18` | 1.78 | 0 | | `.p2`, `.slide-inner-label`, `.hero_wrap` |
 | `body-sm` | display | `text-16` | 1.5 (tab **1.85**, mob **1.385**) | −0.02em | | `.p3` (51), `.btn-link` (25), `.resources-item__button` (14). lh tab/mob — з `.p3` лайву (сесія 9); `btn-link` / `resources-item__button` звірити у своїх проходах |
-| `body-sm` + `is-strong` | body, 700 | 16 / **16** / 14 | 1.5 (mob 1.57) | 0 | | `.p3-bold`: підписи карток Interactive. Розмір tab/mob лишаємо як на лайві, тому комбо перевизначає й розмір |
+| `body-sm` + `is-strong` | body, 700 | 16 / **16** / 14 | 1.5 (mob 1.57) | −0.02em (сесія 13, лайв −0.3px) | | `.p3-bold`: підписи карток Interactive. Розмір tab/mob лишаємо як на лайві, тому комбо перевизначає й розмір |
 | `text-label` | body | `text-16-label` | 1.0 | −0.03em | | `.breadcrumb-item`, `.nav-toggle`, `.logo-text-sections`, `.resources-header__count` |
 | `text-shape` | **display** | `text-64` | 1.0 | **−0.007rem** | | `.anim-shape` (4, Intro). Вага 400, як на лайві (Light 300 немає). Сесія 9: шрифт і ls — з лайву (було Inktrap / −0.06em з Figma) |
 
@@ -328,6 +328,11 @@ Inktrap 700. 13 `.otf` не заливаємо.
 UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`. Фони ілюстрацій — `background-image: @img_<assetId>`
 (формат API для ассета). Дерево — docs/sections/intro.md «Збірка в копії».
 
+**Interactive (створено, сесія 13):** `section-interactive` (режим `base`), `interactive-head`, `interactive-pin`,
+`interactive-track`, `interactive-item`, `interactive-text`, `interactive-sphere`, `interactive-lottie`, `interactive-hover`.
+Ролі `data-motion`: `interactive` (тригер), `interactive-pin`, `interactive-track`, `interactive-sphere`, `interactive-lottie`
+(+ `data-src`), `interactive-hover`. Дерево — docs/sections/interactive.md «Збірка в копії».
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
 `resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
@@ -347,6 +352,25 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-10 (сесія 13) — Interactive: аналіз, лайв-заміри, верстка
+
+- **Webflow MCP працює** в цій сесії (`list_sites` бачить оригінал і копію) — збірка і публікація агентом.
+- **Аналіз:** Figma `4611-22244` (4 кадри 1440 — розкадровка pin-скролу) — sonnet-субагент → docs/sections/interactive.md.
+  Його 5 питань закрито без користувача: нахил гравітації — відновлюємо (сесія 4), ≤991 — лайв (сесія 5), решта — лайв-заміри.
+- **Лайв-заміри** (`tools/record/interactive-probe.mjs`): заголовок на лайві **не зменшується** (у Figma — так), беремо лайв;
+  pin `x: −(scrollWidth − vw)` sine.out scrub 1, зсув 852 / 1224 / 827 px; кола 5.7rem на 1440 **і 768**, 3.44rem на 375.
+- **Верстка:** `section-interactive` після `section-intro` (9 нових класів, кольори/обводка на змінних). Злиття `track-flex` +
+  `track-padding` → `interactive-track` (`max-content`). Lottie — `div[data-src]` під плеєр у коді.
+- **Текстові стилі:** `display-lg` lh 1.0625, tab lh 1 / ls −0.064em, mob lh 1.1 / ls −0.04em; `body-sm.is-strong` ls −0.02em.
+- **Звірка:** `tools/record/interactive-compare.mjs` — нова vs стара секція на одній staging-сторінці, 1440/768/375:
+  Δ ≤ 0.7 px, 0 прапорців (перший прогін зловив ls заголовка на 768: 668 проти 641 px → виправлено).
+- **Staging опубліковано агентом** двічі: 2026-10-10 ~07:5x UTC (task `45da67fc…`) і 07:57 UTC після правки `display-lg`
+  (task `a890a2e0…`). Нова секція поки статична (без коду) між новим Intro і старими секціями; старі pin-и тримає `syncLegacy()`.
+- **Пастки:** (1) `data_whtml_builder` з HTML без CSS **перевикористовує наявні класи** (`body-sm`, комбо `is-strong`) —
+  дублів немає, але пробіл перед `<br>` у кінці рядка обрізає (невидимо). (2) `element_snapshot_tool` знову таймаут —
+  звірка лише через staging + Playwright. (3) Скрипт звірки блокує код → прелоадер-оверлеї лишаються, для скриншотів ховати CSS.
+
 
 ### 2026-10-10 (сесія 12) — підключення «поруч зі старим» (варіант 2), підготовка
 

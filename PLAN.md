@@ -46,7 +46,7 @@
 - [x] Каркас `src/motion.js` (ES-module, GSAP 3.13.0 піновано) + `preloader-gate.js` + `preloader.css` (2026-10-09)
 - [x] Підключення до Webflow, варіант 2 «поруч зі старим» (сесія 12): сніпети вставлені в Home → Custom code (усе в `<head>`: гейт + preloader.css + модуль), staging опубліковано 2026-10-10 07:39 UTC, перевірено `coexist-run --live` (1440 і 375)
 - [ ] Збірка/мініфікація, версія в імені — разом із видаленням старих `loader`, Hero, Intro і `script.v33` (тоді ж прибрати `legacy-guard.js` і `syncLegacy()`)
-- [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl, body-lg — сесія 8; text-shape, body-sm — сесія 9; лишились display-xl/lg, heading-lg/md/sm, body-md, text-label)
+- [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl, body-lg — сесія 8; text-shape, body-sm — сесія 9; display-lg, body-sm.is-strong — сесія 13; лишились display-xl, heading-lg/md/sm, body-md, text-label)
 
 ## Етап 3 — Секції (кожна окремим проходом) 🟨
 
@@ -60,7 +60,7 @@
 | Preloader | ✅ | ✅ [preloader.md](docs/sections/preloader.md) | ✅ зібрано, знімки фаз (2026-10-09) | 🟨 `initPreloader()` написано й прогнано на staging-розмітці, у Webflow не підключено | ⬜ |
 | Hero | ✅ | ✅ | ✅ `section-hero` (2026-10-09), звірено з лайвом 1–2 px, знімок Designer (сесія 9); старий Hero ще на сторінці | ✅ вхід — `initPreloader()`, вихід ліній/кільця — `initHero()` (сесія 9, прогнано на staging-розмітці); у Webflow не підключено | ⬜ |
 | Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ✅ `section-intro` зі сценою, шляхами й UI-слайдером (сесія 9), звірено з лайвом Δ 0–1 px; старий Intro ще на сторінці | ✅ `initIntro()` (кулька по шляху, тексти, посадка) + хмари кодом — Δ ≤ 1 px на 3 смугах (сесія 10); ✅ `initUi()` (pin слайдера, передача кульки, відео) + ідл-похитування — 768 / 375 без розбіжностей з лайвом, 1440 — 2 очікувані (сесія 11) | 🟨 уся секція звірена на staging-розмітці з фікстурою (intro-run, ui-run); у Webflow код не підключено |
-| Interactive | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| Interactive | ✅ `4611-22244` (4 кадри 1440) | ✅ [interactive.md](docs/sections/interactive.md) + лайв-заміри | ✅ `section-interactive` (сесія 13), звірено з лайвом на staging Δ ≤ 0.7 px на 1440/768/375; старий `#interactive` ще на сторінці | ⬜ код: `initInteractive()` (pin + x), `initSphere()` (Matter.js + нахил), Lottie hover | ⬜ |
 | Techniques | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Lessons ×8 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Resources | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
