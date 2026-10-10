@@ -903,6 +903,382 @@ export function initTechniques() {
   );
 }
 
+/* ---------- lessons (live IX2 e-668…e-687, docs/sections/lessons.md «Скрол-анімації», «План анімації») ---------- */
+
+// Same catch-up as Techniques: every lesson trigger has IX2 smoothing 90.
+const LESSONS_SCRUB = 1;
+
+// IX2 scroll progress as ScrollTrigger positions. 0: the trigger top at the viewport bottom (startsEntering) or at
+// max(vh − h, 0); 1: its top at −h·(1 − endOffset), i.e. its bottom at h·endOffset from the viewport top.
+const ix2Range = (el, entering, endOffset = 0) => ({
+  start: () => (entering ? 'top bottom' : `top ${Math.max(innerHeight - el.offsetHeight, 0)}px`),
+  end: () => `bottom ${el.offsetHeight * endOffset}px`,
+});
+
+// Implementation keys per band, as fractions of the progress: [from, to] (track: [from, to, xPercent]).
+// ≤767 takes the tiny keys in every lesson: on the live site 480–767 had them in easing only (lessons 2–8 stood still).
+const CASES_KEYS = {
+  desktop: { entering: true, endOffset: 0.26, title: [0.23, 0.32], card2: [0.32, 0.42], card3: [0.38, 0.48], track: [0.5, 0.84, -40] },
+  tablet: { entering: false, endOffset: 0.5, title: [0, 0.24], card2: [0.24, 0.5], card3: null, track: [0.45, 1, -122] },
+  small: { entering: true, endOffset: 0.26, title: [0.23, 0.3], card2: [0.3, 0.44], card3: null, track: [0.48, 0.74, -178] },
+};
+
+// Demo: state i (video i, line width) starts at DEMO_STEPS[i − 1] of the progress; the live IX2 jumps within 1 %.
+const DEMO_STEPS = [0.17, 0.345, 0.51, 0.675, 0.835];
+const DEMO_LINE = [16.7, 33.33, 50.03, 66.63, 83.35, 100];
+
+// Classic: the wrapper and the overlay over Implementation go transparent → black. Easing first, then delay.
+const CLASSIC_WINDOWS = [[0.18, 0.24], [0.24, 0.3]];
+
+const loadLottie = (() => {
+  let p = null;
+  return () => (p ||= import(LOTTIE_URL).then((m) => m.default));
+})();
+
+// One file per band in the demo (data-src-tablet / data-src-mobile), one file elsewhere.
+const videoSrc = (v) => {
+  const b = band();
+  return (b === 'mobile' && v.dataset.srcMobile) || (b === 'tablet' && v.dataset.srcTablet) || v.dataset.src;
+};
+const setVideoSrc = (v, preload = 'metadata') => {
+  const src = videoSrc(v);
+  if (!src || v.dataset.loaded === src) return;
+  const resume = v.dataset.loaded && !v.paused;
+  v.dataset.loaded = src;
+  v.preload = preload;
+  v.src = src;
+  if (resume) v.play().catch(() => {});
+};
+// Transition: Finsweet autovideo (still on the page for the old sections) plays every <video> in view, ours included.
+// A video of ours that was not asked to play pauses itself again. Goes away with the old script.
+const wantedVideos = new WeakSet();
+const guardVideo = (v) => {
+  if (v.dataset.guard) return;
+  v.dataset.guard = '1';
+  v.addEventListener('play', () => wantedVideos.has(v) || v.pause());
+};
+// Reduced motion: the first frame only, no playback.
+const playVideo = (v) => {
+  guardVideo(v);
+  setVideoSrc(v, 'auto');
+  if (reducedMotion()) return;
+  wantedVideos.add(v);
+  v.play().catch(() => {});
+};
+const pauseVideo = (v) => {
+  wantedVideos.delete(v);
+  if (!v.paused) v.pause();
+};
+
+// Videos that already have a source take the file of the new band.
+let videoBandWatch = false;
+function watchVideoBand() {
+  if (videoBandWatch) return;
+  videoBandWatch = true;
+  ['(min-width: 992px)', '(max-width: 479px)'].forEach((m) =>
+    matchMedia(m).addEventListener('change', () =>
+      document.querySelectorAll('video[data-loaded]').forEach((v) => setVideoSrc(v, v.preload))
+    )
+  );
+}
+
+/**
+ * Lazy videos instead of Finsweet autovideo: the band's file is set half a viewport ahead (metadata only, the poster
+ * stays under the video), the video plays while on screen and pauses off it.
+ */
+function lazyVideo(videos) {
+  if (!videos.length) return;
+  watchVideoBand();
+  const near = new IntersectionObserver(
+    (entries) => entries.forEach((e) => e.isIntersecting && (setVideoSrc(e.target), near.unobserve(e.target))),
+    { rootMargin: '50% 0px' }
+  );
+  const seen = new IntersectionObserver((entries) =>
+    entries.forEach((e) => (e.isIntersecting ? playVideo(e.target) : pauseVideo(e.target)))
+  );
+  videos.forEach((v) => (guardVideo(v), near.observe(v), seen.observe(v)));
+}
+
+/**
+ * Hero visual of every lesson: the Lottie (or the dimension video) loads one viewport ahead and plays only while on
+ * screen (on the live site all 17 Lotties played all the time).
+ */
+function initLessonVisuals() {
+  const boxes = qa('lesson-visual').filter((b) => b.dataset.src);
+  if (!boxes.length) return;
+  const players = new Map();
+  const visible = new Set();
+  const run = (box) => {
+    const p = players.get(box);
+    if (!p) return;
+    const on = visible.has(box) && !reducedMotion();
+    if (p instanceof HTMLVideoElement) on ? playVideo(p) : pauseVideo(p);
+    else on ? p.play() : p.pause();
+  };
+  const load = async (box) => {
+    if (box.dataset.kind === 'video') {
+      const v = document.createElement('video');
+      Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'auto' });
+      guardVideo(v);
+      v.setAttribute('aria-hidden', 'true');
+      v.style.cssText = 'width:100%;height:100%;display:block';
+      // The live embed paired the HEVC file (alpha, Safari) with a VP9 webm for the other browsers.
+      const sources = [[box.dataset.src, 'video/mp4; codecs="hvc1"'], [box.dataset.src.replace(/_hevc\.mov$/, '_VP9.webm'), 'video/webm']];
+      sources.forEach(([src, type], i) => {
+        if (i && src === box.dataset.src) return;
+        const s = document.createElement('source');
+        Object.assign(s, { src, type });
+        v.append(s);
+      });
+      box.append(v);
+      players.set(box, v);
+    } else {
+      const lottie = await loadLottie();
+      const anim = lottie.loadAnimation({ container: box, renderer: 'svg', loop: true, autoplay: false, path: box.dataset.src });
+      players.set(box, anim);
+    }
+    run(box);
+  };
+  const near = new IntersectionObserver(
+    (entries) => entries.forEach((e) => e.isIntersecting && (near.unobserve(e.target), load(e.target))),
+    { rootMargin: '100% 0px' }
+  );
+  const seen = new IntersectionObserver((entries) =>
+    entries.forEach((e) => {
+      e.isIntersecting ? visible.add(e.target) : visible.delete(e.target);
+      run(e.target);
+    })
+  );
+  boxes.forEach((b) => (near.observe(b), seen.observe(b)));
+}
+
+/**
+ * Lessons ×8: Implementation (title shrinks, cards 2–3 rise, the track slides left), the easing extras (examples row
+ * and stars, the demo states), the black background of the classic blocks, lazy videos and Lotties.
+ * Every scroll animation is a port of the live IX2 keys with the live progress formula (ix2Range).
+ */
+export function initLessons() {
+  const lessons = qa('lesson');
+  if (!lessons.length) return;
+  const rem = (v) => () => v * remPx();
+
+  gsap.matchMedia().add(
+    // Every band is listed: matchMedia() skips the callback when no condition matches.
+    {
+      desktop: '(min-width: 992px)',
+      tablet: '(min-width: 768px) and (max-width: 991px)',
+      small: '(max-width: 767px)',
+      reduce: '(prefers-reduced-motion: reduce)',
+    },
+    ({ conditions: c }) => {
+      const k = CASES_KEYS[c.desktop ? 'desktop' : c.tablet ? 'tablet' : 'small'];
+      // Reduced motion: no smoothing and no decorative moves; the track still slides, it carries cards 2–3 into view.
+      const scrub = c.reduce ? true : LESSONS_SCRUB;
+      const span = ([a, b]) => b - a;
+
+      qa('lesson-cases').forEach((cases) => {
+        const track = q('lesson-track', cases);
+        if (!track) return;
+        const head = q('lesson-cases-head', cases);
+        const [, c2, c3] = qa('lesson-card', track);
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: { trigger: cases, ...ix2Range(cases, k.entering, k.endOffset), scrub, invalidateOnRefresh: true },
+        });
+        if (!c.reduce) {
+          if (head) tl.fromTo(head, { scale: 1 }, { scale: 0.6, duration: span(k.title) }, k.title[0]);
+          if (c2) tl.fromTo(c2, { y: rem(1.5) }, { y: 0, duration: span(k.card2) }, k.card2[0]);
+          if (c3 && k.card3) tl.fromTo(c3, { y: rem(3) }, { y: 0, duration: span(k.card3) }, k.card3[0]);
+        }
+        tl.fromTo(track, { xPercent: 0 }, { xPercent: k.track[2], duration: k.track[1] - k.track[0] }, k.track[0]);
+        tl.set({}, {}, 1);
+      });
+
+      // Examples (easing): the row runs left, odd stars sink, even ones rise; ≥768 over 0–80 % with end offset 80.
+      const examples = q('lesson-examples');
+      const line = examples && q('examples-line', examples);
+      if (line && !c.reduce) {
+        const small = c.small;
+        const stars = qa('examples-star', examples);
+        const d = small ? 1 : 0.8;
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: { trigger: examples, ...ix2Range(examples, false, small ? 0.5 : 0.8), scrub, invalidateOnRefresh: true },
+        });
+        tl.fromTo(line, { xPercent: 0 }, { xPercent: small ? -130 : -104, duration: d }, 0);
+        stars.forEach((s, i) => tl.fromTo(s, { y: 0 }, { y: rem((i % 2 ? -1 : 1) * (small ? 0.54 : 0.9)), duration: d }, 0));
+        tl.set({}, {}, 1);
+      }
+
+      // Classic: from the classic top at the viewport bottom to its bottom at the top.
+      qa('lesson-classic').forEach((classic, i) => {
+        const [a, b] = CLASSIC_WINDOWS[i] || CLASSIC_WINDOWS[0];
+        const overlay = q('lesson-overlay', classic.closest('[data-motion="lesson"]') || document);
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: { trigger: classic, ...ix2Range(classic, true), scrub, invalidateOnRefresh: true },
+        });
+        tl.fromTo(els(classic, overlay), { backgroundColor: 'rgba(0, 0, 0, 0)' }, { backgroundColor: 'rgba(0, 0, 0, 1)', duration: b - a }, a);
+        tl.set({}, {}, 1);
+      });
+    }
+  );
+
+  const demo = q('lesson-demo');
+  if (demo) initLessonDemo(demo);
+  lazyVideo(qa('lesson-video'));
+  initLessonVisuals();
+}
+
+/**
+ * Demo (easing): six states over the sticky block, as the live IX2 steps: one video visible and playing, the progress
+ * line at 1/6 per state, tick i lit from state i, step titles 2 and 3 lit from states 2 and 4. No tweening, as live.
+ */
+function initLessonDemo(demo) {
+  const videos = qa('demo-video', demo);
+  const steps = qa('demo-step', demo);
+  const ticks = qa('demo-tick', demo);
+  const line = q('demo-line', demo);
+  let state = -1;
+  let inView = false;
+  videos.forEach(guardVideo);
+
+  const playActive = () =>
+    videos.forEach((v, i) => {
+      if (i === state && inView) playVideo(v);
+      else pauseVideo(v);
+    });
+  const apply = (s) => {
+    if (s === state) return;
+    state = s;
+    videos.forEach((v, i) => v.classList.toggle('is-active', i === s));
+    steps.forEach((el, j) => el.classList.toggle('is-active', s >= 2 * j));
+    ticks.forEach((el, j) => el.classList.toggle('is-on', s >= j));
+    if (line) line.style.width = `${DEMO_LINE[s]}%`;
+    if (videos[s + 1]) setVideoSrc(videos[s + 1]); // the next state is one step away
+    playActive();
+  };
+
+  watchVideoBand();
+  new IntersectionObserver(
+    (entries, io) => entries.forEach((e) => e.isIntersecting && (setVideoSrc(videos[Math.max(state, 0)]), io.disconnect())),
+    { rootMargin: '50% 0px' }
+  ).observe(demo);
+  new IntersectionObserver((entries) => {
+    inView = entries.at(-1).isIntersecting;
+    playActive();
+  }).observe(demo);
+
+  const at = (p) => DEMO_STEPS.filter((x) => p >= x).length;
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: demo,
+      ...ix2Range(demo, false, 0.2),
+      scrub: reducedMotion() ? true : LESSONS_SCRUB,
+      invalidateOnRefresh: true,
+    },
+    onUpdate: () => apply(at(tl.progress())),
+  });
+  tl.set({}, {}, 1);
+  apply(0);
+}
+
+/**
+ * Easing schemes slider (was Splide 2): the track slides by one circle + gap in 0.6 s on the Splide ease, the active
+ * circle switches at once, the caption 0.4 s later. Arrows are disabled at the ends; a horizontal drag follows the
+ * pointer and moves one scheme past 150 px or on a flick, as Splide did. One Lottie per scheme: the active one loops,
+ * the rest hold frame 0 (the live site had two copies of each).
+ */
+export function initLessonSchemes() {
+  const root = q('lesson-schemes');
+  const track = root && q('schemes-track', root);
+  if (!track) return;
+  const schemes = qa('scheme', track);
+  const prev = q('schemes-prev', root);
+  const next = q('schemes-next', root);
+  const text = q('schemes-text', root);
+  const last = schemes.length - 1;
+  if (last < 1) return;
+
+  // One step from the layout: circle width + gap (377 / 377 / 252 px on the live site).
+  const step = () => schemes[1].offsetLeft - schemes[0].offsetLeft;
+  const ease = bez(0.42, 0.65, 0.27, 0.99);
+  let index = 0;
+  let caption = null;
+  const anims = [];
+  let inView = false;
+
+  const runLotties = () =>
+    anims.forEach((a, i) => {
+      if (!a) return;
+      if (i === index && inView && !reducedMotion()) a.play();
+      else a.goToAndStop(0, true);
+    });
+
+  const go = (i, { instant = false } = {}) => {
+    i = gsap.utils.clamp(0, last, i);
+    const moved = i !== index;
+    index = i;
+    gsap.to(track, { x: -i * step(), duration: instant || reducedMotion() ? 0 : 0.6, ease, overwrite: true });
+    schemes.forEach((s, j) => s.classList.toggle('is-active', j === i));
+    if (prev) prev.disabled = i === 0;
+    if (next) next.disabled = i === last;
+    if (moved) {
+      runLotties();
+      caption?.kill();
+      const swap = () => text && (text.textContent = schemes[i].dataset.text || '');
+      caption = reducedMotion() ? (swap(), null) : gsap.delayedCall(0.4, swap);
+    }
+  };
+
+  prev?.addEventListener('click', () => go(index - 1));
+  next?.addEventListener('click', () => go(index + 1));
+
+  // Drag: follows the pointer horizontally (vertical drags stay page scroll: touch-action pan-y in styles-rem).
+  let base = 0;
+  ScrollTrigger.observe({
+    target: track,
+    type: 'touch,pointer',
+    lockAxis: true,
+    dragMinimum: 5,
+    onPress: () => (base = gsap.getProperty(track, 'x')),
+    onDrag: (self) => self.axis === 'x' && gsap.set(track, { x: base + self.x - self.startX, overwrite: true }),
+    onRelease: (self) => {
+      if (self.axis !== 'x') return;
+      const dx = self.x - self.startX;
+      const flick = Math.abs(self.velocityX) > 600; // px/s; Splide 2: 0.6 px/ms
+      if (Math.abs(dx) > 150 || flick) go(index - Math.sign(dx));
+      else go(index);
+    },
+  });
+
+  // The step changes with the band: keep the track on its scheme after every refresh (resize included).
+  ScrollTrigger.addEventListener('refresh', () => go(index, { instant: true }));
+
+  // Lotties: loaded one viewport ahead, the active one plays only while the slider is on screen.
+  const near = new IntersectionObserver(
+    async (entries, io) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      const lottie = await loadLottie();
+      schemes.forEach((s, i) => {
+        const box = q('scheme-lottie', s);
+        if (!box?.dataset.src) return;
+        anims[i] = lottie.loadAnimation({ container: box, renderer: 'svg', loop: true, autoplay: false, path: box.dataset.src });
+        anims[i].addEventListener('DOMLoaded', runLotties);
+      });
+    },
+    { rootMargin: '100% 0px' }
+  );
+  near.observe(root);
+  new IntersectionObserver((entries) => {
+    inView = entries.at(-1).isIntersecting;
+    runLotties();
+  }).observe(root);
+
+  go(0, { instant: true });
+}
+
 /* ---------- boot ---------- */
 
 // Transition only: the old script.v33 keeps its own GSAP + ScrollTrigger for the sections below ours.
@@ -929,7 +1305,9 @@ async function init() {
   initUi();
   initInteractive();
   initTechniques();
-  // Next passes: initLessons(), … then one refresh.
+  initLessons();
+  initLessonSchemes();
+  // Next passes: initResources(), … then one refresh.
   syncLegacy();
   ScrollTrigger.refresh();
 }
