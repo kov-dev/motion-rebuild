@@ -21,7 +21,7 @@
 | Копія: CMS templates | Lessons `6ac8e84728488a6bd334f2e7`, Resources `6ac8e84728488a6bd334f2e8`, Courses `6ac8e84728488a6bd334f2e6` |
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
-| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) · `lesson-section` `d5e7e221-35f7-91c5-dee2-9f546f061f62` і `lesson-card` `ced33071-48b2-67a1-9aa0-8c8ef29e9556` (група Lessons, сесія 18) |
+| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) · `lesson-section` `d5e7e221-35f7-91c5-dee2-9f546f061f62` і `lesson-card` `ced33071-48b2-67a1-9aa0-8c8ef29e9556` (група Lessons, сесія 18) · `lesson-schemes` `351eeca4-68ac-7398-7bde-b899033e7b95`, `lesson-examples` `9ddff661-a2e2-e75d-4cb9-525dcb9f2dcd`, `lesson-demo` `92eadc1c-5b69-d7bc-a693-ad3bc52ee46c` (слот Extras easing), `lesson-classic` `f42e65c0-edaa-a1e0-2c1d-ec0fecccf5d4` (слот After easing і delay; варіант delay `6e0b570a-f804-b832-c7ae-16cc31f718d8`) — сесія 19 |
 | Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) · `section-lessons` `7ed4e6ea-6542-fa7a-6e65-0defdfa4304c` (одразу після `section-techniques`, 8 інстансів `lesson-section`, id `<урок>-next`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
@@ -345,6 +345,22 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `lesson-card-icon`. Ролі `data-motion`: `lesson` (+ `data-theme="color"`), `lesson-visual` (+ `data-src`, `data-kind`), `lesson-cases`,
 `lesson-track`, `lesson-card`, `lesson-video` (+ `data-src`), `lesson-overlay`. Дерево — docs/sections/lessons.md «Збірка в копії».
 
+**Lessons: блоки easing і classic (створено, сесія 19):** схеми — `lesson-schemes`, `lesson-schemes-stage`, `lesson-schemes-track`,
+`lesson-scheme` (+ `is-active`), `lesson-scheme-lottie`, `lesson-scheme-label`, `lesson-schemes-arrows`, `lesson-schemes-arrow`,
+`lesson-schemes-icon`, `lesson-schemes-divider`, `lesson-schemes-caption`; examples — `lesson-examples`, `lesson-examples-sticky`,
+`lesson-examples-stars`, `lesson-examples-star` (+ `is-even`), `lesson-examples-line`, `lesson-examples-title`; демо — `lesson-demo`,
+`lesson-demo-sticky`, `lesson-demo-media`, `lesson-demo-video` (+ `is-active`), `lesson-demo-progress`, `lesson-demo-steps`, `lesson-demo-step`
+(+ `is-active`), `lesson-demo-ticks`, `lesson-demo-tick` (+ `is-large` / `is-edge`), `lesson-demo-tick-fill` (+ `is-on`), `lesson-demo-line`,
+`lesson-demo-line-fill`; classic — `lesson-classic`, `lesson-classic-mask`, `lesson-classic-film` (+ `is-left` / `is-right`), `lesson-classic-body`,
+`lesson-classic-head`, `lesson-classic-title`, `lesson-classic-list`, `lesson-classic-media`, `lesson-classic-video`, `lesson-classic-poster`,
+`lesson-classic-steps`, `lesson-classic-sticky`, `lesson-classic-step`, `lesson-classic-text`, `lesson-classic-link`, `lesson-classic-icon`.
+Ролі `data-motion`: `lesson-schemes`, `schemes-track`, `scheme` (+ `data-text`), `scheme-lottie` (+ `data-src`), `schemes-prev` / `schemes-next`,
+`schemes-text`; `lesson-examples`, `examples-star`, `examples-line`; `lesson-demo` (+ `data-theme="dark"`), `demo-video` (+ `data-src`,
+`data-src-tablet`, `data-src-mobile`), `demo-step`, `demo-tick`, `demo-line`; `lesson-classic`, відео classic — спільна роль `lesson-video`.
+Стани `is-active` / `is-on` — JS-маркери. Літерали поза стилями: `lesson-scheme-label` (Plain 18/32, tiny 14/24), `lesson-examples-title`
+(lh 2.2rem, ls −0.09rem / tab −0.014rem), `lesson-classic-link` (16/24, tiny 13). Дерево — docs/sections/lessons.md «Збірка в копії:
+блоки easing і classic».
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
 `resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
@@ -364,6 +380,33 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-10 (сесія 19) — Lessons: блоки easing (схеми, examples, демо) і classic у слоти, звірка
+
+- **Компоненти** (група Lessons): `lesson-schemes`, `lesson-examples`, `lesson-demo` → слот Extras easing; `lesson-classic` (11 пропсів +
+  варіант delay) → слот After easing і delay. 45 нових класів + 9 комбо. Splide замінено розміткою під код: трек, 5 кіл з однією Lottie,
+  `<button>` зі стрілками, опис схеми в `data-text`. Дерево — docs/sections/lessons.md «Збірка в копії: блоки easing і classic».
+- **`heading-lg` (глобально)** = `.h2-secondary` лайву на 3 смугах (1.0957 / −0.0174em · 1.1563 / −0.0313em · 1.1111 / −0.0222em). Пункт
+  PLAN «heading-lg» закрито.
+- **`styles-rem`** (`src/styles-rem.html` → ембед, прочитано назад): підкреслення активної схеми, `:disabled` стрілки, `touch-action` /
+  `user-select` треку, Safari-маска для медіа classic, шум `::before` classic (Texture_01 з бакета копії, лише ≥992, без анімації при
+  reduced-motion).
+- **Звірка:** `tools/record/lessons-compare.mjs` розширено: бази блоків + токени перевірок (фон, sticky, src за смугою, видимий тег,
+  прозорість, підкреслення). 8 уроків × 4 смуги (1440 / 768 / 600 / 375): **0 прапорців**, Δ ≤ 1 px (600: схеми ≤ 2.1 px — округлення
+  Splide), повні висоти easing (11615 на 1440) і delay збігаються.
+- **Staging опубліковано агентом** 2 рази (задачі `9a58852c…`, `fbf231c9…`) — для звірки.
+- **Рішення агента:** (1) один `lesson-classic` на обидва уроки: крок 1 = текст (+ View, `Show link`), крок 2 = відео + примітка
+  (`Show second`); (2) стартовий стан блоків у класах = кадр лайву при scrollY 0, далі комбо `is-active` / `is-on` ставить код;
+  (3) фон обгортки classic прозорий, чорний дасть код; (4) рядок examples — літеральний клас, не `display-xl` (інший tracking);
+  (5) відео демо — один тег на стан з трьома `data-src` за смугою (на лайві 18 тегів).
+- **Пастки MCP:** (1) **атрибут з порожнім значенням Webflow викидає при публікації** (`disabled=""`, `muted=""`, `loop=""` зникли) —
+  давати значення (`disabled="disabled"`, `muted="muted"`); (2) `set_text` на TextBlock у білдері знову не ліг — ставити на String-дитину;
+  (3) після `transform_element_to_component` (replace) інстанс лишається на сторінці — видалити й вставити в слот `insert_in_slot`;
+  (4) `query_styles` з 2-сегментним `name_path` не бачить 3-рівневих комбо (`.classic-anim_sideimg.is-left.is-easing` з tiny-картинкою
+  `Film_mobile.svg`) — додатково читати скомпільований CSS staging; (5) ембед у кнопці: `HtmlEmbed` дитиною DOM-`button` працює,
+  код — `set_settings` key `code`.
+- **Не зроблено:** анімації й завантаження медіа — `initLessons()` / `initLessonSchemes()` (наступна сесія). Hover-підкреслення «View» у
+  classic поставив станом класу; чи є воно на лайві — не перевірено.
 
 ### 2026-10-10 (сесія 18) — Lessons: компонент lesson-section, 8 уроків, звірка
 

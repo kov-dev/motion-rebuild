@@ -368,3 +368,71 @@ preload=none, + `img.lesson-card-poster` {Poster}, alt "") → `div.lesson-card-
   (1440 / 768 / 600 / 375): **0 прапорців**, Δ ≤ 0.3 px (600 — ≤ 1 px, округлення offset). Стартовий зсув карток IX2 (y 1.5 /
   3rem) віднімається — у нас його ставить код.
 - **Без коду** hero-візуал порожній (Lottie вантажить `initLessons()`), відео карток стоять на постері.
+
+## Збірка в копії: блоки easing і classic (сесія 19, 2026-10-10)
+
+MCP кладе в слот лише інстанси компонентів, тож одноразові блоки — теж компоненти (група Lessons). Збирали деревом на
+сторінці → `transform_element_to_component` → тимчасовий інстанс видалити → `insert_in_slot`. Значення — зі старих класів копії
+(`query_styles`, 4 смуги) і лайв-зонда сесії 17 (`lessons-struct-*.json`), розбіжності між ними розв'язував лайв.
+
+| Компонент | ID | Слот | Пропси |
+|---|---|---|---|
+| `lesson-schemes` | `351eeca4-68ac-7398-7bde-b899033e7b95` | easing → Extras (1) | — (статичний вміст) |
+| `lesson-examples` | `9ddff661-a2e2-e75d-4cb9-525dcb9f2dcd` | easing → Extras (2) | — |
+| `lesson-demo` | `92eadc1c-5b69-d7bc-a693-ad3bc52ee46c` | easing → Extras (3) | — |
+| `lesson-classic` | `f42e65c0-edaa-a1e0-2c1d-ec0fecccf5d4` | easing → After, delay → After | 11 + `Variant` (easing = база, delay `6e0b570a-…`) |
+
+```
+div.lesson-schemes  data-motion="lesson-schemes"            relative, flex column, overflow hidden, mt .74/.6/.32, pl 2.5/.56
+├─ div.lesson-schemes-stage                                  tiny pl .19
+│  ├─ div.lesson-schemes-track  data-motion="schemes-track"  flex, gap .32 / tiny .24, cursor grab (touch-action, user-select — styles-rem)
+│  │  └─ div.lesson-scheme(.is-active)  data-motion="scheme" data-text="<опис схеми>"  ×5   коло 3.45 / tiny 2.28, рамка 1px (активна 2px)
+│  │     ├─ div.lesson-scheme-lottie  data-motion="scheme-lottie" data-src=<json копії> aria-hidden   1.834 × 1.36 (одна Lottie на схему)
+│  │     └─ div.lesson-scheme-label  «Linear» …                   abs bottom .16, Plain .18/.32 · tiny .14/.24; підкреслення активної — styles-rem
+│  ├─ div.lesson-schemes-arrows                               abs top 1.3/1.45/.94, space-between, px .34/.32/.22
+│  │  └─ button.lesson-schemes-arrow  data-motion="schemes-prev|next" type=button aria-label (prev: disabled)   .84/.54/.4, svg-ембед
+│  └─ div.lesson-schemes-divider  aria-hidden                 .02 × .32, ml 1.74 / tiny 1.14, mb .24
+└─ div.lesson-schemes-caption > p.body-md  data-motion="schemes-text" aria-live=polite   w 5.7/6.5/2.98, h .91
+
+div.lesson-examples  data-motion="lesson-examples"          h 200vh / auto (pb .4) / auto (pb 0)
+└─ div.lesson-examples-sticky                                 sticky top 0, pt .94 pl .34, gap .24; md pt .88 justify end; tiny relative, p .88/.22/.4
+   ├─ div.lesson-examples-stars aria-hidden > div.lesson-examples-star(.is-even) data-motion="examples-star" ×5   2.74/1.8/1.65, even mt .9/.59/.54
+   └─ div.lesson-examples-line  data-motion="examples-line" > h3.lesson-examples-title «Let's look at an example»
+
+div.lesson-demo  data-motion="lesson-demo" data-theme="dark"   h 400vh, bg neutral-1000
+└─ div.lesson-demo-sticky                                     sticky, 100vh, flex column center, p 1.1/1.33/.4 · md 1.95/0/2.13/.6 · tiny 1.08/0/1.06/.38
+   ├─ div.lesson-demo-media                                   10.14×5 (max 71vh), ml 1.17 · 6.88×3.95 · 3.23×2
+   │  └─ video.lesson-demo-video(.is-active) data-motion="demo-video" data-src / data-src-tablet / data-src-mobile, muted loop playsinline preload=none aria-hidden  ×6
+   └─ div.lesson-demo-progress                                md pr .6, tiny pr .38
+      ├─ div.lesson-demo-steps (grid 3, h .25 / tiny .72) > div.lesson-demo-step(.is-active) data-motion="demo-step" > p.body-sm  ×3
+      ├─ div.lesson-demo-ticks aria-hidden (flex between, h .3/.16/.08) > div.lesson-demo-tick(.is-edge/.is-large) > div.lesson-demo-tick-fill(.is-on) data-motion="demo-tick"   ×7 (крайні — is-edge, без заливки)
+      └─ div.lesson-demo-line aria-hidden > div.lesson-demo-line-fill data-motion="demo-line"   1px, заливка 16.7 % (стан 0)
+
+div.lesson-classic  data-motion="lesson-classic"            relative z1 flex; ::before — шум (styles-rem, лише ≥992)
+└─ div.lesson-classic-mask                                    radius .76 / tiny .32
+   ├─ div.lesson-classic-film.is-left aria-hidden             sticky 100vh, mb −100vh, 1.62/1.32/.5, Film_right.svg (tiny Film_mobile.svg), колір classic
+   ├─ div.lesson-classic-body                                 flex column center, gap .8 / tiny .24, колір classic
+   │  ├─ div.lesson-classic-head                              pt 1.4 px 1 · md px 0 · tiny pt 1, gap .4/.16
+   │  │  ├─ div.lesson-classic-title > h3.heading-lg {Title}
+   │  │  └─ div.lesson-classic-list > div.lesson-classic-media > video.lesson-classic-video data-src={Video 1} + img.lesson-classic-poster {Poster 1}
+   │  └─ div.lesson-classic-steps                             h 150vh/60vh/80vh (delay: 60/50/90vh)
+   │     └─ div.lesson-classic-sticky                         sticky top .6 / tiny 1, w 6.4/4.08/2.3, mb −100vh
+   │        ├─ div.lesson-classic-step > div.lesson-classic-text (p.body-sm.is-strong {Step title}, p.body-sm {Step text})
+   │        │                          + a.lesson-classic-link {Link} «View» + icon   (видимість = {Show link})
+   │        └─ div.lesson-classic-step (видимість = {Show second}) > media (video {Video 2} + poster {Poster 2}) + p.body-sm {Note}
+   └─ div.lesson-classic-film.is-right
+```
+
+- **Пропси `lesson-classic`:** `Title`, `Video 1`, `Poster 1`, `Step title`, `Step text` (multiline, `\n\n` → два `<br>`), `Show link`, `Link`,
+  `Show second`, `Video 2`, `Poster 2`, `Note`. Дефолти = easing. Delay: `Show link` on, `Show second` off, flower-відео й постер.
+  Одна структура покриває обидва уроки: на лайві easing = текст → (відео + примітка), delay = (текст + View).
+- **Стартовий стан у класах = кадр лайву при scrollY 0:** активна перша схема, перше відео демо, перший заголовок прогресу,
+  перша мітка й заливка лінії 16.7 %. Код перемикає комбо `is-active` / `is-on` і ширину заливки.
+- **Фон обгортки classic прозорий** (на лайві клас чорний, IX2 стартує з прозорого). Чорний на 18–24 % / 24–30 % дасть код
+  разом з `lesson-cases-overlay`.
+- **`heading-lg` (глобально) = точні пропорції `.h2-secondary`:** 1.0957 / −0.0174em · tab 1.1563 / −0.0313em · mob 1.1111 / −0.0222em.
+- **Рядок examples — літеральний клас**, а не `display-xl`: lh 2.2rem і ls −0.09rem / tab −0.014rem (у Techniques `display-xl`
+  має інший tracking). Розмір — змінна `text-215`.
+- **Звірка:** `lessons-compare.mjs` розширено (бази schemes / examples / demo / classic, 66 нових рядків, токени перевірок): 8 уроків
+  × 4 смуги — **0 прапорців**, повні висоти easing і delay збігаються. Відео демо 2–6 звіряються лише за src (старі `preload=none`
+  без CSS-розміру дають дефолтні 300 px), на 600 рядки схем мають допуск 2.5 px (Splide округлює ширину слайда).

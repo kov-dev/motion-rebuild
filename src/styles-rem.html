@@ -54,7 +54,61 @@
     text-decoration: underline;
   }
   /* Safari: keep video corners clipped by the rounded media box. */
-  .lesson-card-media {
+  .lesson-card-media,
+  .lesson-classic-media {
     -webkit-mask-image: -webkit-radial-gradient(white, black);
+  }
+
+  /* Easing schemes slider: active label is underlined, the disabled arrow
+     inverts its colours (live Splide parity), the track is dragged by code. */
+  .lesson-scheme.is-active .lesson-scheme-label {
+    text-decoration: underline;
+  }
+  .lesson-schemes-arrow:disabled {
+    background-color: var(--_core---extra-lesson-easing);
+    color: var(--_core---neutral-1000);
+    cursor: default;
+  }
+  .lesson-schemes-track {
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Classic animation block: animated film-grain overlay, desktop only
+     (live main-css `.classic-anim_wrap::before`). */
+  .lesson-classic::before {
+    content: "";
+    position: absolute;
+    z-index: 20;
+    inset: 0;
+    background: url("https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f383_Texture_01.png");
+    opacity: 0.2;
+    border-top-left-radius: 0.76rem;
+    border-top-right-radius: 0.76rem;
+    animation: lesson-noise 0.2s infinite;
+    pointer-events: none;
+  }
+  @keyframes lesson-noise {
+    0%, 100% { background-position: 0 0; }
+    10% { background-position: -5% -10%; }
+    20% { background-position: -15% 5%; }
+    30% { background-position: 7% -25%; }
+    40% { background-position: 20% 25%; }
+    50% { background-position: -25% 10%; }
+    60% { background-position: 15% 5%; }
+    70% { background-position: 0 15%; }
+    80% { background-position: 25% 35%; }
+    90% { background-position: -10% 10%; }
+  }
+  @media (max-width: 991px) {
+    .lesson-classic::before {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lesson-classic::before {
+      animation: none;
+    }
   }
 </style>
