@@ -349,3 +349,73 @@ section-resources  (<section>, id resources-next поки є старий; data-
 - **Перевірка**: `resources-compare.mjs` (статика нової секції проти старої на staging, 1440 / 768 / 600 / 375) і
   `resources-run.mjs` (точки pin 0 / 25 / 48.6 / 60 / 71.8 / 85 / 100 % проти моделі й лайву; hover-послідовність проти правил вище,
   без багів лайву).
+
+## Збірка в копії (сесія 22, 2026-10-10)
+
+Home копії, `main` → **`section-resources`** (`3bac52ac-b16e-2485-d6be-b553324fcfc3`, `<section>`) одразу після `section-lessons`, перед
+старими секціями. Старий `#resources` лишається до видалення старих секцій, тому id нової — `resources-next`.
+
+```
+section.section-resources  #resources-next  data-motion="resources"             relative, bg / foreground (semantic)
+├─ div.res-clouds  data-motion="res-clouds"  aria-hidden                       abs top 0, h 0, z 9, overflow clip visible
+│  └─ div.res-cloud.is-first | is-second | is-third | is-fourth                bg SVG за смугою (ассети копії, ті самі, що в старих класах)
+│     (is-second … is-fourth: data-motion="res-cloud" — рухає код; is-first стоїть)
+└─ div.res-pin  data-motion="res-pin"                                          relative, z 10, 100vh, overflow hidden, bg
+   └─ div.res-track  data-motion="res-track"                                   flex, align center, width max-content
+      ├─ div.res-intro                                                          100vw × 100%, overflow hidden (≤991 visible)
+      │  └─ div.res-titles  role="heading" aria-level="2" aria-label="Useful courses & sources"
+      │     └─ div.res-row ×3 > div.res-word {Useful | courses | &Sources}
+      │                       + div.res-shutter  data-motion="res-shutter" aria-hidden  (абс. на весь рядок, bg) > embed.res-arrow (SVG 199×190)
+      ├─ div.res-student > p.res-student-text  aria-hidden                      Magilio, rotate 90°
+      └─ div.res-main                                                           pt 1.6 / 1rem, relative
+         ├─ div.res-layout                                                      row gap .9 → column ≤991
+         │  ├─ div.res-stack  data-motion="res-stack"                           сюди код переносить картинки рядків
+         │  └─ div.res-content
+         │     ├─ div.res-tabs > div.res-tab(.is-active) ×2  data-motion="res-tab"
+         │     │                 > h3.heading-sm {courses | Sources} + div.res-count  data-motion="res-count" {10 | 4}
+         │     └─ div.res-lists  data-motion="res-lists"
+         │        └─ Collection List .res-list  data-motion="res-list" data-list="courses" | "sources"
+         │           └─ Collection Item .res-item  data-motion="res-item"      бордер низ, py .16
+         │              ├─ a.res-link {CMS link} target _blank rel noopener aria-label {CMS name}
+         │              │  ├─ div.res-name  data-motion="res-name"  (+ is-active) > div.res-dot + div.res-text > p.body-sm {name-in-list}
+         │              │  └─ div.res-view > div «View» + embed.res-icon (SVG, currentColor)
+         │              └─ img.res-image {course-image}  data-motion="res-image" loading lazy alt ""   (+ is-active)
+         └─ div.res-overlay  data-motion="res-overlay" aria-hidden              для твіну футера (прохід Footer)
+```
+
+- **Класи** (29 + комбо `res-cloud.is-first…is-fourth`, `res-image.is-active`, `res-tab.is-active`, `res-name.is-active`): значення 1:1 з лайв-CSS
+  (таблиця «Розкладка»), кольори — `semantic` (`bg`, `foreground`, `border`), бордери — `border-1`, шрифти — `font-display` / `font-accent`.
+  Лічильник і «View» — літерали (16/16 і 16/24, ls 0), таб — `heading-sm`, назва рядка — `body-sm`.
+- **`heading-sm` (глобально, лише тут)** = лайв `.h5`: lh **1.0741** (58/54), tab **1.3182** (58/44), mob **1.1765** (40/34). Пункт PLAN «heading-sm» закрито.
+- **Відступи від лайву (свідомі):** (1) заголовок — `div role=heading` з `aria-label`, бо `div` у `h2` невалідний, а рядки — блоки;
+  (2) колір посилання `inherit` (лайв успадковував `rgb(0,0,238)`, баг 3); (3) бордери student — змінна `border` (#0C0B0B), на лайві `#000`;
+  (4) картинка — у рядку, `opacity 0` + `pointer-events none` до переносу в стек; (5) `res-clouds` обрізає хмари по X (`overflow: clip visible`):
+  без цього `is-third` (right −2.16rem) розширював layout viewport мобільних до 984 px — на лайві хмари сиділи в секції з `overflow hidden`.
+- **CMS:** Sources — `dynamic` без сортування = «нові спершу» = порядок лайву. **Courses — порядок неправильний:** на лайві «Created On, старі
+  спершу»; MCP `set_settings` → `sort` відхиляє системні поля (`created-on`: Unknown field) і падає з `[Conflict]` на будь-якому
+  користувацькому полі; курований режим (`queryMode curated` + `curatedItemIds`) приймає, але ID не зберігає → список порожній (відкочено).
+  **Потрібна дія в Designer:** Collection List `res-list` (courses) → Sort → Created On → Oldest first. Без неї `resources-compare` дає 1 прапорець
+  ORDER на смугу.
+- **Звірка:** `tools/record/resources-compare.mjs` — нова vs стара секція на staging (старий скрипт і наш модуль заблоковано), 1440 / 768 / 600 / 375,
+  197 перевірок на смугу: геометрія за індексом, текст / шрифт / href за посиланням, картинки — після переносу в стек (як код) проти старого
+  стека за файлом + чи належить картинка своєму рядку. Результат: **196/197 на кожній смузі, Δ ≤ 1 px**; єдиний прапорець — ORDER курсів (вище).
+  Ширина назв не порівнюється (залежить від тексту; `body-sm` −0.02em = −0.32 px проти `.p3` −0.3 px дає ≤ 1.3 px на рядок).
+
+## Код анімації (сесія 22)
+
+`initResources()` у `src/motion.js` (після `initLessonSchemes()`), коміт `0b615c4`.
+
+- **Pin** на `res-pin` одразу (не ліниво), `start top top`, `end +total`, `scrub 3`, `anticipatePin 1`; `total = 1.5·vw + (track.offsetWidth − vw) +
+  listsH`; фази — цілі відсотки `pA / pT / pL` як на лайві (шторки `x = 0.84·vw` / ≤479 `0.78·vw`, stagger `pA/4`; трек; списки `yPercent −100`).
+  Розміри міряються раз на побудову; зміна ширини (не висоти) перебудовує `matchMedia`-контекст і робить `refresh` (лайв міряв раз на завантаженні).
+- **Таб:** `onUpdate` на таймлайні (не на тригері — інакше таб не встигає за скрабленими списками): активний той список, що під низом табів.
+  Лічильники — кількість рядків.
+- **Хмари** (≥992, без reduced-motion): тригер — секція, `start: top 1.2·vh`, `end: top 1.2·vh − 0.4·(1.2·vh + h)` (IX2 startsEntering −20 %, ключі
+  0–40 %), `scrub 1`; y 1.2 / 1 / 2 rem. Звірено зі сканом лайву s21: старт при верху на 1080 px, повний хід за 792 px (1440×900).
+- **Hover-стек:** `pointerenter` рядка; правила — «Лайв-заміри → Hover-стек» без багів 1 і 2 (картинка своя, стек — на список).
+- **reduced-motion:** pin без згладжування, хмари стоять, стек без поворотів і без переходу opacity.
+- **Перевірка:** `tools/record/resources-run.mjs` (локальний модуль на staging або `--live`): довжина pin проти лайву, 9 точок pin проти моделі
+  таймлайну, таб за геометрією, хмари в 20 / 40 % IX2, послідовність hover (поворот, розмір стека, z, list switch, revisit). 1440 / 768 / 600 / 375 —
+  **0 прапорців** (Δ ≤ 0.4 px, pin 4683 / 2945 / 2121 проти лайву 4684 / 2944 / 2121); `--live` 1440 / 375 — 0; `coexist-run --live` — старі pin-и Δ0.
+- **Не зроблено:** оверлей і чорні хмари — прохід Footer; тема навбара — Navigation; id `resources-next` → `resources` і видалення старої секції —
+  разом з іншими старими секціями.

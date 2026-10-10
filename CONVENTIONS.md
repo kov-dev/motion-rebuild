@@ -22,7 +22,7 @@
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
 | Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) · `lesson-section` `d5e7e221-35f7-91c5-dee2-9f546f061f62` і `lesson-card` `ced33071-48b2-67a1-9aa0-8c8ef29e9556` (група Lessons, сесія 18) · `lesson-schemes` `351eeca4-68ac-7398-7bde-b899033e7b95`, `lesson-examples` `9ddff661-a2e2-e75d-4cb9-525dcb9f2dcd`, `lesson-demo` `92eadc1c-5b69-d7bc-a693-ad3bc52ee46c` (слот Extras easing), `lesson-classic` `f42e65c0-edaa-a1e0-2c1d-ec0fecccf5d4` (слот After easing і delay; варіант delay `6e0b570a-f804-b832-c7ae-16cc31f718d8`) — сесія 19 |
-| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) · `section-lessons` `7ed4e6ea-6542-fa7a-6e65-0defdfa4304c` (одразу після `section-techniques`, 8 інстансів `lesson-section`, id `<урок>-next`) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) · `section-lessons` `7ed4e6ea-6542-fa7a-6e65-0defdfa4304c` (одразу після `section-techniques`, 8 інстансів `lesson-section`, id `<урок>-next`) · `section-resources` `3bac52ac-b16e-2485-d6be-b553324fcfc3` (одразу після `section-lessons`, id `resources-next`; Collection List courses `898bc600-…0f9b`, sources `8b16de03-…e0eb`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
@@ -361,8 +361,15 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 (lh 2.2rem, ls −0.09rem / tab −0.014rem), `lesson-classic-link` (16/24, tiny 13). Дерево — docs/sections/lessons.md «Збірка в копії:
 блоки easing і classic».
 
+**Resources (створено, сесія 22):** `section-resources`, `res-clouds`, `res-cloud` (+ `is-first` … `is-fourth`), `res-pin`, `res-track`,
+`res-intro`, `res-titles`, `res-row`, `res-word`, `res-shutter`, `res-arrow`, `res-student`, `res-student-text`, `res-main`, `res-layout`,
+`res-stack`, `res-image` (+ `is-active`), `res-content`, `res-tabs`, `res-tab` (+ `is-active`), `res-count`, `res-lists`, `res-list`, `res-item`,
+`res-link`, `res-name` (+ `is-active`), `res-dot`, `res-text`, `res-view`, `res-icon`, `res-overlay`. Префікс `res-*`, бо старі `resources*`
+читає блок E `script.v33`. Ролі `data-motion`: `resources`, `res-clouds`, `res-cloud`, `res-pin`, `res-track`, `res-shutter`, `res-stack`, `res-tab`,
+`res-count`, `res-lists`, `res-list` (+ `data-list`), `res-item`, `res-name`, `res-image`, `res-overlay`. Дерево — docs/sections/resources.md «Збірка в копії».
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
-`resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
+`res-*` (Resources), `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
 
 **Стани й маркери:**
@@ -380,6 +387,31 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-10 (сесія 22) — Resources: верстка, звірка, код анімації, підключення
+
+- **Верстка:** `section-resources` після `section-lessons` (id `resources-next`): хмари (SVG 3 смуг з ассетів копії), pin, 3 рядки зі шторками й
+  стрілками (ембед SVG), student, стек, таби з лічильниками, 2 Collection List (Courses / Resources) з картинкою в рядку. 29 класів `res-*` + 6 комбо,
+  значення з лайв-CSS. `heading-sm` = лайв `.h5` (lh 1.0741 / tab 1.3182 / mob 1.1765). Дерево й відступи від лайву — resources.md «Збірка в копії».
+- **Звірка:** `tools/record/resources-compare.mjs` (новий) — 1440 / 768 / 600 / 375: 196/197, Δ ≤ 1 px; єдиний прапорець — порядок курсів (нижче).
+- **Код:** `initResources()` + `initResourcesStack()` (pin одразу, 3 фази цілими відсотками, scrub 3, таб на таймлайні, хмари ≥992 за IX2 −20 % / 0–40 %,
+  hover-стек без багів лайву). `tools/record/resources-run.mjs` (новий): 4 смуги — 0 прапорців, pin 4683 / 2945 / 2121 (лайв 4684 / 2944 / 2121);
+  `--live` 1440 / 375 — 0; `coexist-run --live` 1440 / 375 — старі pin-и Δ0.
+- **Хостинг і Webflow:** коміт `0b615c4` → jsDelivr (200); Home head оновлено через MCP (`set_page_freeform_code`, прочитано назад),
+  `src/webflow/home-footer.html` — той самий sha.
+- **Staging опубліковано агентом** 6 разів (задачі `4706df10…`, `1129ddc1…`, `85bbb176…`, `0ee61db3…`, `c7800a3c…`, `06ecc191…`)
+  — для звірки й перевірки коду.
+- **Рішення агента:** (1) заголовок — `div role=heading aria-level=2` + `aria-label` (div у h2 невалідний); (2) `res-clouds` — `overflow: clip visible`
+  (хмара розширювала layout viewport мобільних до 984 px і ламала `innerWidth`); (3) таб синхронізується в `onUpdate` таймлайну; (4) перебудова
+  pin при зміні ширини; (5) рядки й тексти списків порівнюються за посиланням, порядок — окремим прапорцем.
+- **Пастки MCP:** (1) **сортування Collection List не пишеться**: `sort` з `created-on` / `slug` / `createdOn` — «Unknown field», з користувацьким
+  полем — `[Conflict] … component map`; `curatedItemIds` приймається, але не зберігається (опублікований список порожній). (2) Порожній `sort` =
+  «нові спершу». (3) Порядок запису: спершу `source`, потім інше (у тому ж виклику поле ще «невідоме»). (4) `settings` у `data_element_builder`
+  працюють лише для DOM-елементів — Link / Image прив'язувати окремим `set_settings`. (5) Прив'язки CMS: Link → `link` binding, Paragraph → `text`,
+  Image → `assetId`; атрибут `aria-label` — `value_binding` на поле. (6) `whtml_builder` створює Section / Block / Paragraph / Heading з атрибутами й
+  комбо за наявними класами; `&` у тексті дає два String-вузли (невидимо).
+- **Не зроблено / потрібно від користувача:** Designer → Collection List `res-list` (courses) → Sort: **Created On, Oldest first** (MCP не вміє,
+  10 секунд руками). Оверлей і чорні хмари — прохід Footer; тема навбара — Navigation; `resources-next` → `resources` — з видаленням старих секцій.
 
 ### 2026-10-10 (сесія 21) — Resources: аналіз Figma, лайв-заміри, план секції й анімації
 
