@@ -63,7 +63,7 @@ node-id у таблиці — перший/репрезентативний; п�
 | Intro: UI-слайдер | `4609-22242` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4609-22242&m=dev | 2026-10-09 | ⬜ субагент → дописати в sections/intro.md (розділ «UI-слайдер») |
 | Interactive | `4611-22244` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4611-22244&m=dev | 2026-10-10 | ✅ [sections/interactive.md](sections/interactive.md): 4 кадри 1440×750 (розкадровка pin-скролу) + символ `Interactive_circle`; 768/375 немає — еталон лайв |
 | Techniques | `702:14385` (огляд) + `702:15306…15882` (6 кроків), 768 `869:20845`, 375 `918:28871` | обгортка `4611:22246` | 2026-10-10 | ✅ [sections/techniques.md](sections/techniques.md): огляд 1440×2491 + 6 кадрів 1440×750; 768/375 — довгі кадри + кроки. Стара версія анімації — еталон лайв |
-| Lessons | — | TODO | | |
+| Lessons | `4611-22250` (лише урок easing, 15 кадрів 1440) + уроки 2–8 `1553:25009…27397` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4611-22250&m=dev | 2026-10-10 | ✅ [sections/lessons.md](sections/lessons.md): довгий кадр `1553:20458` + 5 станів слайдера схем + 2 Examples + 6 станів демо; 2–8 — лише відмінності; classic-блока й 768/375 у Figma немає, еталон — лайв |
 | Resources | — | TODO | | |
 | Footer | — | TODO | | |
 | Preloader | `4608-23740` (Preloader(4..11)) + сторінка `1301:33520` | — | 2026-10-09 | ✅ [sections/preloader.md](sections/preloader.md): сторінка Preloader — лише фаза лічильника (3 стани × 3 смуги); слова — Preloader(4..11) + Full design 768/375; кадри `1057:46616`, `1063:29105`, `1063:29726` з назвою «Preloader» — це Intro |
