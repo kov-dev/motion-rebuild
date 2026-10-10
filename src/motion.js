@@ -858,6 +858,51 @@ async function initInteractiveLottie() {
   draw();
 }
 
+/* ---------- techniques (live IX2 e-632 / e-634 / e-633, docs/sections/techniques.md) ---------- */
+
+// Catch-up time of the scrub, fitted to the live IX2 smoothing 90 (tools/record/techniques-run.mjs --lag).
+const TECHNIQUES_SCRUB = 1;
+
+/**
+ * Techniques: while the section passes the viewport, word 2 and word 3 drift up at their own pace, the stars
+ * shrink to 0.4 and the paragraph to 0.6 (the words and the paragraph are sticky, so this reads as parallax).
+ * Progress 0 = section top at the viewport bottom, 1 = its bottom at the top; ≤991 starts 30 % of the section later.
+ * The tilt of the words stays in their classes: GSAP reads it from the matrix and keeps it while moving y.
+ */
+export function initTechniques() {
+  const [w1, w2, w3] = qa('techniques-word');
+  const sec = w1?.closest('section');
+  if (!sec || !w2 || !w3) return;
+  const [s1, s2] = qa('techniques-star', sec);
+  const text = q('techniques-text', sec);
+  const rem = (v) => () => v * remPx();
+
+  gsap.matchMedia().add(
+    // Every band is listed: matchMedia() skips the callback when no condition matches.
+    { large: '(min-width: 992px)', tablet: '(max-width: 991px)', small: '(max-width: 767px)', reduce: '(prefers-reduced-motion: reduce)' },
+    ({ conditions: c }) => {
+      if (c.reduce) return; // static: the words stand as laid out, as without JS
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: sec,
+          start: c.tablet ? '30% bottom' : 'top bottom',
+          end: 'bottom top',
+          scrub: TECHNIQUES_SCRUB,
+          invalidateOnRefresh: true,
+        },
+      });
+      // Positions and durations are fractions of the whole pass (the timeline is padded to 1 below).
+      tl.fromTo(w2, { y: rem(1) }, { y: rem(-2), duration: 0.5 }, 0)
+        .fromTo(w3, { y: 0 }, { y: rem(c.small ? -3 : -5), duration: 0.6 }, 0);
+      if (s1) tl.fromTo(s1, { scale: 1, y: 0 }, { scale: 0.4, y: rem(-0.6), duration: 0.26 }, 0);
+      if (s2) tl.fromTo(s2, { scale: 1, y: 0 }, { scale: 0.4, y: rem(-1), duration: 0.24 }, 0);
+      if (text) tl.fromTo(text, { scale: 1 }, { scale: 0.6, duration: 0.12 }, 0.6);
+      tl.set({}, {}, 1);
+    }
+  );
+}
+
 /* ---------- boot ---------- */
 
 // Transition only: the old script.v33 keeps its own GSAP + ScrollTrigger for the sections below ours.
@@ -883,7 +928,8 @@ async function init() {
   initIntro();
   initUi();
   initInteractive();
-  // Next passes: initTechniques(), … then one refresh.
+  initTechniques();
+  // Next passes: initLessons(), … then one refresh.
   syncLegacy();
   ScrollTrigger.refresh();
 }
