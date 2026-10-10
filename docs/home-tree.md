@@ -482,7 +482,7 @@ section.nav.nav-color#easing (239)
 
 ## 6. Resources
 
-Обгортка/секція `section.nav.nav-light#resources` `7a61b557-4dcd-92ad-1f18-47267d8318e1` (Block, tag section); `div.resources` (Section, tag div) `…8318e2`. CMS: 2 `resources-images__list` (10+4 айтеми) і 2 `resources-list` (по 14 айтемів: `.resources-item`) — усього 28 `w-dyn-item` у DOM (CMS-шаблони `Courses`/`Resources`; назву колекції в HTML не видно). 3 стрілки (`resources-arrow-icon`, ембед SVG) + 14 `btn-link-icon` + інше SVG. IX2: тільки `div.resources`.
+Обгортка/секція `section.nav.nav-light#resources` `7a61b557-4dcd-92ad-1f18-47267d8318e1` (Block, tag section); `div.resources` (Section, tag div) `…8318e2`. CMS: 2 `resources-images__list` (10+4 айтеми) і 2 `resources-list` (10+4 айтеми `.resources-item`; сесія 21 — не 14+14) — усього 28 `w-dyn-item` у DOM (CMS-шаблони `Courses`/`Resources`; назву колекції в HTML не видно). 3 стрілки (`resources-arrow-icon`, ембед SVG) + 14 `btn-link-icon` + інше SVG. IX2: тільки `div.resources`.
 
 ```
 section.nav.nav-light#resources (288)
