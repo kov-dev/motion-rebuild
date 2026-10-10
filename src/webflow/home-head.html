@@ -1,0 +1,78 @@
+<script>
+// preloader-gate.js — inline in the Home head, before the preloader.css style element.
+// Canonical source: src/preloader-gate.js. Must run before first paint, so it cannot
+// live in the deferred motion.js module.
+(function () {
+  var html = document.documentElement;
+  html.classList.add('is-preloading');
+
+  // overflow: hidden stops native scrolling only; a smooth-scroll library (the old script's
+  // Lenis, mobile normalizeScroll) moves the page itself on wheel/touch. Registered here, before
+  // any of them, as capture listeners on window, so they run first and swallow the input.
+  var types = ['wheel', 'touchmove'];
+  var swallow = function (e) {
+    if (!html.classList.contains('is-preloading')) return release();
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  };
+  var release = function () {
+    types.forEach(function (t) { window.removeEventListener(t, swallow, { capture: true }); });
+  };
+  types.forEach(function (t) { window.addEventListener(t, swallow, { capture: true, passive: false }); });
+  document.addEventListener('motion:preloader-done', release);
+
+  // Failsafe: the module never took over, so never trap the page behind the overlay.
+  // A module script always runs before DOMContentLoaded, so check right after it; on a slow
+  // page that can be 20+ s away (sync scripts in the body), hence also a hard cap.
+  var bail = function () {
+    if (window.__motionPreloader) return;
+    html.classList.remove('is-preloading');
+    release();
+  };
+  document.addEventListener('DOMContentLoaded', function () { setTimeout(bail, 1000); });
+  setTimeout(bail, 20000);
+})();
+</script>
+<style>
+/*
+  preloader.css — gate and start states for the Home preloader.
+  Canonical source: src/preloader.css. Webflow holds a copy in the Home page-level
+  head (page custom code is not executed in the Designer, so there the section stays
+  a plain 100vh block that can be edited). Not connected to Webflow yet.
+
+  Home head = a script element with src/preloader-gate.js (first), then a style
+  element with this file. Never put HTML tags inside this comment: a closing style
+  tag here would end the style element early and print the rest of the CSS as text.
+
+  Without JS the preloader never shows. Phase 2 start states live here (not in the
+  Designer classes) so the words and discs stay visible in the Designer; nothing
+  flashes because the opaque preloader-loader covers phase 2 until JS starts.
+*/
+
+.section-preloader {
+  display: none;
+}
+
+html.is-preloading {
+  overflow: hidden;
+}
+
+html.is-preloading .section-preloader {
+  display: block;
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  z-index: 1000;
+}
+
+html.is-preloading [data-motion="preloader-disc"] {
+  clip-path: circle(0px at 50% 50%);
+}
+
+html.is-preloading [data-motion="preloader-word"] {
+  transform: translateY(100vh);
+}
+
+/* Hero start states for phase 3 are set by gsap.set() in initPreloader() while the
+   overlay still covers the page, so they are not duplicated here. */
+</style>

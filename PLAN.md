@@ -44,7 +44,8 @@
 - [ ] Структурні й базові класи (`btn`, `ball*`, `section-*` …) — у проходах секцій, не наперед
 - [ ] Компоненти: navbar, footer, lesson-section (8 уроків → 1 компонент з пропсами), lottie-card
 - [x] Каркас `src/motion.js` (ES-module, GSAP 3.13.0 піновано) + `preloader-gate.js` + `preloader.css` (2026-10-09)
-- [ ] Збірка/мініфікація, версія в імені, підключення до Webflow (jsDelivr) — разом із видаленням старих `loader` і Hero
+- [ ] Підключення до Webflow, варіант 2 «поруч зі старим» (сесія 12): код і сніпети `src/webflow/` готові й перевірені (coexist-run), jsDelivr на коміт; **чекає вставки в Home → Custom code + публікації staging**
+- [ ] Збірка/мініфікація, версія в імені — разом із видаленням старих `loader`, Hero, Intro і `script.v33` (тоді ж прибрати `legacy-guard.js` і `syncLegacy()`)
 - [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl, body-lg — сесія 8; text-shape, body-sm — сесія 9; лишились display-xl/lg, heading-lg/md/sm, body-md, text-label)
 
 ## Етап 3 — Секції (кожна окремим проходом) 🟨

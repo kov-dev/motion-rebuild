@@ -3,12 +3,13 @@
 // the Intro fixture in place of the stale published section-intro, src/motion.js as a module after the old scripts.
 // Checks: the preloader holds the scroll, which gsap ends up global, new sections animate under real wheel input,
 // and the old pins below still start where their spacers are.
-// Usage: node coexist-run.mjs <project-root> <out-dir> [1440|375] [--published]
+// Usage: node coexist-run.mjs <project-root> <out-dir> [1440|375] [--published] [--cdn]
 import { chromium } from 'playwright';
 import { readFileSync } from 'node:fs';
 const args = process.argv.slice(2);
 const published = args.includes('--published');
-const [root, out, only = '1440'] = args.filter((a) => a !== '--published');
+const cdn = args.includes('--cdn');
+const [root, out, only = '1440'] = args.filter((a) => !a.startsWith('--'));
 const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 
@@ -37,15 +38,18 @@ await p.route('**/*', async (route) => {
   if (route.request().resourceType() !== 'document') return route.continue();
   const res = await route.fetch();
   let html = await res.text();
-  html = html.replace('<head>', `<head><script>${gate}</script><style>${css}\n${published ? '' : fixtureCss}</style>`);
+  html = html.replace('<head>', cdn
+    ? `<head>${readFileSync(`${root}/src/webflow/home-head.html`, 'utf8')}${published ? '' : `<style>${fixtureCss}</style>`}`
+    : `<head><script>${gate}</script><style>${css}\n${published ? '' : fixtureCss}</style>`);
   // --published: the staging Intro already carries every data-motion role (published 2026-10-10), no fixture.
   if (!published) html = html.replace(/<section[^>]*class="section-intro[\s\S]*?<\/section>/, section);
-  html = html.replace('</body>', `<script type="module">${js}</script></body>`);
+  // --cdn: exactly the Webflow page code (src/webflow/home-footer.html, motion.js from jsDelivr).
+  html = html.replace('</body>', cdn ? `${readFileSync(`${root}/src/webflow/home-footer.html`, 'utf8')}</body>` : `<script type="module">${js}</script></body>`);
   route.fulfill({ response: res, body: html });
 });
 
 const t0 = Date.now();
-await p.route('**/legacy-guard.js', (r) => r.fulfill({ contentType: 'text/javascript', body: readFileSync(`${root}/src/legacy-guard.js`, 'utf8') })); // motion.js imports it relatively
+if (!cdn) await p.route('**/legacy-guard.js', (r) => r.fulfill({ contentType: 'text/javascript', body: readFileSync(`${root}/src/legacy-guard.js`, 'utf8') })); // motion.js imports it relatively
 await p.goto(STAGING, { waitUntil: 'domcontentloaded', timeout: 90000 });
 const rows = [`== ${only}`];
 const done = p.evaluate(() => new Promise((r) => document.addEventListener('motion:preloader-done', () => r(), { once: true })));
