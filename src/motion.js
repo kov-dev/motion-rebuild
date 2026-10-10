@@ -764,6 +764,100 @@ function initUiIdle(blocks) {
   });
 }
 
+/* ---------- interactive (script.v33 blocks F and G, docs/sections/interactive.md) ---------- */
+
+// Pinned: loaded on demand, near the section only.
+const LOTTIE_URL = 'https://cdn.jsdelivr.net/npm/lottie-web@5.13.0/build/player/lottie_light.min.js/+esm';
+const LOTTIE_RUN = 3.43; // live IX2: one pass over the whole file (206 frames at 60 fps)
+
+// Sound state. Transition: the old Sound button (`.sound-btn-mute.is-active` = muted) until the Navigation pass.
+const soundOn = () => {
+  const mute = q('sound-state') || document.querySelector('.sound-btn-mute');
+  return !!mute && !mute.classList.contains('is-active');
+};
+
+/**
+ * Interactive: the row of circles pins and slides left until the last circle has passed (live block G),
+ * the Real-time circle gets the Matter.js ball pit, the Not real-time circle gets its Lottie.
+ * Both load once the pin is one viewport away. The scroll direction tilts the pit's gravity while pinned.
+ */
+export function initInteractive() {
+  const pin = q('interactive-pin');
+  const track = pin && q('interactive-track', pin);
+  if (!pin || !track) return;
+
+  // Live: scrollWidth − vw of the pinned block = its padding-left + the track (with its end padding) − vw.
+  const shift = () => Math.max(0, parseFloat(getComputedStyle(pin).paddingLeft) + track.offsetWidth - innerWidth);
+
+  let sphere = null;
+  gsap.to(track, {
+    x: () => -shift(),
+    ease: 'sine.out',
+    scrollTrigger: {
+      trigger: pin,
+      pin: true,
+      anticipatePin: 1,
+      scrub: 1,
+      start: 'top top',
+      end: () => `+=${shift()}`,
+      invalidateOnRefresh: true,
+      // The live tilt never ran (its trigger looked for .wf-section, script-map №15); restored on the pin.
+      onUpdate: (self) => sphere?.setTilt(-self.direction / 2),
+    },
+  });
+  ScrollTrigger.addEventListener('scrollEnd', () => sphere?.setTilt(0));
+
+  ScrollTrigger.create({
+    trigger: pin,
+    start: 'top bottom',
+    once: true,
+    onEnter: () => {
+      initSphere().then((s) => (sphere = s));
+      initInteractiveLottie();
+    },
+  });
+}
+
+// The Matter.js ball pit, lazy: the module (and Matter.js with it) is fetched on first use.
+async function initSphere() {
+  const wrap = q('interactive-sphere');
+  if (!wrap || wrap.dataset.ready) return null;
+  wrap.dataset.ready = '1';
+  const { createSphere } = await import('./sphere.js');
+  return createSphere(wrap, { soundOn });
+}
+
+// Not real-time: lottie-web plays the live file on hover (≥992) or tap (≤991), as the live IX2 did:
+// hover = from frame 0 to the end; out = finish the pass from where it is, then back to frame 0; tap = one pass.
+async function initInteractiveLottie() {
+  const box = q('interactive-lottie');
+  const zone = q('interactive-hover');
+  if (!box?.dataset.src || box.dataset.ready) return;
+  box.dataset.ready = '1';
+  const { default: lottie } = await import(LOTTIE_URL);
+  const anim = lottie.loadAnimation({ container: box, renderer: 'svg', loop: false, autoplay: false, path: box.dataset.src });
+  await new Promise((resolve) => anim.addEventListener('DOMLoaded', resolve));
+  if (!zone) return;
+
+  const last = anim.totalFrames - 1;
+  const head = { frame: 0 };
+  const draw = () => anim.goToAndStop(head.frame, true);
+  // Constant duration whatever the distance, like an IX2 tween towards a target value.
+  const toEnd = (from, then) => {
+    if (from !== undefined) head.frame = from;
+    gsap.to(head, { frame: last, duration: LOTTIE_RUN, ease: 'none', overwrite: true, onUpdate: draw, onComplete: then });
+  };
+  const reset = () => {
+    head.frame = 0;
+    draw();
+  };
+  const wide = () => innerWidth >= 992;
+  zone.addEventListener('mouseenter', () => wide() && toEnd(0));
+  zone.addEventListener('mouseleave', () => wide() && toEnd(undefined, reset));
+  zone.addEventListener('click', () => !wide() && toEnd(0, reset));
+  draw();
+}
+
 /* ---------- boot ---------- */
 
 // Transition only: the old script.v33 keeps its own GSAP + ScrollTrigger for the sections below ours.
@@ -788,7 +882,8 @@ async function init() {
   initHero();
   initIntro();
   initUi();
-  // Next passes: initInteractive(), … then one refresh.
+  initInteractive();
+  // Next passes: initTechniques(), … then one refresh.
   syncLegacy();
   ScrollTrigger.refresh();
 }
