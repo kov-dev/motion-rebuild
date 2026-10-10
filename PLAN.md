@@ -60,7 +60,7 @@
 | Preloader | ✅ | ✅ [preloader.md](docs/sections/preloader.md) | ✅ зібрано, знімки фаз (2026-10-09) | 🟨 `initPreloader()` написано й прогнано на staging-розмітці, у Webflow не підключено | ⬜ |
 | Hero | ✅ | ✅ | ✅ `section-hero` (2026-10-09), звірено з лайвом 1–2 px, знімок Designer (сесія 9); старий Hero ще на сторінці | ✅ вхід — `initPreloader()`, вихід ліній/кільця — `initHero()` (сесія 9, прогнано на staging-розмітці); у Webflow не підключено | ⬜ |
 | Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ✅ `section-intro` зі сценою, шляхами й UI-слайдером (сесія 9), звірено з лайвом Δ 0–1 px; старий Intro ще на сторінці | ✅ `initIntro()` (кулька по шляху, тексти, посадка) + хмари кодом — Δ ≤ 1 px на 3 смугах (сесія 10); ✅ `initUi()` (pin слайдера, передача кульки, відео) + ідл-похитування — 768 / 375 без розбіжностей з лайвом, 1440 — 2 очікувані (сесія 11) | 🟨 уся секція звірена на staging-розмітці з фікстурою (intro-run, ui-run); у Webflow код не підключено |
-| Interactive | ✅ `4611-22244` (4 кадри 1440) | ✅ [interactive.md](docs/sections/interactive.md) + лайв-заміри | ✅ `section-interactive` (сесія 13), звірено з лайвом на staging Δ ≤ 0.7 px на 1440/768/375; старий `#interactive` ще на сторінці | ⬜ код: `initInteractive()` (pin + x), `initSphere()` (Matter.js + нахил), Lottie hover | ⬜ |
+| Interactive | ✅ `4611-22244` (4 кадри 1440) | ✅ [interactive.md](docs/sections/interactive.md) + лайв-заміри | ✅ `section-interactive` (сесія 13), звірено з лайвом на staging Δ ≤ 0.7 px на 1440/768/375; старий `#interactive` ще на сторінці | ✅ `initInteractive()` (pin + зсув Δ0 з лайвом), `sphere.js` (Matter.js 0.20, нахил гравітації), Lottie hover/tap (сесія 14) | 🟨 staging `--live` 1440/768/375 зелені; лишились: перенос `id="interactive"` і видалення старої секції, тач-скрол по сфері — після `script.v33`, hover-звук — етап 4 |
 | Techniques | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Lessons ×8 | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Resources | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
@@ -75,7 +75,7 @@
 - [ ] Lenis + ScrollTrigger інтеграція, `prefers-reduced-motion`
 - [ ] Звук (ті самі mp3), gtag-події sound_on/off
 - [ ] Прибрати jQuery-залежності з нашого коду (Webflow сам його вантажить, але ми не спираємось)
-- [ ] Пінити версії: GSAP (одна), Lenis, Matter.js. Splide і будь-які інші слайдери — прибрати, замінити на GSAP/IX3
+- [ ] Пінити версії: GSAP (одна), Lenis, Matter.js (✅ 0.20.0, lottie-web 5.13.0 — сесія 14). Splide і будь-які інші слайдери — прибрати, замінити на GSAP/IX3
 
 ## Етап 5 — Перформанс і QA ⬜
 

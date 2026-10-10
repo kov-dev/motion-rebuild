@@ -139,3 +139,11 @@ section.section-interactive   data-motion="theme" data-theme="light"   semantic:
 - **Далі (код):** `initInteractive()` — pin + `x` (формула вище, `invalidateOnRefresh`), `syncLegacy()`; `initSphere()` —
   порт блоку F з фіксами (`e.target` замість `e.toElement`, без неявних глобалів, нахил гравітації на
   `data-motion="interactive-pin"`), Matter.js пінований, lazy; Lottie-плеєр (пінований `lottie-web`, lazy) на hover/click.
+
+## Код (сесія 14, 2026-10-10)
+
+- `initInteractive()` у `src/motion.js` — pin + зсув (формула вище), нахил гравітації з `onUpdate` pin-тригера, лінивий
+  старт сфери й Lottie на `top bottom` pin. `src/sphere.js` — порт блоку F (Matter.js 0.20.0). Lottie — `lottie-web`
+  5.13.0 light; IX2-поведінка: hover 0→кінець 3.43 с, out — дограти до кінця й скинути на 0, тап ≤991 — один прохід.
+- Перевірка: `tools/record/interactive-run.mjs` (зсув 852 / 1224 / 827 = лайв, Δ0), `tools/record/sphere-touch.mjs`.
+  Деталі й рішення — журнал CONVENTIONS, сесія 14.
