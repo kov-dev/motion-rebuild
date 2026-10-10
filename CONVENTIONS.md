@@ -22,7 +22,7 @@
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
 | Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) |
-| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
@@ -259,13 +259,13 @@ absolute-розкладкою.
 
 | Клас | Шрифт | Розмір | lh | ls | | Замінює |
 |---|---|---|---|---|---|---|
-| `display-xl` | display | `text-215` | 1.0 | −0.04em | UP | `.list-item` (Intro), `.scrolling-text.is-lessons`. Кандидат у `h1` |
+| `display-xl` | display | `text-215` | 1.0 | −0.04em (tab **−0.0717em**, mob **−0.0393em**) | UP | `.list-item` (Techniques), `.scrolling-text.is-lessons`. ls tab/mob — з лайву `.list-item` (сесія 15) |
 | `display-lg` | display | `text-160` | 1.0625 (tab **1**, mob **1.1**) | −0.04em (tab **−0.064em**) | UP | `.h2`. lh/ls tab/mob — з лайву (сесія 13) |
 | `heading-xl` | display | `text-140` | 1.03 | −0.036em | UP | `.h3`, `.h3.white` |
 | `heading-lg` | **accent** | `text-115` | 1.1 | −0.02em | | `.h2-secondary` |
 | `heading-md` | display | `text-74` | 1.08 | −0.04em | UP | `.h4`, `.label-1` |
 | `heading-sm` | display | `text-54` | 1.07 | 0 | UP | `.h5` |
-| `body-lg` | display | `text-28` | 1.57 | 0 | | `.p1` |
+| `body-lg` | display | `text-28` | **1.5714** (tab **1.5833**, mob **1.4545**) | 0 | | `.p1`. lh = `.p1` лайву 44/28, 38/24, 32/22 (сесія 15) |
 | `body-md` | body | `text-18` | 1.78 | 0 | | `.p2`, `.slide-inner-label`, `.hero_wrap` |
 | `body-sm` | display | `text-16` | 1.5 (tab **1.85**, mob **1.385**) | −0.02em | | `.p3` (51), `.btn-link` (25), `.resources-item__button` (14). lh tab/mob — з `.p3` лайву (сесія 9); `btn-link` / `resources-item__button` звірити у своїх проходах |
 | `body-sm` + `is-strong` | body, 700 | 16 / **16** / 14 | 1.5 (mob 1.57) | −0.02em (сесія 13, лайв −0.3px) | | `.p3-bold`: підписи карток Interactive. Розмір tab/mob лишаємо як на лайві, тому комбо перевизначає й розмір |
@@ -333,6 +333,11 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 Ролі `data-motion`: `interactive` (тригер), `interactive-pin`, `interactive-track`, `interactive-sphere`, `interactive-lottie`
 (+ `data-src`), `interactive-hover`. Дерево — docs/sections/interactive.md «Збірка в копії».
 
+**Techniques (створено, сесія 15):** `section-techniques` (режим `dark`), `techniques-words`, `techniques-word` (режим `base`; +
+`is-first` / `is-second` / `is-third`), `techniques-divider`, `techniques-star` (+ `is-first` / `is-second`), `techniques-clouds`,
+`techniques-text`. Ролі `data-motion`: `techniques-word` ×3, `techniques-star` ×2, `techniques-text`. Дерево — docs/sections/techniques.md
+«Збірка в копії».
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
 `resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
@@ -352,6 +357,29 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-10 (сесія 15) — Techniques: аналіз, лайв-заміри, верстка, план анімації
+
+- **Webflow MCP працює** (`list_sites` бачить обидва сайти). Копію перед сесією хтось публікував о 08:21 UTC.
+- **Аналіз Figma** (sonnet-субагент): огляд `702:14385`, 6 кроків `702:15306…15882`, 768 `869:20845`, 375 `918:28871` →
+  docs/sections/techniques.md. Figma — стара версія (косий rect замість divider, зірки зникають, хмара шаром); береться лайв.
+- **Лайв-заміри:** `tools/record/techniques-probe.mjs` + стилі старих класів через MCP. Слова й абзац — `sticky`, анімація —
+  IX2 scroll-scrub (smoothing 90): слово 2 y 1→−2rem (0–50 %), слово 3 y 0→−5rem / −3rem ≤767 (0–60 %), зірки scale 1→0.4
+  + y (0–26 %), абзац scale 1→0.6 (60–72 %); плашки **не обертаються**. На ≤991 старт зсунутий на 30 % висоти секції
+  (`start: "30% bottom"`, виведено з трьох замірів на 768).
+- **Верстка:** `section-techniques` після `section-interactive` (11 нових класів/комбо, кольори/обводка/радіус на змінних,
+  плашки — режим `base` у темній секції). Злиття: `list-wrap` → `techniques-words` (ARIA heading), `content-wrap` +
+  `text-wrap` → `techniques-clouds` / `techniques-text`.
+- **Текстові стилі (глобально):** `display-xl` tab ls −0.0717em, mob −0.0393em; `body-lg` lh 1.5714 / 1.5833 / 1.4545 —
+  точні співвідношення `.p1` лайву (Hero теж на `body-lg`, зміна ≤0.04 px на рядок, у бік лайву).
+- **Звірка:** `tools/record/techniques-compare.mjs` — нова vs стара на staging, 14 елементів × 3 смуги: **Δ ≤ 0.2 px, 0 прапорців**.
+- **Staging опубліковано агентом** двічі: після вставки секції (task `e6fc4daf…`) і після правки `body-lg` (task `a15274e7…`).
+- **План анімації** — код (`initTechniques()`, ескіз у techniques.md): тригер у спільному ScrollTrigger після pin-ів
+  Intro/Interactive, `gsap.matchMedia` на смуги, rem-функції. IX3 відкинуто через порядок/refresh тригерів.
+- **Пастки:** (1) `getBoundingClientRect` повернутих плашок — bbox, для звірки брати ще `offsetWidth/Height`; (2) webflow.js
+  (IX2) у скрипті звірки не блокується — інлайн-трансформи старої секції знімати перед замірами; (3) у Webflow
+  комбо-клас найвищої специфічності на `main` перебиває медіа-правило бази (третя плашка: висоту на medium/tiny треба
+  ставити в комбо, не в базі).
 
 ### 2026-10-10 (сесія 14) — Interactive: код (pin + зсув, сфера, Lottie), підключення
 

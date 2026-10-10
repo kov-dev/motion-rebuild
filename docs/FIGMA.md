@@ -62,7 +62,7 @@ node-id у таблиці — перший/репрезентативний; п�
 | Intro | `4608-23742` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4608-23742&m=dev | 2026-10-09 | ✅ [sections/intro.md](sections/intro.md): фрейм `869:18299` 1440×3810, один статичний стан, без SVG-шляху, UI-слайдера й відео |
 | Intro: UI-слайдер | `4609-22242` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4609-22242&m=dev | 2026-10-09 | ⬜ субагент → дописати в sections/intro.md (розділ «UI-слайдер») |
 | Interactive | `4611-22244` | https://www.figma.com/design/KJQjG15P2P3SkXwrJJxLOp/Motion--DEV-?node-id=4611-22244&m=dev | 2026-10-10 | ✅ [sections/interactive.md](sections/interactive.md): 4 кадри 1440×750 (розкадровка pin-скролу) + символ `Interactive_circle`; 768/375 немає — еталон лайв |
-| Techniques | — | TODO | | |
+| Techniques | `702:14385` (огляд) + `702:15306…15882` (6 кроків), 768 `869:20845`, 375 `918:28871` | обгортка `4611:22246` | 2026-10-10 | ✅ [sections/techniques.md](sections/techniques.md): огляд 1440×2491 + 6 кадрів 1440×750; 768/375 — довгі кадри + кроки. Стара версія анімації — еталон лайв |
 | Lessons | — | TODO | | |
 | Resources | — | TODO | | |
 | Footer | — | TODO | | |
