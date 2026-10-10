@@ -218,3 +218,44 @@ header.site-nav  data-motion="nb"                    fixed top/left 0, w 100 %, 
   код), висота кореня (старий 1rem з margin −1rem) і посилань соцмереж (старі на 4 px вищі за іконку).
 - **Стан staging після сесії:** новий навбар видно, але без коду — очі лого й Lottie карток не вантажаться, тогл не відкриває меню, тема завжди dark.
   Закривається `initNav()` / `initTheme()` (наступна сесія).
+
+## Анімація в коді (сесія 27, 2026-10-10)
+
+`initNav()` (до прелоадера: очі лого вантажаться, поки він іде) і `initTheme()` (останнім, після `initFooter()`) у `src/motion.js`.
+
+**Тема (`initTheme()` + `paintNav()`).** Кожен `[data-theme]` поза навбаром → `ScrollTrigger` `top top+=1` / `bottom top+=1`,
+`refreshPriority: -1` (після pin-а Resources, що перебудовується при зміні ширини), `onToggle` + подія `refresh` → вибір: **найглибша**
+активна зона, серед рівних — пізніша в DOM (футер над Resources). Поза зонами схема лишається. Фарбування — один `gsap.to` трьох змінних
+на `header.site-nav` (`--_semantic---bg` / `--_semantic---foreground` / `--_semantic---border`, значення з `--_core---neutral-1000/0`),
+0.4 с `power1.out`; очі — кросфейд за `data-eyes` (схована пара Lottie стає на паузу після згасання); крихти — opacity 1 лише в `color` для
+`data-crumb` = id уроку без `-next`. Колір `color` = `getComputedStyle(секції).backgroundColor`. Reduced motion — без твіну.
+
+**Resources → футер (рішення сесії 25):** тригер футера стартує з `top (1 − 0.25)·(vh + 0.15·h)` — прогрес футера 0.25, коли оверлей
+`res-overlay` = 50 %. Світла тема тримається весь pin Resources.
+
+**Меню (`initNav()`).** Ключі лайву (семпли `nav-probe.mjs` сесії 27, підігнані в `nav-run.mjs`): усе **лінійне**, крім карток.
+
+| Ключ | Відкриття | Закриття |
+|---|---|---|
+| `nb-menu` | display block → opacity 0 → 1, 0.2 с `none` (щоразу з 0, як перша група a-58) | 1 → 0, 0.2 с, потім display none |
+| `nb-cards` x | 4rem → 0, 0.6 с `power1.inOut` (reduced motion — стоїть на 0) | → 4rem, 0.6 с |
+| лейбли `menu` + `close` (діти обгортки `nb-toggle-label`) | yPercent 0 → −104, 0.3 с `none` | → 0 |
+| `nb-line-top` / `-bottom` | rotation ±45, y .02 / −.03rem, 0.2 с `none` | → 0 |
+| інше | `aria-expanded`, `aria-label` «Close menu», `html` overflow hidden, тема dark | inline overflow знято, тема секції |
+
+- **Lottie карток** — ліниво: перший намір відкрити (`pointerenter` / `focus` тогла) або перше відкриття; `lottie_light` 5.13.0, `svg`,
+  без автоплею. Hover (≥992 і `pointer: fine`, лише `pointerType: mouse`): кадр 0 → останній за 0.67 с `none`; out — з поточного до 0 за 0.67 с.
+- **Лого** — 2 Lottie `loop`, видима грає, схована на паузі; reduced motion — кадр 0.
+- **Колесо** над відкритим меню (на всьому `site-nav`, тож і над шапкою) → `nb-track.scrollLeft += (deltaX + deltaY)·k`, `k` за `deltaMode`
+  (рядки 16 px, сторінки — ширина треку); `preventDefault` + `stopPropagation` — старий Lenis сторінку не крутить. `touchstart/move` при
+  відкритому меню теж не спливають (старий `normalizeScroll`).
+- **Esc** закриває й повертає фокус на тогл. **Клік по картці** — `preventDefault` + **`stopPropagation`**, закрити, `scrollTo(0, top + scrollY)`.
+  Пастка: без `stopPropagation` вбудований скрол Webflow до якорів (делегований на `document`) віднімає висоту fixed-шапки → ціль на 80 px нижче top.
+- **Introduction → `#hero-next`:** `#hero` на staging — **старий** Hero під нашим футером. `section-hero` отримала id `hero-next`, перша картка
+  `site-nav` — посилання `#hero-next` (MCP, сесія 27). На `hero` / `<урок>` — разом із видаленням старих секцій.
+
+**Перевірка** — `tools/record/nav-run.mjs` (PART=theme,menu,links; `--live`, `--reduce`; `LIVE=nav-menu-1440.txt` — підгонка лайв-семплів):
+21 точка теми (усі зони, демо й урок після нього, середина pin-а Resources, футер p 0.22 / 0.28, назад угору) + тривалість твіну; меню —
+кожен кадр rAF проти моделі у вікні [t − 50, t + 34] мс; лайв-семпли — зсув годинника підганяється за x карток (open 160 мс, close 6 мс),
+решта ключів у межах одного тіку IX2; очі, ліниві картки (0 → 10), hover-кадри (нахил 58 к/с), колесо 300 → 300, Esc + фокус; кліки по 5 картках
+→ ціль у top ±2 px зі схемою секції.

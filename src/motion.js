@@ -1461,6 +1461,8 @@ function initResourcesStack(pin, listEls) {
 // Same catch-up as Techniques: the footer trigger has IX2 smoothing 90.
 const FOOTER_SCRUB = 1;
 const FOOTER_CLOUDS_Y = [1.2, 1, 2]; // rem: second, third, fourth cloud (the first one is the footer's own top edge)
+// Distance of the footer top from the viewport top at progress 0 (the live −15 % offset is of the footer height).
+const footerSpan = (footer) => innerHeight + 0.15 * footer.offsetHeight;
 
 /**
  * Footer: as it comes in, the overlay of Resources turns black (0 → 50 % of the progress) and the black clouds
@@ -1482,7 +1484,7 @@ export function initFooter() {
         defaults: { ease: 'none' },
         scrollTrigger: {
           trigger: footer,
-          start: () => `top ${innerHeight + 0.15 * footer.offsetHeight}px`,
+          start: () => `top ${footerSpan(footer)}px`,
           end: 'top top',
           // Reduced motion: the overlay still darkens (it is colour, not motion), without the catch-up.
           scrub: c.reduce ? true : FOOTER_SCRUB,
@@ -1497,6 +1499,242 @@ export function initFooter() {
       tl.set({}, {}, 1);
     }
   );
+}
+
+/* ---------- navigation (script.v33 blocks I / J, IX2 a-58 / a-88 / a-60 / a-61; docs/sections/navigation.md) ---------- */
+
+const NAV_THEME_TIME = 0.4; // live: gsap.to defaults, i.e. power1.out
+// Live IX2 a-58 / a-88, sampled on motion.zajno.com: every key is linear except the cards (easeInOut = power1.inOut).
+const MENU = { fade: 0.2, cards: 0.6, cardsX: 4, label: 0.3, lines: 0.2, lineY: [0.02, -0.03] };
+const NAV_CARD_RUN = 0.67; // live a-60 / a-61: hover plays the card Lottie to its end, out plays it back to 0, both linear
+// The footer theme takes over when the overlay of Resources is half black: overlay = p / 0.5 in initFooter(), so p = 0.25.
+// Agent's fix (session 25): on the live site the navbar darkened in the middle of the light Resources pin.
+const FOOTER_THEME_AT = 0.25;
+
+// Scheme under the navbar line ({ theme: dark | light | color, bg, crumb }) and the menu state; an open menu is always dark.
+let navScheme = { theme: 'dark' };
+let navMenuOpen = false;
+const navEyes = new Map(); // logo eyes box → its Lottie
+
+/**
+ * Paints the navbar: two semantic variables on the root (pills, toggle lines and eye circles read them), the logo eyes
+ * cross-fade (dark file on dark, the other one on light and colour), the crumb of the current lesson on colour.
+ */
+function paintNav(instant = false) {
+  const root = q('nb');
+  if (!root) return;
+  const s = navMenuOpen ? { theme: 'dark' } : navScheme;
+  const core = (n) => getComputedStyle(root).getPropertyValue(`--_core---neutral-${n}`).trim();
+  const dark = core(1000);
+  const light = core(0);
+  const bg = s.theme === 'dark' ? dark : s.theme === 'light' ? light : s.bg;
+  const fg = s.theme === 'dark' ? light : dark;
+  const duration = instant || reducedMotion() ? 0 : NAV_THEME_TIME;
+  const to = (target, vars) => gsap.to(target, { ...vars, duration, ease: 'power1.out', overwrite: 'auto' });
+
+  to(root, { '--_semantic---bg': bg, '--_semantic---foreground': fg, '--_semantic---border': fg });
+  const eyes = s.theme === 'dark' ? 'dark' : 'light';
+  qa('nb-eyes', root).forEach((box) => {
+    const on = box.dataset.eyes === eyes;
+    const anim = navEyes.get(box);
+    if (on && anim && !reducedMotion()) anim.play();
+    // The hidden eyes stop once faded out.
+    to(box, { opacity: +on, onComplete: () => !on && anim?.pause() });
+  });
+  qa('nb-crumb', root).forEach((c) => to(c, { opacity: +(s.theme === 'color' && c.dataset.crumb === s.crumb) }));
+}
+
+/**
+ * Theme of the navbar by section: every [data-theme] gets a trigger over the navbar line (top + 1 px); the active one
+ * is the deepest active (the dark demo inside the easing lesson wins over the lesson, the lesson is back after it),
+ * among equals the later one (the footer over Resources). Between zones and after the last one the scheme stays.
+ * Colour = the background of the section, the crumb of the lesson (its id without the transitional "-next").
+ * Our pins have their spacers, so no manual offsets (the live resourcesPinLen).
+ */
+export function initTheme() {
+  const root = q('nb');
+  if (!root) return;
+  const footer = q('footer');
+  const depth = (el) => {
+    let d = 0;
+    for (let x = el; (x = x.parentElement); ) d++;
+    return d;
+  };
+  const zones = [...document.querySelectorAll('[data-theme]')]
+    .filter((el) => !root.contains(el))
+    .map((el) => ({ el, depth: depth(el), theme: el.dataset.theme }));
+  if (!zones.length) return;
+
+  let painted = false;
+  const pick = () => {
+    // Trigger callbacks can fire while the triggers are still being created.
+    const on = zones.filter((z) => z.st?.isActive);
+    if (!on.length) return;
+    const z = on.reduce((a, b) => (b.depth >= a.depth ? b : a));
+    const next = {
+      theme: z.theme,
+      bg: z.theme === 'color' ? getComputedStyle(z.el).backgroundColor : null,
+      crumb: z.theme === 'color' ? z.el.id.replace(/-next$/, '') : null,
+    };
+    if (painted && next.theme === navScheme.theme && next.bg === navScheme.bg && next.crumb === navScheme.crumb) return;
+    navScheme = next;
+    paintNav(!painted);
+    painted = true;
+  };
+
+  zones.forEach((z) => {
+    z.st = ScrollTrigger.create({
+      trigger: z.el,
+      start: z.el === footer ? () => `top ${(1 - FOOTER_THEME_AT) * footerSpan(footer)}px` : 'top top+=1',
+      end: 'bottom top+=1',
+      // After every pin above (Resources rebuilds its pin on a width change, later than these were created).
+      refreshPriority: -1,
+      onToggle: pick,
+    });
+  });
+  ScrollTrigger.addEventListener('refresh', pick);
+}
+
+// Logo eyes: both Lotties load at once and loop (the live files, 7 s); the hidden one is paused by paintNav().
+async function initNavLogo(root) {
+  const boxes = qa('nb-eyes', root).filter((b) => b.dataset.src);
+  if (!boxes.length) return;
+  const lottie = await loadLottie();
+  boxes.forEach((box) => {
+    const anim = lottie.loadAnimation({ container: box, renderer: 'svg', loop: true, autoplay: false, path: box.dataset.src });
+    navEyes.set(box, anim);
+    anim.addEventListener('DOMLoaded', () => {
+      if (+getComputedStyle(box).opacity > 0 && !reducedMotion()) anim.play();
+    });
+  });
+}
+
+/**
+ * Menu: the toggle (a <button>, aria-expanded) opens the full-screen menu with the live a-58 / a-88 keys, locks the page
+ * and paints the navbar dark; Esc and a card click close it. A card click then jumps to its section (our pin spacers are
+ * in the DOM, so the target lands at the top; the live anchor missed on 375). The wheel over the open menu scrolls the
+ * track sideways. Card Lotties load on the first intent to open (hover / focus of the toggle) and play on hover with a
+ * mouse on ≥992. Reduced motion: the cards do not slide.
+ */
+export function initNav() {
+  const root = q('nb');
+  const toggle = root && q('nb-toggle', root);
+  const menu = root && q('nb-menu', root);
+  if (!toggle || !menu) return;
+  const cards = q('nb-cards', menu);
+  const track = q('nb-track', menu);
+  const label = q('nb-toggle-label', toggle);
+  const labels = label ? [...label.parentElement.children] : []; // "menu" and "close" move together
+  const lineTop = q('nb-line-top', toggle);
+  const lineBottom = q('nb-line-bottom', toggle);
+  const links = cards ? [...cards.querySelectorAll('a[href^="#"]')] : [];
+  const rem = (v) => () => v * remPx();
+
+  initNavLogo(root);
+  gsap.set(menu, { display: 'none', opacity: 0 });
+  if (cards) gsap.set(cards, { x: reducedMotion() ? 0 : rem(MENU.cardsX) });
+
+  // Card Lotties, once. All ten files are fetched at once, but the SVGs are built one per frame in card order: built together
+  // they make one long task right in the middle of the opening slide.
+  const players = new Map(); // link → { anim, head, last }
+  let loading = null;
+  const loadCards = () =>
+    (loading ||= loadLottie().then(async (lottie) => {
+      const files = links.map((link) => {
+        const box = q('nb-card-lottie', link);
+        return box?.dataset.src ? fetch(box.dataset.src).then((r) => r.json()).catch(() => null) : null;
+      });
+      for (const [i, link] of links.entries()) {
+        const data = await files[i];
+        if (!data) continue;
+        await new Promise(requestAnimationFrame);
+        const anim = lottie.loadAnimation({ container: q('nb-card-lottie', link), renderer: 'svg', loop: false, autoplay: false, animationData: data });
+        players.set(link, { anim, head: { frame: 0 }, last: anim.totalFrames - 1 });
+        anim.goToAndStop(0, true);
+      }
+    }));
+  const hoverable = matchMedia('(min-width: 992px) and (pointer: fine)');
+  // Constant duration whatever the distance, like the IX2 tweens: in from frame 0 to the end, out from where it is to 0.
+  const playCard = (link, into) => {
+    const p = players.get(link);
+    if (!p) return;
+    if (into) p.head.frame = 0;
+    gsap.to(p.head, {
+      frame: into ? p.last : 0,
+      duration: NAV_CARD_RUN,
+      ease: 'none',
+      overwrite: true,
+      onUpdate: () => p.anim.goToAndStop(p.head.frame, true),
+    });
+  };
+
+  const html = document.documentElement;
+  const setOpen = (open) => {
+    if (open === navMenuOpen) return;
+    navMenuOpen = open;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Menu');
+    const slide = !reducedMotion();
+    if (open) {
+      loadCards();
+      html.style.overflow = 'hidden';
+      gsap.set(menu, { display: 'block' });
+      // From the start state every time, as the first (instant) group of a-58.
+      gsap.fromTo(menu, { opacity: 0 }, { opacity: 1, duration: MENU.fade, ease: 'none', overwrite: true });
+      if (cards && slide) gsap.fromTo(cards, { x: rem(MENU.cardsX) }, { x: 0, duration: MENU.cards, ease: 'power1.inOut', overwrite: true });
+    } else {
+      html.style.removeProperty('overflow');
+      gsap.to(menu, { opacity: 0, duration: MENU.fade, ease: 'none', overwrite: true, onComplete: () => gsap.set(menu, { display: 'none' }) });
+      if (cards && slide) gsap.to(cards, { x: rem(MENU.cardsX), duration: MENU.cards, ease: 'power1.inOut', overwrite: true });
+    }
+    gsap.to(labels, { yPercent: open ? -104 : 0, duration: MENU.label, ease: 'none', overwrite: true });
+    const line = (el, turn, y) =>
+      el && gsap.to(el, { rotation: open ? turn : 0, y: open ? rem(y) : 0, duration: MENU.lines, ease: 'none', overwrite: true });
+    line(lineTop, 45, MENU.lineY[0]);
+    line(lineBottom, -45, MENU.lineY[1]);
+    paintNav();
+  };
+
+  toggle.addEventListener('click', () => setOpen(!navMenuOpen));
+  ['pointerenter', 'focus'].forEach((t) => toggle.addEventListener(t, loadCards, { once: true }));
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !navMenuOpen) return;
+    setOpen(false);
+    toggle.focus();
+  });
+
+  links.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      let target = null;
+      try {
+        target = document.querySelector(link.getAttribute('href'));
+      } catch {}
+      if (!target) return setOpen(false);
+      // Webflow's own anchor scroll (delegated on document) would land the target below our fixed header, 80 px short.
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(false);
+      scrollTo(0, target.getBoundingClientRect().top + scrollY);
+    });
+    link.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && hoverable.matches && playCard(link, true));
+    link.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && hoverable.matches && playCard(link, false));
+  });
+
+  // The open menu owns the input: the wheel scrolls the track sideways (deltaMode lines / pages scaled to px), and
+  // neither the wheel nor touches reach the page's smooth scroll (the old Lenis, mobile normalizeScroll) underneath.
+  root.addEventListener(
+    'wheel',
+    (e) => {
+      if (!navMenuOpen) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (!track) return;
+      const k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? track.clientWidth : 1;
+      track.scrollLeft += (e.deltaX + e.deltaY) * k;
+    },
+    { passive: false }
+  );
+  ['touchstart', 'touchmove'].forEach((t) => root.addEventListener(t, (e) => navMenuOpen && e.stopPropagation(), { passive: true }));
 }
 
 /* ---------- boot ---------- */
@@ -1518,6 +1756,8 @@ function syncLegacy() {
 }
 
 async function init() {
+  // Before the preloader: the logo eyes load while it runs, the navbar enters in its phase 3.
+  initNav();
   await initPreloader();
   // Created in DOM order, so every trigger below a pin already knows its spacer.
   initHero();
@@ -1529,7 +1769,9 @@ async function init() {
   initLessonSchemes();
   initResources();
   initFooter();
-  // Next passes: Navigation, Sound, … then one refresh.
+  // Last: its triggers measure every pin above.
+  initTheme();
+  // Next passes: Sound, … then one refresh.
   syncLegacy();
   ScrollTrigger.refresh();
 }
