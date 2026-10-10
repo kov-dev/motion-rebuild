@@ -343,7 +343,7 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `lesson-cases`, `lesson-cases-head`, `lesson-cases-pin`, `lesson-cases-track`, `lesson-cases-overlay`; картка (компонент `lesson-card`):
 `lesson-card`, `lesson-card-media`, `lesson-card-video`, `lesson-card-poster`, `lesson-card-body`, `lesson-card-text`, `lesson-card-btn`,
 `lesson-card-icon`. Ролі `data-motion`: `lesson` (+ `data-theme="color"`), `lesson-visual` (+ `data-src`, `data-kind`), `lesson-cases`,
-`lesson-track`, `lesson-card`, `lesson-video` (+ `data-src`), `lesson-overlay`. Дерево — docs/sections/lessons.md «Збірка в копії».
+`lesson-cases-head` (сесія 20), `lesson-track`, `lesson-card`, `lesson-video` (+ `data-src`), `lesson-overlay`. Дерево — docs/sections/lessons.md «Збірка в копії».
 
 **Lessons: блоки easing і classic (створено, сесія 19):** схеми — `lesson-schemes`, `lesson-schemes-stage`, `lesson-schemes-track`,
 `lesson-scheme` (+ `is-active`), `lesson-scheme-lottie`, `lesson-scheme-label`, `lesson-schemes-arrows`, `lesson-schemes-arrow`,
@@ -380,6 +380,31 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-10 (сесія 20) — Lessons: код анімації, слайдер схем, медіа, підключення
+
+- **`initLessons()`** (`src/motion.js`): порти IX2 — Implementation ×8 (scrub 1, `gsap.matchMedia` ≥992 / 768–991 / ≤767, tiny-ключі
+  на 480–767 для всіх уроків), examples (рядок + зірки), демо (стан 0–5 за порогами → `is-active` / `is-on` / ширина лінії), фон
+  classic + `lesson-overlay`; позиції — `ix2Range()` за формулою прогресу IX2. `lazyVideo()` (src за смугою, play у в'юпорті, зміна смуги
+  міняє src), ліниві Lottie hero (`lottie_light`) і dimension-відео (HEVC + VP9). **`initLessonSchemes()`**: твін треку 0.6 с на кривій
+  Splide, `is-active` одразу, текст через 0.4 с, drag через `ScrollTrigger.observe` (пороги Splide 2), `disabled` на крайніх, одна Lottie
+  на схему. Деталі — docs/sections/lessons.md «Код анімації».
+- **Роль `lesson-cases-head`** додано в компонент `lesson-section` (елемент `…f061f74`) через MCP, прочитано назад.
+- **Перевірка:** `tools/record/lessons-run.mjs` (новий; impl на easing / fade / zoom, examples, демо, classic, слайдер, медіа) проти лайву
+  й ключів IX2, 1440 / 768 / 600 / 375 — **0 прапорців**: Δ ≤ 0.5 px, scale ≤ 0.001, `x%` ≤ 0.1, alpha ≤ 0.004, стани демо = лайву;
+  крива слайдера Δ ≤ 0.04 кроку, текст через 387–419 мс (лайв 409–415).
+- **Хостинг і Webflow:** коміт `7afb11e` → jsDelivr (200). Home head оновлено через MCP (`set_page_freeform_code`, прочитано назад),
+  `src/webflow/home-footer.html` — той самий sha. **Staging опубліковано агентом** 2 рази (задачі `7197021e…` — роль заголовка,
+  `9c9be796…` — новий модуль). `--live`: lessons-run 1440 / 375 — 0 прапорців; coexist-run 1440 / 375 — прелоадер 14.1 / 13.2 с,
+  старі pin-и Δ0 до й після проходу.
+- **Рішення агента:** (1) Splide рушав на ~28 мс пізніше кліку (2 кадри) — затримку не відтворюємо, крива й тривалість 1:1; (2) пороги демо
+  — середини 1 %-вікон IX2 (17 / 34.5 / 51 / 67.5 / 83.5 %); (3) вікна фону classic — за порядком у DOM (easing, delay), без нового атрибута;
+  (4) reduced-motion: без згладжування й декоративних рухів, трек карток їде (несе картки 2–3 у кадр), відео — перший кадр; (5) усі медіа
+  уроків грають лише в в'юпорті (на лайві 17 Lottie й усі 6 відео демо грали завжди).
+- **Пастка:** Finsweet `autovideo` (старий, на сторінці) на старті бере **всі** `<video>` і запускає ті, що в в'юпорті, — зокрема наші
+  стоси відео демо (на 768 / 600 грали всі 6). Тимчасовий `guardVideo()`: наше відео, яке код не просив грати, ставить себе на паузу.
+  Побічно в консолі `play() request was interrupted` — необроблені проміси autovideo; зникне разом зі старим скриптом.
+- **Не зроблено:** тема навбара за уроком (`data-theme`) — прохід Navigation; id `<урок>-next` → справжні — з видаленням старих уроків.
 
 ### 2026-10-10 (сесія 19) — Lessons: блоки easing (схеми, examples, демо) і classic у слоти, звірка
 
