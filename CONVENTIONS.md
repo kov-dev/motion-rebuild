@@ -21,7 +21,7 @@
 | Копія: CMS templates | Lessons `6ac8e84728488a6bd334f2e7`, Resources `6ac8e84728488a6bd334f2e8`, Courses `6ac8e84728488a6bd334f2e6` |
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
-| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) · `lesson-section` `d5e7e221-35f7-91c5-dee2-9f546f061f62` і `lesson-card` `ced33071-48b2-67a1-9aa0-8c8ef29e9556` (група Lessons, сесія 18) · `lesson-schemes` `351eeca4-68ac-7398-7bde-b899033e7b95`, `lesson-examples` `9ddff661-a2e2-e75d-4cb9-525dcb9f2dcd`, `lesson-demo` `92eadc1c-5b69-d7bc-a693-ad3bc52ee46c` (слот Extras easing), `lesson-classic` `f42e65c0-edaa-a1e0-2c1d-ec0fecccf5d4` (слот After easing і delay; варіант delay `6e0b570a-f804-b832-c7ae-16cc31f718d8`) — сесія 19 · `site-footer` `4ecddcd8-b434-4aca-e41a-0503bfda4bd9` (група System, без пропсів) — сесія 23 |
+| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) · `lesson-section` `d5e7e221-35f7-91c5-dee2-9f546f061f62` і `lesson-card` `ced33071-48b2-67a1-9aa0-8c8ef29e9556` (група Lessons, сесія 18) · `lesson-schemes` `351eeca4-68ac-7398-7bde-b899033e7b95`, `lesson-examples` `9ddff661-a2e2-e75d-4cb9-525dcb9f2dcd`, `lesson-demo` `92eadc1c-5b69-d7bc-a693-ad3bc52ee46c` (слот Extras easing), `lesson-classic` `f42e65c0-edaa-a1e0-2c1d-ec0fecccf5d4` (слот After easing і delay; варіант delay `6e0b570a-f804-b832-c7ae-16cc31f718d8`) — сесія 19 · `site-footer` `4ecddcd8-b434-4aca-e41a-0503bfda4bd9` (група System, без пропсів) — сесія 23 · `site-nav` `daeb550f-d5e5-bb1e-57c2-ce20de27307f` (група System, без пропсів), інстанс на Home `59d41228-6445-8433-dfa4-e045e757e119` — другий у Body після `styles-rem` (сесія 26) |
 | Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) · `section-lessons` `7ed4e6ea-6542-fa7a-6e65-0defdfa4304c` (одразу після `section-techniques`, 8 інстансів `lesson-section`, id `<урок>-next`) · `section-resources` `3bac52ac-b16e-2485-d6be-b553324fcfc3` (одразу після `section-lessons`, id `resources-next`; Collection List courses `898bc600-2573-264c-dec9-67b335000f9b`, sources `8b16de03-df05-b6ec-1acc-29ea5180e0eb`) · інстанс `site-footer` `0b1d1fec-de0e-2091-a1a9-e96419bad760` (одразу після `section-resources`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
@@ -368,8 +368,16 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 читає блок E `script.v33`. Ролі `data-motion`: `resources`, `res-clouds`, `res-cloud`, `res-pin`, `res-track`, `res-shutter`, `res-stack`, `res-tab`,
 `res-count`, `res-lists`, `res-list` (+ `data-list`), `res-item`, `res-name`, `res-image`, `res-overlay`. Дерево — docs/sections/resources.md «Збірка в копії».
 
+**Navigation (створено, сесія 26):** компонент `site-nav` — `site-nav` (режим `dark`), `nb-bar`, `nb-panel`, `nb-start`, `nb-logo`, `nb-eye-bg`
+(+ `is-left` / `is-right`), `nb-eyes` (+ `is-light`), `nb-pill`, `nb-pill.nb-toggle`, `nb-crumbs`, `nb-crumb` (+ `is-easing` … `is-zoom`, кольори
+`extra-lesson-*`), `nb-toggle-label-wrap`, `nb-toggle-label` (+ `is-close`), `nb-toggle-icon`, `nb-toggle-line`, `nb-menu`, `nb-scroller`, `nb-track`,
+`nb-cards`, `nb-card`, `nb-card-lottie`, `nb-bottom`, `nb-credit`, `nb-link`, `nb-socials`, `nb-social`, `nb-social-icon`. Префікс `nb-*`, бо старі `.nav*`,
+`.toggle-*`, `.breadcrumb-*` читає `script.v33`. Ролі `data-motion`: `nb`, `nav` (на `nb-panel`, в'їзд), `nb-eyes` (+ `data-eyes`, `data-src`), `nb-crumbs`,
+`nb-crumb` (+ `data-crumb`), `nb-toggle`, `nb-toggle-label`, `nb-line-top` / `nb-line-bottom`, `nb-menu`, `nb-track`, `nb-cards`, `nb-card-lottie` (+ `data-src`).
+Пілюлі — літерал у `nb-pill` (Plain 16/16, ls −.005rem), окремого текстового стилю немає. Дерево — docs/sections/navigation.md «Збірка в копії».
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
-`res-*` (Resources), `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
+`res-*` (Resources), `ft-*` (футер), `nb-*` (навбар), `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
 
 **Стани й маркери:**
@@ -387,6 +395,31 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-10 (сесія 26) — Navigation: компонент `site-nav`, звірка
+
+- **Resources Sort:** `get_settings` на courses — досі `sort: []`; staging заради цього не публікувався, `resources-compare` не проганявся.
+  **Чекає дії користувача** (Designer → `res-list` courses → Sort → Created On, Oldest first).
+- **Figma** (субагент sonnet): вузол користувача `4616:22254` — уся секція `menu` (5 кадрів 1440, 768, 375, кадр-перехід); намальовано 5 з 10
+  карток, ховер-стани з кольоровою заливкою (на лайві це Lottie), «Made by» + spotify. Заміри лайву нічим не спростовані → дописано в
+  navigation-figma.md, FIGMA.md; SVG — `reference/figma-nav/`. Кадр-перехід `1815:34902` аналога на лайві не має — не будуємо.
+- **Верстка:** класи створено `data_style_tool` (лонгхенди бордерів і радіусів, змінні через `variable_as_value`, смуги `medium` / `tiny`), розмітку —
+  `whtml_builder` без CSS, тогл — `element_builder` (DOM `button`), іконки — HtmlEmbed. Компонент `site-nav` (System) другим у Body. Дерево й
+  відхилення від плану — navigation.md «Збірка в копії». `data-theme`: `section-resources` = light, `site-footer` = dark.
+- **Head Home:** новий `<style>` з `src/legacy-hide.css` (`.navigation { display: none !important }`) після preloader.css; `set_page_freeform_code`,
+  прочитано назад; `src/webflow/home-head.html` синхронізовано з Webflow (тепер разом із рядком модуля, sha `99028b6` без змін).
+- **Звірка:** `tools/record/nav-compare.mjs` (новий) — 1440 / 768 / 600 / 375: **53 / 53, Δ ≤ 0.1 px, 0 прапорців**. Перший прогін: `nb-bottom` поза
+  скролером (на 375 −272 px) і висота карток (Δ1.6 на 600) → виправлено.
+- **Staging опубліковано агентом** 2 рази (задачі `30067ebc…`, `991fdd88…`).
+- **Рішення агента:** (1) роль `nav` на внутрішній `nb-panel` (в'їзд −200 % від висоти панелі, як `.nav-panels`); (2) `data-eyes` замість
+  `data-theme` на лого; (3) картка = `aspect-ratio 282/543` + `padding-bottom 7px` (лайв: inline SVG Lottie + зазор рядка); (4) пілюлі — літерал,
+  без текстового стилю; (5) `nb-crumb` — окремий клас, не комбо на `nb-pill`.
+- **Пастки MCP:** (1) `whtml_builder` перетворює `<button>` на **Link** (`<a type="button">`) — кнопку робити `element_builder` типу DOM з
+  `dom_tag: button` (діти — DOM `span` з `set_text`); (2) `<a href="#…">` у `whtml_builder` стає Link **без** налаштування `link`, лише з атрибутом
+  `href` — ставити `link` (`static_link` url `#…`) і чистити атрибут, як для зовнішніх; (3) `aspect-ratio` через `update_style` зберігається
+  (`282 / 543`).
+- **Стан staging:** новий навбар без коду — очей лого й Lottie карток немає, меню не відкривається, тема не перемикається (старий схований).
+  Закривається `initNav()` / `initTheme()`.
 
 ### 2026-10-10 (сесія 25) — Resources Sort, прохід Navigation: Figma, лайв-зонд, план
 

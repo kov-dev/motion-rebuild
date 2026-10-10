@@ -1,0 +1,11 @@
+/*
+  legacy-hide.css — hides old Home blocks that a rebuilt component has replaced
+  while both still live on the page. Canonical source; Webflow holds a copy in the
+  Home page-level head, after preloader.css. The hidden elements stay in the DOM
+  because script.v33 still queries them; delete each rule together with its block.
+*/
+
+/* Old navbar (.navigation w-nav) — replaced by the site-nav component (session 26). */
+.navigation {
+  display: none !important;
+}

@@ -162,3 +162,59 @@ header.site-nav  data-motion="nb"  semantic: dark (на класі)   fixed top 
 - `nav-compare.mjs`: статика `site-nav` проти старого `.navigation` на тій самій staging-сторінці (закрито й відкрито, 4 смуги).
 - `nav-run.mjs`: тема по секціях (послідовність таблиці вище, нові секції на staging), семпли меню проти `nav-menu-*.txt`, hover-кадри,
   колесо, Esc, клік по картці → ціль у top ±2 px.
+
+## Збірка в копії (сесія 26, 2026-10-10)
+
+Компонент **`site-nav`** `daeb550f-d5e5-bb1e-57c2-ce20de27307f` (група System, без пропсів). Інстанс на Home
+`59d41228-6445-8433-dfa4-e045e757e119` — другий у Body, одразу після `styles-rem`, перед `section-preloader`. Старий `.navigation`
+лишається в DOM (його читає `script.v33`), схований правилом `src/legacy-hide.css` у head Home.
+
+```
+header.site-nav  data-motion="nb"                    fixed top/left 0, w 100 %, z 14, pointer-events none, semantic: dark, color foreground
+├─ div.nb-bar                                         relative, z 2; padding-top/left/right .34 / ≤991 .24 / ≤479 .22rem
+│  └─ div.nb-panel  data-motion="nav"                  flex space-between, align start (≤479 stretch) — роль в'їзду heroEntrance() (y −200 % від
+│     │                                                 висоти панелі, як .nav-panels лайву; тому роль не на nb-bar з падінгами)
+│     ├─ div.nb-start                                  flex, gap .08rem
+│     │  ├─ a.nb-logo  href="/" aria-label            .9 × .44rem (≤479 h .35), radius .24rem, pointer-events auto
+│     │  │  ├─ div.nb-eye-bg.is-left / .is-right       Ø.4rem, top .02, left|right .02rem, bg semantic bg
+│     │  │  ├─ div.nb-eyes  data-motion="nb-eyes" data-eyes="dark"  data-src=…f4bd_header_logo_big_pupils.json   (absolute 0 0, .9 × .44, z 1)
+│     │  │  └─ div.nb-eyes.is-light  data-eyes="light"  data-src=…f4bc_header_logo_tech.json                     (opacity 0)
+│     │  ├─ a.nb-pill  href="/"  «motion.ed»
+│     │  └─ div.nb-crumbs  data-motion="nb-crumbs" aria-hidden   flex column, align start; ≤479 none
+│     │     └─ div.nb-crumb.is-<lesson>  data-motion="nb-crumb" data-crumb="<lesson>" ×8   absolute 0 0, opacity 0 (is-easing — relative)
+│     └─ button.nb-pill.nb-toggle  type=button data-motion="nb-toggle" aria-expanded=false aria-controls="nb-menu" aria-label="Menu"
+│        ├─ span.nb-toggle-label-wrap  (overflow hidden; ≤479 none)
+│        │  ├─ span.nb-toggle-label  data-motion="nb-toggle-label"  «menu»
+│        │  └─ span.nb-toggle-label.is-close  «close»  (absolute top 104 %)
+│        └─ span.nb-toggle-icon aria-hidden  > span.nb-toggle-line ×2 (data-motion nb-line-top / nb-line-bottom)  .14 × .03rem, bg foreground
+└─ div.nb-menu  id="nb-menu" data-motion="nb-menu"     display none, fixed 0 0, 100 % × 100vh, z 1, bg neutral-1000, color neutral-0
+   └─ div.nb-scroller                                  relative, flex, align center, 100vh, overflow auto; ≤479 column, align start, gap .4, pt .8rem
+      ├─ div.nb-track  data-motion="nb-track"           w 100 %, max-w 100vw, overflow auto
+      │  └─ nav.nb-cards  data-motion="nb-cards" aria-label="Lessons"   flex, gap .4 (≤479 .3), w max-content, padding .16 .34 0 .34 (≤479 left .25)
+      │     └─ a.nb-card  href="#…" aria-label ×10      w 2.8rem (≤479 2.06), padding-bottom 7px, flex none
+      │        └─ div.nb-card-lottie  data-motion="nb-card-lottie" data-src=<…_menu.json> aria-hidden   w 100 %, aspect-ratio 282 / 543
+      └─ div.nb-bottom                                  absolute bottom .34rem (від скролера, як nav-absolute від sticky-container), row
+         │                                              space-between, px .34; Inktrap 16/28, ls −.0048rem; ≤479 relative, column-reverse, center, gap .24
+         ├─ p.nb-credit  «Site by » + a.nb-link «Zajno» (zajno.com, нова вкладка, rel noopener, underline)
+         └─ ul.nb-socials aria-label="Social"  gap .16  > li > a.nb-social (нова вкладка, aria-label) > HtmlEmbed.nb-social-icon (SVG 24 лайву)
+```
+
+- **Пілюлі:** `nb-pill` — літерал (Plain `font-display` 16/16, ls −.005rem, padding .14/.16, radius .26rem, border `border-1` +
+  `semantic border`, bg `semantic bg`, колір `semantic foreground`). Окремого текстового стилю не створено: споживач один (`nb-pill`),
+  `text-label` (Inktrap) не підходить. Крихти — окремий клас `nb-crumb` з тими самими літералами, але кольори `neutral-1000` + комбо
+  `is-<lesson>` → `extra-lesson-*` (не комбо на `nb-pill`, щоб не було 3-рівневих комбо).
+- **Відхилення від плану сесії 25:** (1) додано `nb-panel` для ролі `nav`; (2) лого — атрибут `data-eyes`, а не `data-theme`
+  (`initTheme()` збирає всі `[data-theme]` як секції); (3) `nb-bottom` усередині `nb-scroller` (на лайві `nav-absolute` усередині
+  `sticky-container`; на ≤479 він у потоці колонки під треком); (4) висота картки — не 5.46rem, а як на лайві: SVG Lottie inline =
+  ширина × 543/282 + 7 px зазору рядка (14/20 px, однаковий на всіх смугах) → `aspect-ratio` + `padding-bottom: 7px`; (5) усі 8 крихт
+  `opacity 0` (як лайв), контейнер видимий.
+- **SVG соцмереж** меню — інші, ніж у футері (24×24): `reference/nav-svgs.json` (з лайв-HTML); id `clipPath` з суфіксом `-nb`.
+  LinkedIn на лайві `fill="white"` (не `currentColor`) — лишено 1:1.
+- **`data-theme`:** `section-resources` → `light`, корінь `site-footer` → `dark` (решта секцій уже мали).
+- **Звірка:** `tools/record/nav-compare.mjs` — новий vs старий навбар на staging (обидва скрипти заблоковано, старий розкрито CSS, IX2-трансформи
+  скинуто): закрито (панель, лого, очі, кола, motion.ed, 8 крихт, тогл, лейбли, лінії) і відкрито (меню, скролер, трек + scrollWidth, 10 карток,
+  нижній рядок, Zajno, 5 соцмереж + іконки), шрифт / колір / регістр / текст / рамка / href / target. 1440 / 768 / 600 / 375: **53 / 53, Δ ≤ 0.1 px,
+  0 прапорців** (перший прогін зловив `nb-bottom` поза скролером і висоту карток). Не прапорці: фон пілюль (статичні старі прозорі, тему малює
+  код), висота кореня (старий 1rem з margin −1rem) і посилань соцмереж (старі на 4 px вищі за іконку).
+- **Стан staging після сесії:** новий навбар видно, але без коду — очі лого й Lottie карток не вантажаться, тогл не відкриває меню, тема завжди dark.
+  Закривається `initNav()` / `initTheme()` (наступна сесія).

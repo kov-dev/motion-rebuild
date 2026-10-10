@@ -76,3 +76,18 @@ html.is-preloading [data-motion="preloader-word"] {
 /* Hero start states for phase 3 are set by gsap.set() in initPreloader() while the
    overlay still covers the page, so they are not duplicated here. */
 </style>
+<style>
+/*
+  legacy-hide.css — hides old Home blocks that a rebuilt component has replaced
+  while both still live on the page. Canonical source; Webflow holds a copy in the
+  Home page-level head, after preloader.css. The hidden elements stay in the DOM
+  because script.v33 still queries them; delete each rule together with its block.
+*/
+
+/* Old navbar (.navigation w-nav) — replaced by the site-nav component (session 26). */
+.navigation {
+  display: none !important;
+}
+</style>
+
+<script type="module" src="https://cdn.jsdelivr.net/gh/kov-dev/motion-rebuild@99028b6e73571e51023e5ed2d634c1cbe3fa590f/src/motion.js"></script>
