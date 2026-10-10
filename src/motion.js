@@ -1279,6 +1279,183 @@ export function initLessonSchemes() {
   go(0, { instant: true });
 }
 
+/* ---------- resources (script.v33 block E, IX2 e-664; docs/sections/resources.md «План анімації») ---------- */
+
+const RESOURCES_SCRUB = 3;
+// IX2 e-664 (≥992 only): smoothing 90, start 20 % before the pin top enters, keys 0 → 40 % of the progress.
+const RES_CLOUDS_SCRUB = 1;
+const RES_CLOUDS_Y = [1.2, 1, 2]; // rem: second, third, fourth cloud (the first one stands)
+const RES_STACK_TURN = [0, -3, -6]; // deg, the rotation cycle of the images pushed onto the stack
+
+/**
+ * Resources: one pin over three phases, as the live block E (but created at once, not lazily when Lessons reach the
+ * top). Phase lengths are the live whole percents of total = 1.5·vw + track shift + lists height: the shutters slide
+ * right and uncover the words (stagger 1/4), the track runs left to the lists, the lists scroll up under the tabs.
+ * The tab follows the list under the bottom of the tabs bar. Clouds above the section drift on ≥992 only.
+ */
+export function initResources() {
+  const pin = q('res-pin');
+  const track = pin && q('res-track', pin);
+  const lists = pin && q('res-lists', pin);
+  if (!track || !lists) return;
+  const sec = pin.closest('section') || pin.parentElement;
+  const shutters = qa('res-shutter', pin);
+  const tabs = qa('res-tab', pin);
+  const tabsBar = tabs[0]?.parentElement;
+  const listEls = qa('res-list', lists);
+  const rem = (v) => () => v * remPx();
+
+  // Counters: the number of rows in each list (the markup carries a fallback).
+  listEls.forEach((l, i) => {
+    const count = tabs[i] && q('res-count', tabs[i]);
+    if (count) count.textContent = qa('res-item', l).length;
+  });
+
+  let activeTab = 0;
+  const setTab = (i) => {
+    activeTab = i;
+    tabs.forEach((t, j) => t.classList.toggle('is-active', j === i));
+  };
+  const syncTab = () => {
+    if (!tabsBar) return;
+    const edge = tabsBar.getBoundingClientRect().bottom;
+    listEls.forEach((l, i) => {
+      const r = l.getBoundingClientRect();
+      if (edge >= r.top && edge < r.bottom && activeTab !== i) setTab(i);
+    });
+  };
+
+  const mm = gsap.matchMedia();
+  const setup = () =>
+    mm.add(
+      // Every band is listed: matchMedia() skips the callback when no condition matches.
+      { large: '(min-width: 992px)', any: '(min-width: 0px)', mobile: '(max-width: 479px)', reduce: '(prefers-reduced-motion: reduce)' },
+      ({ conditions: c }) => {
+        // Measured once per build (a width change rebuilds, see below): the phase lengths are whole percents.
+        const vw = innerWidth;
+        const arrows = 1.5 * vw;
+        const shift = Math.max(0, track.offsetWidth - vw);
+        const listsH = lists.getBoundingClientRect().height;
+        const total = arrows + shift + listsH;
+        const pA = Math.trunc((arrows / total) * 100);
+        const pT = Math.trunc((shift / total) * 100);
+        const pL = Math.trunc(((2 * listsH) / total) * 100);
+
+        gsap
+          .timeline({
+            defaults: { ease: 'none' },
+            // On the timeline, not the trigger: the tab follows the scrubbed lists, which lag behind the scroll.
+            onUpdate: syncTab,
+            scrollTrigger: {
+              trigger: pin,
+              pin: true,
+              anticipatePin: 1,
+              start: 'top top',
+              end: `+=${total}`,
+              // Reduced motion: the pin stays (the track is reachable only through it), without the catch-up.
+              scrub: c.reduce ? true : RESOURCES_SCRUB,
+            },
+          })
+          .to(shutters, { x: (c.mobile ? 0.78 : 0.84) * vw, duration: pA, stagger: pA / 4 })
+          .to(track, { x: -shift, duration: pT })
+          .to(lists, { yPercent: -100, duration: pL });
+
+        const clouds = qa('res-cloud', sec);
+        if (c.large && !c.reduce && clouds.length) {
+          // IX2 progress: 0 = pin top at 1.2·vh, 1 = pin bottom at the top; the keys end at 40 % of it.
+          const tl = gsap.timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: {
+              trigger: sec,
+              start: () => `top ${1.2 * innerHeight}px`,
+              end: () => `top ${1.2 * innerHeight - 0.4 * (1.2 * innerHeight + pin.offsetHeight)}px`,
+              scrub: RES_CLOUDS_SCRUB,
+              invalidateOnRefresh: true,
+            },
+          });
+          clouds.forEach((cloud, i) => RES_CLOUDS_Y[i] && tl.fromTo(cloud, { y: 0 }, { y: rem(RES_CLOUDS_Y[i]), duration: 1 }, 0));
+        }
+      }
+    );
+  setup();
+
+  // The live script measured once at load; we rebuild when the width changes (a mobile toolbar only changes height).
+  let width = innerWidth;
+  let timer = 0;
+  addEventListener('resize', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (innerWidth === width) return;
+      width = innerWidth;
+      mm.revert();
+      setup();
+      ScrollTrigger.refresh();
+    }, 200);
+  });
+
+  initResourcesStack(pin, listEls);
+}
+
+/**
+ * Hover stack: each row carries its own CMS image (so a row always shows its picture — the live images list was
+ * reverse-sorted); they move into the stack here. Entering a row makes it active and pushes its image: rotation
+ * 0 → −3 → −6 → 0 …, z-index +1, at most three images (the oldest fades out). Entering a row already in the stack
+ * only lifts it. Switching lists starts a fresh stack (live indices were global across both lists). Mouse-out keeps
+ * the state. Opacity 0.4 s and the name shift 0.4 / 0.2 s are the class transitions.
+ */
+function initResourcesStack(pin, listEls) {
+  const stackEl = q('res-stack', pin);
+  if (!stackEl) return;
+  const rows = listEls.map((l) => qa('res-item', l));
+  const images = rows.map((list) => list.map((row) => q('res-image', row)));
+  images.flat().forEach((img) => img && stackEl.append(img));
+
+  let stack = [];
+  let turn = 0; // index into RES_STACK_TURN of the last pushed image
+  let z = 1;
+  let prevList = 0;
+  const nameOf = (row) => q('res-name', row);
+
+  const activate = (li, ri) => {
+    rows.flat().forEach((r) => nameOf(r)?.classList.remove('is-active'));
+    nameOf(rows[li][ri])?.classList.add('is-active');
+    const img = images[li][ri];
+    if (!img) return;
+    if (li !== prevList) {
+      stack.forEach((s) => s.classList.remove('is-active'));
+      stack = [];
+      turn = RES_STACK_TURN.length - 1; // the first image of a fresh stack stands straight
+    }
+    let push = true;
+    if (stack.includes(img)) {
+      stack.splice(stack.indexOf(img), 1);
+      push = false;
+    } else {
+      turn = (turn + 1) % RES_STACK_TURN.length;
+    }
+    stack.push(img);
+    z++;
+    if (stack.length > 3) stack.shift().classList.remove('is-active');
+    if (push) {
+      gsap.set(img, { rotation: reducedMotion() ? 0 : RES_STACK_TURN[turn] });
+      img.classList.add('is-active');
+    }
+    img.style.zIndex = z;
+    prevList = li;
+  };
+
+  // Start: the first row and its image, straight.
+  const first = images[0]?.[0];
+  if (first) {
+    first.classList.add('is-active');
+    stack = [first];
+  }
+  if (rows[0]?.[0]) nameOf(rows[0][0])?.classList.add('is-active');
+  if (reducedMotion()) images.flat().forEach((img) => img && (img.style.transition = 'none'));
+
+  rows.forEach((list, li) => list.forEach((row, ri) => row.addEventListener('pointerenter', () => activate(li, ri))));
+}
+
 /* ---------- boot ---------- */
 
 // Transition only: the old script.v33 keeps its own GSAP + ScrollTrigger for the sections below ours.
@@ -1307,7 +1484,8 @@ async function init() {
   initTechniques();
   initLessons();
   initLessonSchemes();
-  // Next passes: initResources(), … then one refresh.
+  initResources();
+  // Next passes: Footer, Navigation, … then one refresh.
   syncLegacy();
   ScrollTrigger.refresh();
 }
