@@ -388,6 +388,29 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 
 ## Журнал
 
+### 2026-10-10 (сесія 25) — Resources Sort, прохід Navigation: Figma, лайв-зонд, план
+
+- **Resources Sort:** MCP (`get_settings`) — `sort: []` **на обох** списках: користувач прибрав Sort і з Sources, і з courses. Staging
+  опубліковано агентом (задача `29f85b8e…`), `resources-compare` — **196 / 197 × 4**, тепер ORDER **list1** (курси знову в порядку
+  «нові спершу»), Sources ✅. Спроба повернути Sort на courses через MCP (`static_json` у форматі, що його читав `get_settings` у
+  сесії 23: `[{fieldSlug: created-on, direction: ascending}]`) → «Unknown field 'created-on'» — **потрібна дія користувача:** Designer →
+  Collection List `res-list` (courses) → Sort → Created On, Oldest first; Sources не чіпати.
+- **Figma** (субагент sonnet) → `docs/sections/navigation-figma.md`: символ `Header` 1372×44 (mainComponent MCP не віддає; інстанси
+  `788:28217`, `784:27394`, `1553:20702`, `1221:34843`), крихта — окремий шар `1553:20705`, меню намальоване частково (3 / 5 / 3 картки з
+  10), Sound `675:12444`. Окремого посилання від користувача немає — узято кадри меню з таблиці Full design.
+- **Лайв-зонд** `tools/record/nav-probe.mjs` (новий: struct / menu / scan / edge) + IX2 `a-58` / `a-88` / `a-60` / `a-61` з JSON →
+  `docs/sections/navigation.md`. Знахідки: пілюлі — **Plain** 16/16 на всіх смугах (не Inktrap, `text-label` не підходить); уся картка
+  меню — Lottie 280×546 (≤479 206×404), 40 кадрів, hover 0.67 с; меню: opacity 0.2 с, картки x 4rem → 0 0.6 с `power1.inOut`, лейбл
+  −104 % 0.3 с, лінії ±45° 0.2 с; `logo-eye-menu` ніколи не показується; тема: dark (hero, intro, techniques, демо easing, футер) /
+  light (interactive, resources) / color (уроки + крихта). **Баги лайву:** навбар темніє посеред світлого pin-а Resources (1440 ~39–44 %,
+  768 ~96 %, 375 після pin-а) через ручний `resourcesPinLen`; на 375 клік по картці меню приземляється не туди.
+- **План:** компонент `site-nav` (System, префікс `nb-*`, `<header>` + `<button>` тогл з `aria-expanded`, 8 крихт, 10 карток-посилань з
+  `aria-label`), тема — твін двох змінних `semantic` на корені; код `initTheme()` (найглибший активний `[data-theme]`) + `initNav()`
+  (меню, Lottie ліниво при першому відкритті, колесо, Esc, скрол до цілі). Старий `.navigation` на час переходу — `display:none` у head.
+- **Рішення агента:** (1) тема футера стартує, коли `res-overlay` ≥ 50 %, на всіх смугах (виправлення бага, не 1:1 з лайвом);
+  (2) `logo-eye-menu` не переносимо; (3) Lottie карток ліниво, не eager.
+- Webflow не змінювався (лише публікація staging).
+
 ### 2026-10-10 (сесія 24) — Footer: `initFooter()`, `footer-run.mjs`, підключення
 
 - **Код:** `initFooter()` (після `initResources()`): тригер `site-footer`, start `top (vh + 0.15·h)px`, end `top top`, scrub 1; `res-overlay`
