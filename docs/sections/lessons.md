@@ -316,3 +316,55 @@ lesson-section  (компонент; <section> + id-проп; data-motion="lesso
   твіна, Lottie на першому кадрі.
 - **Перевірка**: `lessons-run.mjs` за зразком techniques-run — точки прогресу на implementation (3 уроки), examples, демо, classic
   проти лайву й моделі IX2, 3 смуги. Плюс таймінг кліку слайдера (кадри через 50 мс) проти `lessons-splide-*.txt`.
+
+## Збірка в копії (сесія 18, 2026-10-10, головна сесія)
+
+Home копії, `main` → **`section-lessons`** (`7ed4e6ea-6542-fa7a-6e65-0defdfa4304c`, `div`) одразу після `section-techniques`,
+перед старими секціями. У ній 8 інстансів компонента **`lesson-section`** (`d5e7e221-35f7-91c5-dee2-9f546f061f62`, група
+Lessons) з варіантами easing (база) … zoom. Старий `#lessons` лишається до видалення старих секцій. Тому інстанси мають
+тимчасові id `<урок>-next` (проп `Section id`), справжні `easing` … `zoom` переходять разом із видаленням старих уроків.
+
+```
+section.lesson-section   id={Section id}  data-motion="lesson" data-theme="color"   variant → bg extra-lesson-*, pt
+├─ div.lesson-hero
+│  ├─ div.lesson-visual-row  aria-hidden                     flex space-between, overflow hidden, h 2.78 / 3 / 1.8
+│  │  ├─ div.lesson-star.is-left                              .8 / .4 / .24, left −.4 / −.2 / −.12, star-lesson.svg
+│  │  ├─ div.lesson-visual  data-motion="lesson-visual" data-src={Visual src} data-kind={Visual kind}   100% × 2rem
+│  │  └─ div.lesson-star.is-right
+│  └─ div.lesson-head                                         flex, mt 1.2 / .58, px 1.32 / .59 / .22; tiny column gap .16
+│     ├─ div.lesson-heading                                   flex
+│     │  ├─ div.lesson-number > div.heading-md {Number}       w 1.18 / .42 / .34
+│     │  └─ div.lesson-title > h2.heading-md {Title}          w 4.9 / 2.48, mr .8 / .5
+│     └─ div.lesson-desc > p.body-md {Description}            tiny pl .34
+├─ slot «Extras»  (порожній; easing: схеми, examples, демо — лише компонентами)
+├─ div.lesson-cases  data-motion="lesson-cases"              flex column, h 300vh / 200vh / 300vh (zoom: 400vh)
+│  ├─ div.lesson-cases-head > h3.heading-xl «Implementation examples»   pt 1.8 / 3.4 / 2, pb .6 / .6 / .4
+│  ├─ div.lesson-cases-pin                                    sticky top 1.02 / 1.94 / 1.6, h 100vh / auto, mb −100vh
+│  │  │                                                         (zoom: mb 0), pb 0 / 1 / .01, overflow hidden
+│  │  └─ div.lesson-cases-track  data-motion="lesson-track"   flex, ml .34 / .24, gap .55 / .4 / .2
+│  │     └─ lesson-card ×3 (компонент, пропси прив'язані до Card N *)
+│  └─ div.lesson-cases-overlay  data-motion="lesson-overlay" aria-hidden   abs inset 0 (для фону classic)
+└─ slot «After»  (порожній; easing, delay: lesson-classic)
+```
+
+**`lesson-card`** (`ced33071-48b2-67a1-9aa0-8c8ef29e9556`): `a.lesson-card` {Link, нова вкладка} `data-motion="lesson-card"` →
+`div.lesson-card-media` (`video.lesson-card-video` `data-motion="lesson-video"` `data-src`={Video src}, muted loop playsinline
+preload=none, + `img.lesson-card-poster` {Poster}, alt "") → `div.lesson-card-body` (`div.lesson-card-text > p.body-sm` {Text},
+`div.lesson-card-btn` «View» + `lesson-card-icon` (ембед SVG стрілки, `currentColor`)). Hover — `box-shadow inset .01rem`
+(рамка 2 px, як на лайві), підкреслення «View» — правило в `styles-rem`.
+
+- **Пропси `lesson-section`** (18): `Section id` (id), `Number`, `Title`, `Description` (textContent, multiline; `\n` → `<br>`),
+  `Visual src`, `Visual kind` (`lottie` | `video` — лише dimension), `Card 1–3 link / text / video / poster`. Плюс `Variant`.
+  Дані всіх 8 уроків (з лайву) — [lessons-props.json](lessons-props.json). Атрибути `data-src` / `data-kind` прив'язано до
+  string-пропсів через `set_settings` → `attributes` з `value_binding`, тож запасний варіант (атрибути кодом) не знадобився.
+- **Варіанти**: база `easing` (pt 1.18 / .75 / 1), решта 7 — `background-color` + pt .88 на всіх смугах; `zoom` ще `lesson-cases`
+  400vh і `lesson-cases-pin` mb 0 (лайв `is-last`).
+- **Тексти з лайву 1:1**, зокрема картка 3 у delay веде на PalmPalm, як на лайві. Заголовки в title case з uppercase-стилем,
+  delay — `Offset \nand Delay` (пробіл перед `<br>`, щоб скрінрідер не злив слова).
+- **Текстові стилі (глобально):** `heading-md` tab lh **1.35**, mob lh **1.1111** / ls **−0.0389em**; `body-md` tab lh **1.7143**;
+  `heading-xl` = точні пропорції `.h3`: **1.0286 / −0.0357em**, tab **1.1282 / −0.0308em**, mob **1.1 / −0.03em** (було 1.03 /
+  −0.036em, 1.13 / −0.03em — Δ 0.2–0.4 px; Hero теж на `heading-xl`, зміна в бік лайву).
+- **Звірка:** `tools/record/lessons-compare.mjs` — 8 нових інстансів проти старих уроків на staging, 39–40 елементів × 4 смуги
+  (1440 / 768 / 600 / 375): **0 прапорців**, Δ ≤ 0.3 px (600 — ≤ 1 px, округлення offset). Стартовий зсув карток IX2 (y 1.5 /
+  3rem) віднімається — у нас його ставить код.
+- **Без коду** hero-візуал порожній (Lottie вантажить `initLessons()`), відео карток стоять на постері.

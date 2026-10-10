@@ -42,11 +42,11 @@
 - [x] Інстанс `styles-rem` на Home — першим у Body (2026-10-09). Старий `main-css` лишається до останньої старої секції (рішення сесії 8)
 - [ ] Перевірити tablet/mobile-режими `type` на staging (дозвіл на публікацію є, сесія 9)
 - [ ] Структурні й базові класи (`btn`, `ball*`, `section-*` …) — у проходах секцій, не наперед
-- [ ] Компоненти: navbar, footer, lesson-section (8 уроків → 1 компонент з пропсами), lottie-card
+- [ ] Компоненти: navbar, footer, ~~lesson-section~~ ✅ (сесія 18, + `lesson-card`), lottie-card
 - [x] Каркас `src/motion.js` (ES-module, GSAP 3.13.0 піновано) + `preloader-gate.js` + `preloader.css` (2026-10-09)
 - [x] Підключення до Webflow, варіант 2 «поруч зі старим» (сесія 12): сніпети вставлені в Home → Custom code (усе в `<head>`: гейт + preloader.css + модуль), staging опубліковано 2026-10-10 07:39 UTC, перевірено `coexist-run --live` (1440 і 375)
 - [ ] Збірка/мініфікація, версія в імені — разом із видаленням старих `loader`, Hero, Intro і `script.v33` (тоді ж прибрати `legacy-guard.js` і `syncLegacy()`)
-- [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl, body-lg — сесія 8; text-shape, body-sm — сесія 9; display-lg, body-sm.is-strong — сесія 13; display-xl і body-lg (lh) — сесія 15; лишились heading-lg/md/sm, body-md, text-label)
+- [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl, body-lg — сесія 8; text-shape, body-sm — сесія 9; display-lg, body-sm.is-strong — сесія 13; display-xl і body-lg (lh) — сесія 15; heading-md, body-md, heading-xl (точно) — сесія 18; лишились heading-lg/sm, text-label)
 
 ## Етап 3 — Секції (кожна окремим проходом) 🟨
 
@@ -62,7 +62,7 @@
 | Introduction | ✅ (1440 + UI-слайдер; 768/375 у Full design) | ✅ | ✅ `section-intro` зі сценою, шляхами й UI-слайдером (сесія 9), звірено з лайвом Δ 0–1 px; старий Intro ще на сторінці | ✅ `initIntro()` (кулька по шляху, тексти, посадка) + хмари кодом — Δ ≤ 1 px на 3 смугах (сесія 10); ✅ `initUi()` (pin слайдера, передача кульки, відео) + ідл-похитування — 768 / 375 без розбіжностей з лайвом, 1440 — 2 очікувані (сесія 11) | 🟨 уся секція звірена на staging-розмітці з фікстурою (intro-run, ui-run); у Webflow код не підключено |
 | Interactive | ✅ `4611-22244` (4 кадри 1440) | ✅ [interactive.md](docs/sections/interactive.md) + лайв-заміри | ✅ `section-interactive` (сесія 13), звірено з лайвом на staging Δ ≤ 0.7 px на 1440/768/375; старий `#interactive` ще на сторінці | ✅ `initInteractive()` (pin + зсув Δ0 з лайвом), `sphere.js` (Matter.js 0.20, нахил гравітації), Lottie hover/tap (сесія 14) | 🟨 staging `--live` 1440/768/375 зелені; лишились: перенос `id="interactive"` і видалення старої секції, тач-скрол по сфері — після `script.v33`, hover-звук — етап 4 |
 | Techniques | ✅ `702:14385` + 6 кроків, 768/375 | ✅ [techniques.md](docs/sections/techniques.md) + лайв-заміри (IX2-ключі, sticky) | ✅ `section-techniques` (сесія 15), звірено з лайвом на staging Δ ≤ 0.2 px на 1440/768/375; старий `#techniques` ще на сторінці | ✅ `initTechniques()` (scrub слів/зірок/абзацу, scrub 1 під IX2 smoothing 90, сесія 16) | 🟨 staging `--live` 1440/768/375 — Δ ≤ 0.2 px до лайву/ключів; лишились перенос `id="techniques"` і видалення старої секції |
-| Lessons ×8 | ✅ `4611-22250` (easing 1440) + 2–8 `1553:*` | ✅ [lessons.md](docs/sections/lessons.md) + лайв-заміри (геометрія 3 смуг, IX2-формула, слайдер, медіа, навбар); план компонента й анімації (сесія 17) | ⬜ наступна: `section-lessons` + компонент `lesson-section` на easing | ⬜ план: усе кодом, `initLessons()` + `initLessonSchemes()` | ⬜ |
+| Lessons ×8 | ✅ `4611-22250` (easing 1440) + 2–8 `1553:*` | ✅ [lessons.md](docs/sections/lessons.md) + лайв-заміри (геометрія 3 смуг, IX2-формула, слайдер, медіа, навбар); план компонента й анімації (сесія 17) | 🟨 `section-lessons` + `lesson-section` ×8 і `lesson-card` (сесія 18), звірено з лайвом 0 прапорців на 4 смугах; лишились блоки easing (схеми, examples, демо) і `lesson-classic` ×2 у слоти | ⬜ план: усе кодом, `initLessons()` + `initLessonSchemes()` | 🟨 статика ✅ (`lessons-compare`) |
 | Resources | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Footer | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | Sound btn | — | ⬜ | ⬜ | ⬜ | ⬜ |

@@ -21,8 +21,8 @@
 | Копія: CMS templates | Lessons `6ac8e84728488a6bd334f2e7`, Resources `6ac8e84728488a6bd334f2e8`, Courses `6ac8e84728488a6bd334f2e6` |
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
-| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) |
-| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) |
+| Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) · `lesson-section` `d5e7e221-35f7-91c5-dee2-9f546f061f62` і `lesson-card` `ced33071-48b2-67a1-9aa0-8c8ef29e9556` (група Lessons, сесія 18) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) · `section-lessons` `7ed4e6ea-6542-fa7a-6e65-0defdfa4304c` (одразу після `section-techniques`, 8 інстансів `lesson-section`, id `<урок>-next`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
@@ -338,6 +338,13 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `techniques-text`. Ролі `data-motion`: `techniques-word` ×3, `techniques-star` ×2, `techniques-text`. Дерево — docs/sections/techniques.md
 «Збірка в копії».
 
+**Lessons (створено, сесія 18):** `section-lessons`, `lesson-section` (компонент, 8 варіантів), `lesson-hero`, `lesson-visual-row`,
+`lesson-star` (+ `is-left` / `is-right`), `lesson-visual`, `lesson-head`, `lesson-heading`, `lesson-number`, `lesson-title`, `lesson-desc`,
+`lesson-cases`, `lesson-cases-head`, `lesson-cases-pin`, `lesson-cases-track`, `lesson-cases-overlay`; картка (компонент `lesson-card`):
+`lesson-card`, `lesson-card-media`, `lesson-card-video`, `lesson-card-poster`, `lesson-card-body`, `lesson-card-text`, `lesson-card-btn`,
+`lesson-card-icon`. Ролі `data-motion`: `lesson` (+ `data-theme="color"`), `lesson-visual` (+ `data-src`, `data-kind`), `lesson-cases`,
+`lesson-track`, `lesson-card`, `lesson-video` (+ `data-src`), `lesson-overlay`. Дерево — docs/sections/lessons.md «Збірка в копії».
+
 Префікси блоків: `hero-*`, `intro-*`, `ui-*`, `interactive-*`, `techniques-*`, `lesson-*`,
 `resources-*`, `footer-*`, `nav-*`, `preloader-*`. Внутрішні класи кожного блока додаються в
 проході його секції, а не заздалегідь.
@@ -357,6 +364,30 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-10 (сесія 18) — Lessons: компонент lesson-section, 8 уроків, звірка
+
+- **Верстка:** `section-lessons` після `section-techniques`; компоненти `lesson-section` (18 пропсів + `Variant`, слоти Extras / After)
+  і `lesson-card` (4 пропси: link, text, video src, poster), вкладений ×3 з прив'язкою до `Card N *` батька. 8 інстансів з даними лайву
+  ([lessons-props.json](docs/sections/lessons-props.json)), 8 варіантів (колір + pt; zoom — 400vh, пін без −100vh). 25 нових класів, дерево
+  — docs/sections/lessons.md «Збірка в копії».
+- **Текстові стилі (глобально):** `heading-md` tab lh 1.35, mob 1.1111 / −0.0389em; `body-md` tab lh 1.7143; `heading-xl` = пропорції
+  `.h3` (1.0286 / −0.0357em · 1.1282 / −0.0308em · 1.1 / −0.03em).
+- **`styles-rem`** (`src/styles-rem.html` → ембед компонента, прочитано назад): підкреслення «View» на hover картки, Safari mask для
+  медіа картки.
+- **Звірка:** `tools/record/lessons-compare.mjs` (новий) — 8 уроків × 4 смуги (1440 / 768 / 600 / 375): **0 прапорців**, Δ ≤ 0.3 px
+  (600 — ≤ 1 px, округлення). Повні висоти fade…zoom збігаються.
+- **Staging опубліковано агентом** 5 разів (задачі `ff2ffdaf…`, `a2892adf…`, `46a7e865…`, `4172b855…`, `ef8cfc40…`) — для звірки.
+- **Рішення агента:** (1) картка — окремий компонент (не 12 пропсів на голих елементах), вкладені пропси прив'язані до пропсів
+  уроку; (2) відео — DOM `<video>` з `data-src` (src ставить код), постер — Image з image-пропом (`loading=lazy`); (3) поки старі
+  уроки на сторінці, id інстансів `<урок>-next`; (4) номер і заголовок — обгортка з шириною + текстовий стиль усередині (без комбо
+  на текстових стилях).
+- **Пастки MCP:** (1) `TextBlock` у `data_element_builder` стає Block зі String, `set_text` треба давати на String-дитину; (2) слоти не
+  перейменовуються через `update_prop` (тип slot), але ім'я береться з **display name** елемента слота (`set_display_name`);
+  (3) у слот MCP кладе лише інстанси компонентів — блоки easing (схеми, examples, демо) і classic робити компонентами;
+  (4) порожній слот рендерить `<div></div>`; (5) варіант інстансу ставиться як проп `Variant` (string = id варіанта);
+  (6) IX2 щокадру переписує стартовий `transform` старих карток — звірка віднімає його, а не скидає.
+- **Не зроблено:** слоти Extras / After порожні (блоки easing і classic — наступна сесія); анімація й Lottie/відео — `initLessons()`.
 
 ### 2026-10-10 (сесія 17) — Lessons: аналіз Figma, лайв-заміри, план компонента й анімації
 

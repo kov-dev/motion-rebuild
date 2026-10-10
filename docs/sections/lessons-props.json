@@ -1,0 +1,218 @@
+[
+ {
+  "id": "easing",
+  "number": 1,
+  "title": "The Basics of Easing",
+  "desc": "In nature, the speed of movement is never linear: objects gain speed as they begin to move, and slow as they come to a halt. Easing is the technique that allows us to convey this.",
+  "visual": "https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f466_1_easing_visual.json",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/19273514-Fly-Dashboard-Design-for-NFT-Creators",
+    "text": "Ease-in/ease-out can also be applied to camera movements and transformation of interface objects.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/Fly_Dashboard_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4a3"
+   },
+   {
+    "link": "https://dribbble.com/shots/18163851-Keep-Website",
+    "text": "Wonder at how smoothly our text content glides into view!",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/Keep Website_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4a4"
+   },
+   {
+    "link": "https://dribbble.com/shots/19220690-PalmPalm-Website-Animation",
+    "text": "Here we see how the guide controls the appearance of content and the animation of icons and visuals.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/PalmPalm Website_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4a5"
+   }
+  ]
+ },
+ {
+  "id": "delay",
+  "number": 2,
+  "title": "Offset\nand Delay",
+  "desc": "A slight delay between two or more objects creates a feeling of softness and multi-layered movement. This technique also helps to direct the user's attention, indicating an objects's place within a hierarchy of elements.",
+  "visual": "https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f464_delay.json",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/15757198-Flower-Delivery-Mobile-App-Animation",
+    "text": "Here, content elements appear one by one, adding softness to the movement and creating the impression of viscosity.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-2/Flower+Delivery_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4a7"
+   },
+   {
+    "link": "https://dribbble.com/shots/12515946-PlayStation-5-Promo-Website",
+    "text": "Having the visual elements arrive one at a time gives each of them a chance to shine and makes the whole effect more engaging.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-2/PlayStation 5 Promo_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4a6"
+   },
+   {
+    "link": "https://dribbble.com/shots/19220690-PalmPalm-Website-Animation",
+    "text": "Here, once again, one-by-one appearance of content elements draws the viewer in.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-2/IMA-HOME Early_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4a8"
+   }
+  ]
+ },
+ {
+  "id": "fade",
+  "number": 3,
+  "title": "Fade-in Fade-out",
+  "desc": "Fade-in, fade-out is the appearance and disappearance of an object via a transition from transparency to opacity. The most widespread and versatile technique for object appearance and disappearance, it works best in conjunction with other techniques, such as animation of position, scale, or (occasionally) form. Where several objects appear on a single screen, it is best also to add some delay.",
+  "visual": "https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f467_Fade_in_out.json",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/19773761-Royal-Caribbean-s-Icon-of-the-Seas-Microsite",
+    "text": "Here we see text appearing under a mask before fading out and disappearing.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-3/Royal Caribbean_s Icon_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4ab"
+   },
+   {
+    "link": "https://dribbble.com/shots/19944514-OpenColony-Website",
+    "text": "Here, a fade-in, fade-out animation of both opacity and position brings life to a text box.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-3/OpenColony Website_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4aa"
+   },
+   {
+    "link": "https://dribbble.com/shots/19946302-Siren-Website-Design-Merge-Development",
+    "text": "To help distinguish adjacent elements we can animate one with both opacity and position, and the other solely with opacity.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-3/Siren Website Design_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4a9"
+   }
+  ]
+ },
+ {
+  "id": "morph",
+  "number": 4,
+  "title": "Transform & Morph",
+  "desc": "A technique for transforming one object (say, a round icon) into another (for example, a large square picture). This creates continuity and holds the viewer's attention on a key object from one screen to another – particularly effective for storytelling.",
+  "visual": "https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f468_Morph.json",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/19220148-Mobile-House-Website-Animation",
+    "text": "Here, the photo container smoothly changes its shape.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-4/Mobile House_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4ad"
+   },
+   {
+    "link": "https://dribbble.com/shots/16780619-3D-Animation-for-the-Online-Museum-of-Old-Games",
+    "text": "Here, two combinations of transformation and masking, as the small photo expands into the larger one.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-4/Online Museum of Old_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4ae"
+   },
+   {
+    "link": "https://dribbble.com/shots/17163476-The-Heritage-Museum-Landing-Page-Animation",
+    "text": "Here, rectangles containing photos morph from irregular forms to regular forms.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-4/The Heritage Museum_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4ac"
+   }
+  ]
+ },
+ {
+  "id": "masking",
+  "number": 5,
+  "title": "Masking",
+  "desc": "Similar to morph, masking lets us use the morphic object as a mask for photography. The photo in the mask can scale, move, or spin – creating a feeling of softness and spaciousness in movement.",
+  "visual": "https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f469_Masking.json",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/16788118-Design-Conference-Promo-Animation",
+    "text": "Here, masking causes the photo to slightly shift within its container. The technique works well in tandem with transformation.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-5/Design Conference Promo_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b0"
+   },
+   {
+    "link": "https://dribbble.com/shots/17535054-Homepage-Animation-for-Melbourne-Wooden-Showroom",
+    "text": "Here, once again, a photo gently shifts within its container.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-5/Homepage Animation_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4af"
+   },
+   {
+    "link": "https://dribbble.com/shots/18076648-Website-animation",
+    "text": "Here the photos subtle scroll within their container.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-5/Website animation_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b1"
+   }
+  ]
+ },
+ {
+  "id": "dimension",
+  "number": 6,
+  "title": "Dimension",
+  "desc": "Of the various ways we can convey volume, the most popular is Floating Dimensionality. This technique makes interaction with objects intuitive and narrative, enriching the experience of using the site or application.",
+  "visual": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-6/dimension_hevc.mov",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/19773761-Royal-Caribbean-s-Icon-of-the-Seas-Microsite",
+    "text": "Here, an animation of a ship sailing away into the distance creates an illusion of space. Reinforcing this, the text follows in the ship's wake.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-6/Royal Caribbean_s Icon_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4ab"
+   },
+   {
+    "link": "https://dribbble.com/shots/15276396--Crappy-Explanation-80s-Vinyl-Records-Store",
+    "text": "Here, the ability to leaf through a box of records is used to create a feeling of depth.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-6/Crappy Explanation_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b3"
+   },
+   {
+    "link": "https://dribbble.com/shots/4850185-Social-Network-Feed-App-Experiment-Animation",
+    "text": "Here it's the ability to scroll left and right through your cards that creates a feeling of depth.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-6/Social Network Feed_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b2"
+   }
+  ]
+ },
+ {
+  "id": "parallax",
+  "number": 7,
+  "title": "Parallax",
+  "desc": "Arranged in layers, several objects pass simultaneously through x and y axes: the farther the object, the less it passes. The result is a feeling of space.",
+  "visual": "https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f46a_Parallax.json",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/19663094-Milkinside-wallet-iOS-app",
+    "text": "As the matte translucent object with the chart and other information moves upwards, the cards underneath it subtly shift position. This 'parallax effect' supports the main 3D visualization.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-7/milkinside_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b5"
+   },
+   {
+    "link": "https://dribbble.com/shots/13961411-Breathtaking",
+    "text": "A classic use of parallax sees an in-focus foreground move in relation to the out-of-focus scenery beyond – just like the view the runner sees.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-7/breathtaking_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b6"
+   },
+   {
+    "link": "https://dribbble.com/shots/19956284-The-Ways-We-Work",
+    "text": "In interactive parallax, movements of the mouse trigger slight displacement of objects on screen – a stylish finishing touch for a minimalistic design.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-7/The Ways We Work_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b4"
+   }
+  ]
+ },
+ {
+  "id": "zoom",
+  "number": 8,
+  "title": "Zoom",
+  "desc": "This technique brings continuity to narrative and lets us achieve a smooth transition between interface, objects, and destinations. Zoom also adds depth and informs users about additional content that is out of sight.",
+  "visual": "https://cdn.prod.website-files.com/6ac8e84728488a6bd334f2fe/6ac8e84728488a6bd334f46b_8_zoom.json",
+  "cards": [
+   {
+    "link": "https://dribbble.com/shots/14412832-Landing-page-concept-with-zoom-in-transition",
+    "text": "Zoom lets us communicate depth, lends continuity to narrative, and helps immerse the viewer in the site.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-8/Landing page concept_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b9"
+   },
+   {
+    "link": "https://dribbble.com/shots/19787226-Animation-for-the-Music-Podcasts-Website",
+    "text": "Here we get the feeling not of moving page to page, but of a smooth, continuous experience.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-8/ Music Podcasts Website_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b8"
+   },
+   {
+    "link": "https://dribbble.com/shots/15641934-Bike-Shop-Interaction",
+    "text": "Here, we apply a camera span animation to show off a product from a variety of angles.",
+    "video": "https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-8/Bike Shop Interaction_desktop_H.264.mp4",
+    "poster": "6ac8e84728488a6bd334f4b7"
+   }
+  ]
+ }
+]

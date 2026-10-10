@@ -47,4 +47,14 @@
   .lenis.lenis-smooth iframe {
     pointer-events: none;
   }
+
+  /* Lessons: underline "View" while its card is hovered (live parity; Designer
+     classes cannot style a child from the parent's hover state). */
+  .lesson-card:hover .lesson-card-btn {
+    text-decoration: underline;
+  }
+  /* Safari: keep video corners clipped by the rounded media box. */
+  .lesson-card-media {
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+  }
 </style>
