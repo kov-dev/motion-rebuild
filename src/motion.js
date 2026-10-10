@@ -1456,6 +1456,49 @@ function initResourcesStack(pin, listEls) {
   rows.forEach((list, li) => list.forEach((row, ri) => row.addEventListener('pointerenter', () => activate(li, ri))));
 }
 
+/* ---------- footer (live IX2 e-720 → a-126, docs/sections/footer.md «IX2 футера», «План анімації») ---------- */
+
+// Same catch-up as Techniques: the footer trigger has IX2 smoothing 90.
+const FOOTER_SCRUB = 1;
+const FOOTER_CLOUDS_Y = [1.2, 1, 2]; // rem: second, third, fourth cloud (the first one is the footer's own top edge)
+
+/**
+ * Footer: as it comes in, the overlay of Resources turns black (0 → 50 % of the progress) and the black clouds
+ * fall behind the footer (0 → 72 %), on every band. Live progress: 0 = footer top at vh + 0.15·h (the −15 % offset
+ * is of the footer height), 1 = footer top at the viewport top. The page end cuts it short (1440: max 0.556).
+ */
+export function initFooter() {
+  const footer = q('footer');
+  if (!footer) return;
+  const overlay = q('res-overlay');
+  const clouds = qa('ft-cloud', footer);
+  const rem = (v) => () => v * remPx();
+
+  gsap.matchMedia().add(
+    // Every band is listed: matchMedia() skips the callback when no condition matches.
+    { any: '(min-width: 0px)', reduce: '(prefers-reduced-motion: reduce)' },
+    ({ conditions: c }) => {
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: footer,
+          start: () => `top ${innerHeight + 0.15 * footer.offsetHeight}px`,
+          end: 'top top',
+          // Reduced motion: the overlay still darkens (it is colour, not motion), without the catch-up.
+          scrub: c.reduce ? true : FOOTER_SCRUB,
+          invalidateOnRefresh: true,
+          // After the pin of Resources: a width change rebuilds that pin later than this trigger was created.
+          refreshPriority: -1,
+        },
+      });
+      // Positions and durations are fractions of the progress (the timeline is padded to 1 below).
+      if (overlay) tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0);
+      if (!c.reduce) clouds.forEach((cloud, i) => FOOTER_CLOUDS_Y[i] && tl.fromTo(cloud, { y: 0 }, { y: rem(FOOTER_CLOUDS_Y[i]), duration: 0.72 }, 0));
+      tl.set({}, {}, 1);
+    }
+  );
+}
+
 /* ---------- boot ---------- */
 
 // Transition only: the old script.v33 keeps its own GSAP + ScrollTrigger for the sections below ours.
@@ -1485,7 +1528,8 @@ async function init() {
   initLessons();
   initLessonSchemes();
   initResources();
-  // Next passes: Footer, Navigation, … then one refresh.
+  initFooter();
+  // Next passes: Navigation, Sound, … then one refresh.
   syncLegacy();
   ScrollTrigger.refresh();
 }
