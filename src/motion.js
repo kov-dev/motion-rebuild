@@ -1,6 +1,7 @@
 /*
   motion.js — the single animation module of the Motion rebuild.
-  Canonical source: src/motion.js. Not connected to Webflow yet (stage 3: preloader, hero exit, intro).
+  Canonical source: src/motion.js. Runs next to the old script.v33 during the transition: see legacy-guard.js
+  and syncLegacy() below; both go away together with the old script.
 
   Rules (CONVENTIONS.md):
   - DOM is bound only through data-motion="<role>" attributes, never through classes.
@@ -9,6 +10,8 @@
   - Numbers come from docs/sections/<section>.md; keep them 1:1 with the live site.
 */
 
+// Must stay the first import: hides the old global GSAP while ours is imported.
+import './legacy-guard.js';
 // Pinned: re-check the latest 3.x before stage 4 and bump in one place.
 import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/+esm';
 import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/CustomEase/+esm';
@@ -16,6 +19,11 @@ import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTr
 import { MotionPathPlugin } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/MotionPathPlugin/+esm';
 
 gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin);
+// Our plugins are bound to our core now: give the old script its global back.
+if ('__legacyGsap' in window) {
+  window.gsap = window.__legacyGsap;
+  delete window.__legacyGsap;
+}
 
 // Landing eases of the live site (script.v33 block C), used by intro and ui.
 CustomEase.create('bounce', 'M0,0 C0.05222,-0.59802 0.31828,-1.38625 0.55039,0 0.65208,-0.78892 0.94566,-0.58262 1,1');
@@ -758,6 +766,22 @@ function initUiIdle(blocks) {
 
 /* ---------- boot ---------- */
 
+// Transition only: the old script.v33 keeps its own GSAP + ScrollTrigger for the sections below ours.
+// Our pins change the page height above them, so the old triggers are re-measured after every refresh of ours.
+function syncLegacy() {
+  const old = window.ScrollTrigger;
+  if (!old || old === ScrollTrigger || typeof old.refresh !== 'function') return;
+  let queued = false;
+  ScrollTrigger.addEventListener('refresh', () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      old.refresh();
+    });
+  });
+}
+
 async function init() {
   await initPreloader();
   // Created in DOM order, so every trigger below a pin already knows its spacer.
@@ -765,6 +789,7 @@ async function init() {
   initIntro();
   initUi();
   // Next passes: initInteractive(), … then one refresh.
+  syncLegacy();
   ScrollTrigger.refresh();
 }
 

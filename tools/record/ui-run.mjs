@@ -99,6 +99,7 @@ for (const vp of vps) {
   const logs = []; p.on('pageerror', (e) => logs.push('pageerror: ' + e.message));
   p.on('console', (m) => m.type() === 'error' && !/ERR_FAILED|Splide/.test(m.text()) && logs.push('console: ' + m.text()));
   await p.route('**/*', (r) => (OLD.test(r.request().url()) ? r.abort() : r.continue()));
+  await p.route('**/legacy-guard.js', (r) => r.fulfill({ contentType: 'text/javascript', body: readFileSync(`${root}/src/legacy-guard.js`, 'utf8') })); // motion.js imports it relatively
   await p.goto(STAGING, { waitUntil: 'load', timeout: 90000 });
   await p.evaluate(({ css, section }) => {
     const st = document.createElement('style');

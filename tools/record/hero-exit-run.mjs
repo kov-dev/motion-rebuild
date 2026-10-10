@@ -12,6 +12,7 @@ const js = readFileSync(`${root}/src/motion.js`, 'utf8');
 const b = await chromium.launch({ channel: 'chrome' });
 const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
 const logs = []; p.on('pageerror', (e) => logs.push('pageerror: ' + e.message));
+await p.route('**/legacy-guard.js', (r) => r.fulfill({ contentType: 'text/javascript', body: readFileSync(`${root}/src/legacy-guard.js`, 'utf8') })); // motion.js imports it relatively
 await p.goto('https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/', { waitUntil: 'load', timeout: 90000 });
 await p.evaluate(({ css, section }) => {
   // Old loader/preloader overlays off; new Intro right after the new Hero, as in the copy.

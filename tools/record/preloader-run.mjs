@@ -13,6 +13,7 @@ await p.route('**/*', async (route) => {
   const body = (await res.text()).replace('<head>', `<head><script>document.documentElement.classList.add('is-preloading')</script><style>${css}\n.loader{display:none!important}</style>`);
   route.fulfill({ response: res, body });
 });
+await p.route('**/legacy-guard.js', (r) => r.fulfill({ contentType: 'text/javascript', body: readFileSync(process.argv[3].replace(/motion\.js$/, 'legacy-guard.js'), 'utf8') })); // motion.js imports it relatively
 await p.goto('https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/', { waitUntil: 'domcontentloaded' });
 const t0 = Date.now();
 await p.addScriptTag({ type: 'module', content: js });
