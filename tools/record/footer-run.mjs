@@ -117,15 +117,20 @@ await p.waitForTimeout(settle);
   flag(got.overlay === 0 && got.clouds.every((v) => v === 0), `before start (p ${s.n.p.toFixed(3)}): ${fmt(got)}`);
 }
 
-// Aim twice: old lazy pins (built when their section passes) change the page height on the way.
+// Aim until the progress is reached: old lazy pins (built when their section passes) change the page height on the way.
+// A long jump also gets extra time: the old IX2 smoothing starts from far away.
 const aim = async (pr, which) => {
-  let s1, y;
-  for (let k = 0; k < 2; k++) {
+  let s1, y, far = false;
+  for (let k = 0; k < 5; k++) {
     s1 = await state();
     y = Math.round(s1[which + 'Top'] - span(s1[which + 'H']) * (1 - pr));
-    await scrollTo(Math.min(y, s1.max));
-    await p.waitForTimeout(k ? settle : 800);
+    const t = Math.min(y, s1.max);
+    if (Math.abs(t - s1.y) > 3 * vp.h) far = true;
+    if (k && Math.abs(t - s1.y) < 4) break;
+    await scrollTo(t);
+    await p.waitForTimeout(800);
   }
+  await p.waitForTimeout(settle + (far ? 2000 : 0));
   return y > s1.max + 2; // cut by the page end
 };
 const check = async (pr, tag = '') => {

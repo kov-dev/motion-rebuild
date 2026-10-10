@@ -289,3 +289,18 @@ footer.site-footer  data-motion="footer"                       relative, z 13 / 
   0 прапорців, Δ 0**. Перший прогін зловив 2 мої помилки: «Site by» → «Made by» (з Figma) і заголовок, розтягнутий flex-рядком.
 - **Не зроблено:** `initFooter()` (оверлей + хмари, план вище) і `footer-run.mjs`; Sound — прохід Sound; тема навбара — Navigation; футер на
   шаблонах CMS і Styleguide — з їхніми проходами.
+
+## Анімація в коді (сесія 24, 2026-10-10)
+
+`initFooter()` у `src/motion.js` (після `initResources()`), коміт `99028b6`:
+
+- Один scrub-таймлайн: `trigger` = `[data-motion="footer"]`, `start: top (vh + 0.15·h)px`, `end: top top`, `scrub: 1`,
+  `invalidateOnRefresh`, **`refreshPriority: -1`** — при зміні ширини Resources перебудовує свій pin пізніше, ніж створено тригер футера,
+  а футер має переміряти позицію вже після нового spacer-а.
+- `res-overlay` `opacity` 0 → 1 на 0 → 0.5; `ft-cloud` (second / third / fourth) `y` 0 → 1.2 / 1 / 2 rem на 0 → 0.72; таймлайн доповнено до 1.
+- reduced-motion: оверлей іде за прогресом без згладжування (`scrub: true`), хмари стоять.
+
+**Перевірка** — `tools/record/footer-run.mjs` (новий): точки p = 0.05 … 1 на новому футері проти моделі `p = (vh + 0.15·h − top) / (vh + 0.15·h)`
+і ті самі точки на **старому футері зі справжнім IX2 `a-126`** на тій самій сторінці staging (лайв-еталон; кінець сторінки обрізає його так само,
+як на motion.zajno.com: 1440 max 0.555, 768 0.766, 600 0.688). 1440 додатково — resize 1440 → 1280 (перебудова pin-а Resources) і повторна точка.
+Результат: 1440 / 768 / 600 / 375, локальний модуль і `--live` — **0 прапорців, Δ opacity ≤ 0.001, Δ хмар ≤ 0.1 px**; `--reduce` 1440 / 375 — 0.
