@@ -2,3 +2,6 @@
 node_modules/
 reference/recordings/
 *.log
+
+# Reference renders from the designer (large, not for the public repo)
+*.mp4

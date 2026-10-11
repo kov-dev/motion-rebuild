@@ -342,8 +342,13 @@ function heroBallRest(ball) {
   return { x: c.x + dx, y: c.y + dy };
 }
 
-// Width of a ui panel before the slider touches it (CSS: 25vw, ≤991 100vw).
-const panelRestWidth = () => (innerWidth >= 992 ? 0.25 : 1) * innerWidth;
+// Wide (≥992) ui slider geometry, in viewport widths (motion video 1_FULL ANIMATION, 1440×750): an open panel is
+// 2/3 wide and the panel centres sit half a viewport apart on one conveyor. The first dot waits at 5/6, right of
+// the heading; an open panel is centred at 1/3; the last one opens at 2/3 beside the previous dot.
+const UI_WIDE = { panel: 2 / 3, step: 1 / 2, lastStep: 1 / 6, expandStep: 1 / 4 };
+
+// Width of a ui panel (≥992: 2/3 vw set by initUi(); ≤991: the CSS 100vw).
+const panelRestWidth = () => (innerWidth >= 992 ? UI_WIDE.panel : 1) * innerWidth;
 
 // Natural (unpinned, untransformed) centre of an element inside a ui block, in document space.
 // `w` overrides the element width (a panel may be mid-tween during a refresh).
@@ -434,6 +439,12 @@ export function initIntro() {
         const rest = heroBallRest(ball);
         return { x: target.x - rest.x, y: target.y - rest.y };
       };
+      // Ball centre resting on top of the first heading line, in the ball's translate space.
+      const hitY = () => {
+        const heading = q('ui-text', block);
+        const top = uiNaturalCentre(heading, block).y - heading.offsetHeight / 2;
+        return top - ball.offsetHeight / 2 - heroBallRest(ball).y;
+      };
       const segment = (start, end) => () => ({ path: path.getAttribute('d'), matrix: toBall(), start, end });
 
       const stops = INTRO_STOPS[b];
@@ -452,7 +463,9 @@ export function initIntro() {
           // Ends exactly where the first UI block pins (desktop: half the heading below the scene).
           endTrigger: block || scene,
           end: block ? 'top top' : 'bottom center',
-          scrub: 1,
+          // No scrub lag: the ball must reach the first dot exactly when the block pins, where it turns into
+          // that dot (with scrub 1 it was still flying while the pinned block stood and looked like a second ball).
+          scrub: true,
           invalidateOnRefresh: true,
         },
         onUpdate: () => sync(),
@@ -478,10 +491,14 @@ export function initIntro() {
         .to(ball, { motionPath: segment(stops[1], stops[2]), duration: 14 })
         .to(ball, { motionPath: segment(stops[2], stops[3]), duration: 27 });
 
-      // Desktop: bounce down into the centre of the first panel while drifting right.
+      // Desktop: fall onto the rising heading, bounce off its top and arc over to the first dot right of it.
       if (b === 'desktop' && block) {
-        tl.fromTo(ball, { y: () => at(1).y }, { y: () => land().y, duration: 8, ease: 'bounce' })
-          .fromTo(ball, { x: () => at(1).x }, { x: () => land().x, duration: 8 }, '<');
+        const apex = () => hitY() - 0.12 * innerHeight;
+        tl.fromTo(ball, { y: () => at(1).y }, { y: hitY, duration: 4, ease: 'power2.in' })
+          .fromTo(ball, { x: () => at(1).x }, { x: () => land().x, duration: 6, ease: 'power1.inOut' })
+          .fromTo(ball, { y: hitY }, { y: apex, duration: 2.5, ease: 'power2.out' }, '<')
+          // Settles into the dot (the video): it stops there, so the swap to the dot is invisible.
+          .fromTo(ball, { y: apex }, { y: () => land().y, duration: 3.5, ease: 'power1.inOut' }, '>');
       }
 
       return () => {
@@ -538,17 +555,25 @@ function blockOrigin(block) {
   return { x: a.left + scrollX, y: a.top + scrollY };
 }
 
+// Wide slider schedule, timeline units (the pin scrolls UI_UNIT_PX·vw per unit).
+const UI_UNITS = { lead: 3, heading: 5, shift: 4, hold: 6, close: 2, move: 3, expand: 4, tail: 4 };
+const UI_UNIT_PX = 0.12;
+// Seconds a panel takes to open from its dot / fold back into it (≤991: the live 0.7 both ways).
+const UI_OPEN = 0.6;
+const UI_CLOSE = 0.5;
+
 /**
- * Pinned horizontal slider of the Intro: every [data-motion=ui] block pins in DOM order, its rail slides left
- * panel by panel, panels grow 25→75vw and open with a circular clip-path, the video fades in and plays.
+ * Pinned slider of the Intro: every [data-motion=ui] block pins in DOM order. Panels are dots (a 9 px circular
+ * clip-path) until they open into the slide, the video fades in and plays.
+ * ≥992 (motion video): the heading leaves to the left, the dots ride one conveyor; a panel folds back into its dot,
+ * the conveyor moves by half a viewport and the next dot opens. The last panel opens at 2/3, widens to the whole
+ * viewport and folds into the centre dot, which drops into the next block.
+ * ≤991 (live script.v33 block D, units 8 per panel): the rail slides one 100vw panel per step.
  * Between blocks the ui-ball drops from one block into the first panel of the next.
- * Timeline units are the live ones (8 per panel); the live per-panel timelines are merged into one per block.
  */
 export function initUi() {
   const blocks = qa('ui');
   if (!blocks.length) return;
-  const heroSticky = q('hero-ball-sticky');
-  const heroAxis = q('hero-ball-wrap');
   const finalPanel = qa('ui-slide', blocks[blocks.length - 1]).pop();
 
   gsap.matchMedia().add(
@@ -560,14 +585,9 @@ export function initUi() {
     },
     ({ conditions: c }) => {
       const wide = c.wide;
-      // Touch screens scroll faster: the live site tripled the pin there and used a slower schedule
-      // (+2 units before each panel). Narrow mouse windows take that schedule too: on the live site they
-      // mixed both and the rail drifted out of sync with the panels.
-      const slow = c.touch || !wide;
       const k = c.reduce ? 0 : 1;
       const vw = () => innerWidth;
-      // One rail step: the active panel width.
-      const step = () => (wide ? 0.75 : 1) * vw();
+      const vwf = (f) => () => f * innerWidth;
 
       // Videos are preload="none" (the live site autoplayed all six at load): buffer one panel ahead instead.
       const warm = (panel) => {
@@ -577,14 +597,19 @@ export function initUi() {
         if (video.readyState === 0 && video.networkState !== video.NETWORK_LOADING) video.load();
       };
 
+      // Open clip: the circle reaches the viewport corners of a full-width panel. Both ends carry the position:
+      // the CSS dot is `circle(.09rem)`, and GSAP would tween the missing `at 50% 50%` from 0 % (top-left).
+      const openClip = () => `circle(${Math.hypot(innerWidth, innerHeight) / 2}px at 50% 50%)`;
+      const dotClip = () => `circle(${0.09 * remPx()}px at 50% 50%)`;
       const open = new Map();
       const setPanel = (panel, on) => {
         if (open.get(panel) === on) return;
         open.set(panel, on);
         const video = q('ui-video', panel);
         if (on) {
-          // 'auto', not true: true would also kill the scrubbed width tweens of the panel.
-          gsap.to(panel, { clipPath: `circle(${Math.max(vw(), innerHeight)}px at 50% 50%)`, duration: 0.7 * k, ease: 'none', overwrite: 'auto' });
+          if (!panel.style.clipPath) gsap.set(panel, { clipPath: dotClip() });
+          // 'auto', not true: true would also kill the scrubbed tweens of the panel.
+          gsap.to(panel, { clipPath: openClip(), duration: (wide ? UI_OPEN : 0.7) * k, ease: 'none', overwrite: 'auto' });
           if (!video) return;
           video.currentTime = 0;
           gsap.to(video, {
@@ -597,14 +622,14 @@ export function initUi() {
           });
         } else {
           gsap.to(panel, {
-            clipPath: `circle(${0.09 * remPx()}px at 50% 50%)`,
-            duration: 0.7 * k,
+            clipPath: dotClip(),
+            duration: (wide ? UI_CLOSE : 0.7) * k,
             ease: 'none',
             overwrite: 'auto',
             onComplete: () => gsap.set(panel, { clearProps: 'clipPath' }), // back to the rem-based CSS dot
           });
           if (!video) return;
-          gsap.to(video, { opacity: 0, duration: 0.7 * k, ease: 'none', overwrite: true, onComplete: () => video.pause() });
+          gsap.to(video, { opacity: 0, duration: (wide ? UI_CLOSE : 0.7) * k, ease: 'none', overwrite: true, onComplete: () => video.pause() });
         }
       };
       // End state of a panel at once, nothing restarted (after a refresh; an open panel also takes the new radius).
@@ -612,7 +637,7 @@ export function initUi() {
         open.set(panel, on);
         const video = q('ui-video', panel);
         gsap.killTweensOf(panel, 'clipPath');
-        if (on) gsap.set(panel, { clipPath: `circle(${Math.max(vw(), innerHeight)}px at 50% 50%)` });
+        if (on) gsap.set(panel, { clipPath: openClip() });
         else gsap.set(panel, { clearProps: 'clipPath' });
         if (!video) return;
         gsap.killTweensOf(video);
@@ -630,22 +655,21 @@ export function initUi() {
       blocks.forEach((block, j) => {
         const track = q('ui-track', block);
         const heading = q('ui-text', block);
+        const row = q('ui-slides', block);
         const panels = qa('ui-slide', block);
         const n = panels.length;
-        if (!track || !n) return;
+        if (!track || !row || !n) return;
         panels.forEach((p) => open.set(p, false));
 
-        // Live: vw·k + vw·n·k + 0.5·vw·n + 0.25·vw, ×3 on touch screens.
-        const pinLength = () => {
-          const w = vw();
-          const kk = wide ? 0.75 : 1;
-          return (w * kk + w * n * kk + 0.5 * w * n + 0.25 * w) * (c.touch ? 3 : 1);
-        };
-        // Rail position after `s` steps. Narrow: the live rail went −100vw while the panel row went from
-        // margin −100vw to 0 (no visible move); here the margin stays and the rail is one step behind.
-        const railX = (s) => () => -(wide ? s : s - 1) * step();
-
+        // [opens, folds] per panel, in timeline units; the timeline is filled below and its length is `units`.
         const windows = [];
+        let units = 0;
+        const pinLength = () =>
+          wide
+            ? units * UI_UNIT_PX * vw() * (c.touch ? 3 : 1)
+            : // Live: vw + vw·n + 0.5·vw·n + 0.25·vw, ×3 on touch screens.
+              (vw() * (1 + 1.5 * n) + 0.25 * vw()) * (c.touch ? 3 : 1);
+
         const tl = gsap.timeline({
           defaults: { ease: 'none', immediateRender: false },
           scrollTrigger: {
@@ -670,52 +694,69 @@ export function initUi() {
         // The first video starts buffering one viewport before the pin.
         ScrollTrigger.create({ trigger: block, start: 'top bottom', onEnter: () => warm(panels[0]) });
 
-        // Step 0: the rail brings the first panel in (narrow: the heading wipes out downwards instead).
-        if (wide) tl.fromTo(track, { x: 0 }, { x: railX(1), duration: 4 }, 0);
-        else if (heading) {
-          gsap.set(heading, { y: 0, yPercent: 50 }); // the CSS translateY(50%), kept relative
-          tl.fromTo(heading, { yPercent: 50, clipPath: CLIP_FULL }, { yPercent: -50, clipPath: CLIP_GONE, duration: 4 }, 0);
-        }
-
-        // Middle panels: one step each, then a hold while the panel is open.
-        let t = 4 + (slow ? 6 : 4);
-        let s = 1;
-        for (let i = 1; i < n - 1; i++, s++, t += 8) tl.fromTo(track, { x: railX(s) }, { x: railX(s + 1), duration: 4 }, t);
-        // Last panel: wide holds, then the rail shifts by the 25vw strip; narrow moves one step, then holds.
-        const last = s;
         if (wide) {
-          t += slow ? 8 : 12;
-          tl.fromTo(track, { x: railX(last) }, { x: () => railX(last)() - 0.25 * vw(), duration: 4 }, t);
-          t += 4;
-        } else {
-          tl.fromTo(track, { x: railX(last) }, { x: railX(last + 1), duration: 4 }, t);
-          t += 12;
-        }
-        const total = t;
-        tl.set({}, {}, total);
+          // Panels 2/3 vw wide, centres half a viewport apart; the heading (75vw) is pulled over by the row so the
+          // first panel starts at 50vw and its dot sits at 5/6, where the Hero ball lands.
+          gsap.set(row, { marginLeft: '-25vw' });
+          gsap.set(panels, { width: `${UI_WIDE.panel * 100}vw`, marginRight: `${(UI_WIDE.step - UI_WIDE.panel) * 100}vw` });
+          const U = UI_UNITS;
+          let at = 0; // conveyor offset, × vw
+          const move = (d, start, duration) => {
+            const from = at;
+            at += d;
+            tl.fromTo(row, { x: vwf(from) }, { x: vwf(at), duration }, start);
+          };
 
-        // Panels: grow at 8·i (+2 slow), open for 4 units (the wide last one for 8), the one before last
-        // folds back to 25vw, the last one widens to the full viewport.
-        panels.forEach((panel, i) => {
-          const start = 8 * i + (slow ? 2 : 0);
-          const r0 = start + 4;
-          const r1 = r0 + (i === n - 1 && !slow ? 8 : 4);
-          windows.push([r0, r1]);
-          if (!wide) return;
-          tl.fromTo(panel, { width: () => 0.25 * vw() }, { width: () => 0.75 * vw(), duration: 4 }, start);
-          if (i === n - 2) tl.fromTo(panel, { width: () => 0.75 * vw() }, { width: () => 0.25 * vw(), duration: 4 }, r1);
-          if (i === n - 1) tl.fromTo(panel, { width: () => 0.75 * vw() }, { width: vw, duration: 4 }, r1);
-        });
-
-        // The Hero ball can still be landing (intro scrub lags ~1 s): keep it on the first panel. The pin
-        // scrolls the page by pinLength linearly, so one tween replaces the live per-frame "manual sticky".
-        if (j === 0) {
-          if (heroSticky) tl.fromTo(heroSticky, { y: 0 }, { y: () => -pinLength(), duration: total }, 0);
-          if (heroAxis && wide) {
-            gsap.set(heroAxis, { y: 0, yPercent: 50 }); // keep the CSS translateY(50%) relative
-            tl.fromTo(heroAxis, { x: 0 }, { x: () => -0.5 * vw(), duration: 4 }, 0);
+          // The ball rests beside the heading for a moment, then the heading leaves to the left while the first
+          // dot rides from 5/6 to 1/3 and opens there.
+          if (heading) tl.fromTo(heading, { x: 0 }, { x: () => -vw(), duration: U.heading }, U.lead);
+          move(-UI_WIDE.step, U.lead + 1, U.shift);
+          let t = U.lead + 1 + U.shift;
+          const opens = [t];
+          const folds = [];
+          // Every next panel: the open one folds into its dot, the conveyor moves on, the next dot opens.
+          for (let i = 1; i < n; i++) {
+            t += U.hold;
+            folds.push(t);
+            move(-(i === n - 1 ? UI_WIDE.lastStep : UI_WIDE.step), t + U.close, U.move);
+            t += U.close + U.move;
+            opens.push(t);
           }
+          // The last panel widens to the whole viewport: its left edge runs to 0, the dot beside it leaves.
+          t += U.hold;
+          const last = panels[n - 1];
+          const centre = 5 / 6 + (n - 1) * UI_WIDE.step + at; // before the widening, × vw
+          const grow = 1 - UI_WIDE.panel;
+          const dx = 0.5 - centre + UI_WIDE.expandStep - grow / 2; // the box grows rightwards from its left edge
+          move(-UI_WIDE.expandStep, t, U.expand);
+          tl.fromTo(last, { width: vwf(UI_WIDE.panel), x: 0 }, { width: vw, x: vwf(dx), duration: U.expand }, t);
+          t += U.expand;
+          // Then it folds into the centre dot, which the ui-ball takes over (not the final panel of the page).
+          t += 1;
+          folds.push(last === finalPanel ? Infinity : t);
+          t += last === finalPanel ? 1 : U.tail;
+          opens.forEach((r0, i) => windows.push([r0, folds[i]]));
+          units = t;
+        } else {
+          // Live narrow schedule, the slower touch one (+2 units before each panel) for mouse windows too: on the live
+          // site they mixed both and the rail drifted out of sync with the panels. Rail position after `s` steps: the live rail went −100vw while the panel row went
+          // from margin −100vw to 0 (no visible move); here the margin stays and the rail is one step behind.
+          const railX = (s) => () => -(s - 1) * vw();
+          if (heading) {
+            gsap.set(heading, { y: 0, yPercent: 50 }); // the CSS translateY(50%), kept relative
+            tl.fromTo(heading, { yPercent: 50, clipPath: CLIP_FULL }, { yPercent: -50, clipPath: CLIP_GONE, duration: 4 }, 0);
+          }
+          // Middle panels: one step each, then a hold while the panel is open; the last moves one step, then holds.
+          let t = 4 + 6;
+          let s = 1;
+          for (let i = 1; i < n - 1; i++, s++, t += 8) tl.fromTo(track, { x: railX(s) }, { x: railX(s + 1), duration: 4 }, t);
+          tl.fromTo(track, { x: railX(s) }, { x: railX(s + 1), duration: 4 }, t);
+          t += 12;
+          // Panels open at 8·i + 2 + 4 for 4 units.
+          panels.forEach((panel, i) => windows.push([8 * i + 6, 8 * i + 10]));
+          units = t;
         }
+        tl.set({}, {}, units);
 
         // Hand-over to the next block: from the pin end until the next block pins (one block height later).
         const next = blocks[j + 1];
@@ -761,7 +802,7 @@ export function initUi() {
         };
         if (wide) {
           // Live: drop near the viewport bottom (½vh + the space under the heading + one ball), then bounce
-          // up into the panel while drifting right. The live bounce ended 7 px low and snapped; here it ends centred.
+          // up into the first dot of the next block while drifting right; here it ends exactly on that dot.
           const drop = () => innerHeight / 2 + (innerHeight - (heading?.offsetHeight || 0)) / 2 + dot.offsetHeight;
           ho.fromTo(dot, { y: 0 }, { y: drop, duration: 0.45 })
             .fromTo(dot, { x: 0 }, { x: () => target().x, duration: 0.7 })
@@ -775,7 +816,7 @@ export function initUi() {
       return () => {
         ScrollTrigger.removeEventListener('refresh', onRefresh);
         open.forEach((on, panel) => {
-          gsap.set(panel, { clearProps: 'clipPath,width' });
+          gsap.set(panel, { clearProps: 'clipPath,width,marginRight' });
           const video = q('ui-video', panel);
           if (video) {
             gsap.set(video, { opacity: 0 }); // the embed starts at inline opacity 0
@@ -784,10 +825,10 @@ export function initUi() {
         });
         blocks.forEach((block) => {
           gsap.set(els(q('ui-track', block), q('ui-text', block), q('ui-ball', block)), { clearProps: 'transform,clipPath,opacity' });
+          gsap.set(els(q('ui-slides', block)), { clearProps: 'transform,marginLeft' });
           const landing = q('ui-landing', block);
           if (landing && block !== blocks[0]) gsap.set(landing, { clearProps: 'opacity' });
         });
-        gsap.set(els(heroSticky, heroAxis), { clearProps: 'transform' });
       };
     }
   );
