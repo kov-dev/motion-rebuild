@@ -390,3 +390,6 @@ staging з фікстурою замість `section-intro`, старі `script
 
 Код: `UI_WIDE`, `UI_UNITS`, `UI_UNIT_PX`, `UI_OPEN` / `UI_CLOSE` у [src/motion.js](../../src/motion.js); посадка — кінець таймлайна `initIntro()` (desktop).
 Передача кульки Hero → крапка: на старті піну (кінець інтро-таймлайна, `scrub: true`), той самий розмір 18 px і та сама точка.
+
+Перевірка: [tools/record/ui-run.mjs](../../tools/record/ui-run.mjs) (сесія 35) — сталі точки розкладу `UI_UNITS` проти цієї розкадровки
+(частки vw, допуск 0.012), довжина піну, одна кулька на передачі; ≤991 — проти лайву. iPad landscape = широка схема з піном ×3.
