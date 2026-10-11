@@ -91,7 +91,7 @@ async function open(kind) {
       route.fulfill({ response: res, body: html });
     });
     // motion.js is inline here, so its relative imports resolve against the page URL.
-    for (const f of ['legacy-guard.js', 'sphere.js']) await p.route(`**/${f}`, (r) => r.fulfill({ contentType: 'text/javascript', body: src(f) }));
+    for (const f of ['sphere.js']) await p.route(`**/${f}`, (r) => r.fulfill({ contentType: 'text/javascript', body: src(f) }));
   }
   await p.goto(kind === 'ours' ? STAGING : LIVE, { waitUntil: kind === 'ours' ? 'domcontentloaded' : 'load', timeout: 120000 });
   if (kind === 'ours') {

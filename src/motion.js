@@ -1,7 +1,6 @@
 /*
   motion.js — the single animation module of the Motion rebuild.
-  Canonical source: src/motion.js. Runs next to the old script.v33 during the transition: see legacy-guard.js
-  and syncLegacy() below; both go away together with the old script.
+  Canonical source: src/motion.js.
 
   Rules (CONVENTIONS.md):
   - DOM is bound only through data-motion="<role>" attributes, never through classes.
@@ -10,8 +9,6 @@
   - Numbers come from docs/sections/<section>.md; keep them 1:1 with the live site.
 */
 
-// Must stay the first import: hides the old global GSAP while ours is imported.
-import './legacy-guard.js';
 // Pinned: re-check the latest 3.x before stage 4 and bump in one place.
 import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/+esm';
 import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/CustomEase/+esm';
@@ -19,11 +16,6 @@ import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTr
 import { MotionPathPlugin } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/MotionPathPlugin/+esm';
 
 gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin);
-// Our plugins are bound to our core now: give the old script its global back.
-if ('__legacyGsap' in window) {
-  window.gsap = window.__legacyGsap;
-  delete window.__legacyGsap;
-}
 
 // Landing eases of the live site (script.v33 block C), used by intro and ui.
 CustomEase.create('bounce', 'M0,0 C0.05222,-0.59802 0.31828,-1.38625 0.55039,0 0.65208,-0.78892 0.94566,-0.58262 1,1');
@@ -950,24 +942,13 @@ const setVideoSrc = (v, preload = 'metadata') => {
   v.src = src;
   if (resume) v.play().catch(() => {});
 };
-// Transition: Finsweet autovideo (still on the page for the old sections) plays every <video> in view, ours included.
-// A video of ours that was not asked to play pauses itself again. Goes away with the old script.
-const wantedVideos = new WeakSet();
-const guardVideo = (v) => {
-  if (v.dataset.guard) return;
-  v.dataset.guard = '1';
-  v.addEventListener('play', () => wantedVideos.has(v) || v.pause());
-};
 // Reduced motion: the first frame only, no playback.
 const playVideo = (v) => {
-  guardVideo(v);
   setVideoSrc(v, 'auto');
   if (reducedMotion()) return;
-  wantedVideos.add(v);
   v.play().catch(() => {});
 };
 const pauseVideo = (v) => {
-  wantedVideos.delete(v);
   if (!v.paused) v.pause();
 };
 
@@ -997,7 +978,7 @@ function lazyVideo(videos) {
   const seen = new IntersectionObserver((entries) =>
     entries.forEach((e) => (e.isIntersecting ? playVideo(e.target) : pauseVideo(e.target)))
   );
-  videos.forEach((v) => (guardVideo(v), near.observe(v), seen.observe(v)));
+  videos.forEach((v) => (near.observe(v), seen.observe(v)));
 }
 
 /**
@@ -1020,7 +1001,6 @@ function initLessonVisuals() {
     if (box.dataset.kind === 'video') {
       const v = document.createElement('video');
       Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'auto' });
-      guardVideo(v);
       v.setAttribute('aria-hidden', 'true');
       v.style.cssText = 'width:100%;height:100%;display:block';
       // The live embed paired the HEVC file (alpha, Safari) with a VP9 webm for the other browsers.
@@ -1142,7 +1122,6 @@ function initLessonDemo(demo) {
   const line = q('demo-line', demo);
   let state = -1;
   let inView = false;
-  videos.forEach(guardVideo);
 
   const playActive = () =>
     videos.forEach((v, i) => {
@@ -1774,7 +1753,7 @@ export function initNav() {
   });
 
   // The open menu owns the input: the wheel scrolls the track sideways (deltaMode lines / pages scaled to px), and
-  // neither the wheel nor touches reach the page's smooth scroll (the old Lenis, mobile normalizeScroll) underneath.
+  // neither the wheel nor touches reach the page's smooth scroll (Lenis, stage 4) underneath.
   root.addEventListener(
     'wheel',
     (e) => {
@@ -1884,22 +1863,6 @@ export function initSound() {
 
 /* ---------- boot ---------- */
 
-// Transition only: the old script.v33 keeps its own GSAP + ScrollTrigger for the sections below ours.
-// Our pins change the page height above them, so the old triggers are re-measured after every refresh of ours.
-function syncLegacy() {
-  const old = window.ScrollTrigger;
-  if (!old || old === ScrollTrigger || typeof old.refresh !== 'function') return;
-  let queued = false;
-  ScrollTrigger.addEventListener('refresh', () => {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(() => {
-      queued = false;
-      old.refresh();
-    });
-  });
-}
-
 async function init() {
   // Before the preloader: the logo eyes load while it runs, the navbar enters in its phase 3.
   initNav();
@@ -1917,7 +1880,6 @@ async function init() {
   initSound();
   // Last: its triggers measure every pin above.
   initTheme();
-  syncLegacy();
   ScrollTrigger.refresh();
 }
 

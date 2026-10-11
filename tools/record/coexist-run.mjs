@@ -51,7 +51,6 @@ if (!live) await p.route('**/*', async (route) => {
 });
 
 const t0 = Date.now();
-if (!cdn && !live) await p.route('**/legacy-guard.js', (r) => r.fulfill({ contentType: 'text/javascript', body: readFileSync(`${root}/src/legacy-guard.js`, 'utf8') })); // motion.js imports it relatively
 await p.goto(STAGING, { waitUntil: 'domcontentloaded', timeout: 90000 });
 const rows = [`== ${only}`];
 const done = p.evaluate(() => new Promise((r) => document.addEventListener('motion:preloader-done', () => r(), { once: true })));

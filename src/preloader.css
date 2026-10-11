@@ -2,7 +2,7 @@
   preloader.css — gate and start states for the Home preloader.
   Canonical source: src/preloader.css. Webflow holds a copy in the Home page-level
   head (page custom code is not executed in the Designer, so there the section stays
-  a plain 100vh block that can be edited). Not connected to Webflow yet.
+  a plain 100vh block that can be edited).
 
   Home head = a script element with src/preloader-gate.js (first), then a style
   element with this file. Never put HTML tags inside this comment: a closing style

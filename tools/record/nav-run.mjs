@@ -48,7 +48,7 @@ if (!live) {
     html = html.replace('</body>', `<script type="module">${js}</script></body>`);
     route.fulfill({ response: res, body: html });
   });
-  for (const f of ['legacy-guard.js', 'sphere.js']) await p.route(`**/${f}`, (r) => r.fulfill({ contentType: 'text/javascript', body: src(f) }));
+  for (const f of ['sphere.js']) await p.route(`**/${f}`, (r) => r.fulfill({ contentType: 'text/javascript', body: src(f) }));
 }
 await p.goto(STAGING + '?run=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 120000 });
 await Promise.race([
