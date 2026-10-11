@@ -1569,7 +1569,7 @@ function paintSound(instant = false) {
  * [data-theme] gets one trigger per line; the active zone is the deepest active (the dark demo inside the easing lesson
  * wins over the lesson, the lesson is back after it), among equals the later one (the footer over Resources). Between
  * zones and after the last one the scheme stays. Colour = the background of the section, the crumb of the lesson (its
- * id without the transitional "-next"). Our pins have their spacers, so no manual offsets (the live resourcesPinLen).
+ * id). Our pins have their spacers, so no manual offsets (the live resourcesPinLen).
  */
 export function initTheme() {
   const nav = q('nb');
@@ -1621,7 +1621,7 @@ export function initTheme() {
     const next = {
       theme: z.theme,
       bg: z.theme === 'color' ? getComputedStyle(z.el).backgroundColor : null,
-      crumb: z.theme === 'color' ? z.el.id.replace(/-next$/, '') : null,
+      crumb: z.theme === 'color' ? z.el.id : null,
     };
     const cur = line.get();
     if (line.painted && next.theme === cur.theme && next.bg === cur.bg && next.crumb === cur.crumb) return;

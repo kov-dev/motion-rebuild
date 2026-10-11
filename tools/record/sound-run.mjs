@@ -117,7 +117,7 @@ const zones = () => p.evaluate(() => [...document.querySelectorAll('[data-theme]
   .filter((e) => !e.closest('[data-motion="nb"]') && !e.closest('[data-motion="snd"]'))
   .map((e, i) => {
     const r = e.getBoundingClientRect();
-    return { key: e.id || `${e.dataset.motion}-${i}`, theme: e.dataset.theme, top: r.top + scrollY, h: r.height, bg: getComputedStyle(e).backgroundColor, motion: e.dataset.motion };
+    return { key: (e.id || `${e.dataset.motion}-${i}`).replace(/-next$/, ''), theme: e.dataset.theme, top: r.top + scrollY, h: r.height, bg: getComputedStyle(e).backgroundColor, motion: e.dataset.motion };
   }));
 const footTop = () => p.evaluate(() => document.querySelector('[data-motion="footer"]').getBoundingClientRect().top + scrollY);
 const settle = reduce ? 300 : 800;
@@ -179,10 +179,10 @@ if (parts.includes('theme')) {
   for (const z of zs) {
     if (z.motion === 'footer') continue;
     checks.push({ name: `${z.key} top+40`, key: z.key, at: (g) => lineAt(g, 40), theme: z.theme, bg: z.bg });
-    if (z.motion === 'lesson-demo') checks.push({ name: 'easing after the demo', key: z.key, at: (g) => lineAt(g, g.h + 40), theme: 'color', bg: color('easing-next') });
+    if (z.motion === 'lesson-demo') checks.push({ name: 'easing after the demo', key: z.key, at: (g) => lineAt(g, g.h + 40), theme: 'color', bg: color('easing') });
     if (z.motion === 'resources') checks.push({ name: 'resources pin middle', key: z.key, at: (g) => lineAt(g, g.h / 2), theme: 'light' });
   }
-  const back = ['zoom-next', 'easing-next'].filter((k) => zs.find((z) => z.key === k));
+  const back = ['zoom', 'easing'].filter((k) => zs.find((z) => z.key === k));
   back.forEach((k) => checks.push({ name: `back up: ${k}`, key: k, at: (g) => lineAt(g, 40), theme: 'color', bg: color(k) }));
   checks.push({ name: 'back up: top', key: zs[0].key, at: () => 0, theme: 'dark' });
   for (const c of checks) {

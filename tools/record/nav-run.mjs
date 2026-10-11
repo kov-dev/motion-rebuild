@@ -98,7 +98,7 @@ const zones = () => p.evaluate(() => [...document.querySelectorAll('[data-theme]
   .filter((e) => !e.closest('[data-motion="nb"]'))
   .map((e, i) => {
     const r = e.getBoundingClientRect();
-    return { key: e.id || `${e.dataset.motion}-${i}`, theme: e.dataset.theme, top: r.top + scrollY, h: r.height, bg: getComputedStyle(e).backgroundColor, motion: e.dataset.motion };
+    return { key: (e.id || `${e.dataset.motion}-${i}`).replace(/-next$/, ''), theme: e.dataset.theme, top: r.top + scrollY, h: r.height, bg: getComputedStyle(e).backgroundColor, motion: e.dataset.motion };
   }));
 const settle = reduce ? 300 : 800;
 
@@ -125,7 +125,7 @@ if (parts.includes('theme')) {
   for (const z of zs) {
     if (z.motion === 'footer') continue;
     checks.push({ name: `${z.key} top+40`, key: z.key, at: (g) => g.top + 40, theme: z.theme, bg: z.bg, crumb: crumb(z.key) });
-    if (z.motion === 'lesson-demo') checks.push({ name: 'easing after the demo', key: z.key, at: (g) => g.top + g.h + 40, theme: 'color', bg: color('easing-next'), crumb: 'easing' });
+    if (z.motion === 'lesson-demo') checks.push({ name: 'easing after the demo', key: z.key, at: (g) => g.top + g.h + 40, theme: 'color', bg: color('easing'), crumb: 'easing' });
     if (z.motion === 'resources') checks.push({ name: 'resources pin middle', key: z.key, at: (g) => g.top + g.h / 2, theme: 'light' });
   }
   // Footer: progress p = (span − top) / span, span = vh + 0.15·h; the theme turns at p = 0.25.
@@ -136,7 +136,7 @@ if (parts.includes('theme')) {
     checks.push({ name: 'footer p 0.28 (overlay 56 %)', key: fz.key, at: footAt(0.28), theme: 'dark' });
   }
   // Back up: a lesson, the light Interactive, the dark top.
-  const back = ['zoom-next', 'easing-next'].filter((k) => zs.find((z) => z.key === k));
+  const back = ['zoom', 'easing'].filter((k) => zs.find((z) => z.key === k));
   back.forEach((k) => checks.push({ name: `back up: ${k}`, key: k, at: (g) => g.top + 40, theme: 'color', bg: color(k), crumb: crumb(k) }));
   checks.push({ name: 'back up: top', key: zs[0].key, at: () => 0, theme: 'dark' });
 

@@ -1,9 +1,9 @@
 // Runs initFooter() on the published staging page (local src/motion.js injected, as resources-run does) and checks the overlay
 // of Resources and the black clouds against the live IX2 a-126 model (docs/sections/footer.md «IX2 футера»):
 //   p = (vh + 0.15·h − top) / (vh + 0.15·h), top / h of the footer; overlay opacity = p / 0.5, clouds y = p / 0.72 · 1.2 / 1 / 2 rem.
-// The old footer is still on the staging page with its native Webflow IX2 (the live a-126), so the same points are measured on it
-// too ("live" column): its overlay rgba alpha and .footer-cloud-item y. The old footer sits at the page end, so its progress
-// is cut where the page ends (1440: max ≈ 0.556), as on motion.zajno.com.
+// Our footer is the page end (since step 2 of docs/legacy-removal.md, as on motion.zajno.com), so its progress is cut where
+// the page ends (1440: max ≈ 0.556) and the points beyond are skipped. Until session 29 the old footer was still on the staging
+// page with its native Webflow IX2 (the live a-126): that "live" column is kept for a page that still has it.
 // 1440 also rebuilds the Resources pin by a width change (1440 → 1280) and re-checks one point (the footer refreshes after it).
 // Usage: node footer-run.mjs <project-root> <out-dir> [1440|768|600|375] [--live] [--reduce]
 // --live: the staging page exactly as published (snippets already in Webflow), nothing injected.
@@ -134,18 +134,19 @@ const aim = async (pr, which) => {
   return y > s1.max + 2; // cut by the page end
 };
 const check = async (pr, tag = '') => {
-  await aim(pr, 'n');
+  const cut = await aim(pr, 'n');
   const s = await state();
   const got = { overlay: s.nOverlay, clouds: s.nClouds };
   const want = model(s.n.p, s.rem);
   const d = dOf(got, want);
-  // A missed aim would pass trivially (both at rest): the reached progress must be the asked one.
-  flag(okD(d) && Math.abs(s.n.p - pr) <= 0.03, `${tag}new p ${s.n.p.toFixed(3)} (asked ${pr}): ${fmt(got)} | model ${fmt(want)} Δa ${d.a.toFixed(3)} Δc ${d.c.toFixed(1)}`);
-  return s;
+  // A missed aim would pass trivially (both at rest): the reached progress must be the asked one — unless the page end cut it.
+  flag(okD(d) && (cut || Math.abs(s.n.p - pr) <= 0.03), `${tag}new p ${s.n.p.toFixed(3)} (asked ${pr}${cut ? ', page end' : ''}): ${fmt(got)} | model ${fmt(want)} Δa ${d.a.toFixed(3)} Δc ${d.c.toFixed(1)}`);
+  return { s, cut };
 };
 for (const pr of POINTS) {
-  const s = await check(pr);
-  if (pr === 0.45 || pr === 1) await p.screenshot({ path: `${out}/footer-run-${only}${reduce ? '-reduce' : ''}-${Math.round(s.n.p * 100)}.png` });
+  const { s, cut } = await check(pr);
+  if (pr === 0.45 || pr === 1 || cut) await p.screenshot({ path: `${out}/footer-run-${only}${reduce ? '-reduce' : ''}-${Math.round(s.n.p * 100)}.png` });
+  if (cut) break; // the page end: the rest of the points are unreachable
 }
 
 // The old footer with the live IX2 a-126: same points, as far as the page end allows (reduced motion does not change IX2).
