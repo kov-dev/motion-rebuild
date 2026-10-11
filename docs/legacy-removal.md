@@ -36,11 +36,11 @@ footer code Home, `main-css` ще перший ембед у Body. Інвент�
 
 Порядок у Body був: `styles-rem` → `site-nav` → `site-sound` → `section-preloader` → **`main-css`** → **`.navigation`** →
 **`.loader`** → `main` → **`.fixed-bottom`**. Після кроку 2: `styles-rem` → `site-nav` → `site-sound` → `section-preloader` →
-`main-css` → `main` (7 нових секцій, останній — `site-footer`). ID нижче — історичні (елементів уже немає, крім `main-css`).
+`main-css` → `main` (7 нових секцій, останній — `site-footer`); після кроку 4 (сесія 31) — без `main-css`. ID нижче — історичні (елементів уже немає).
 
 | Блок | Клас | element id | Що всередині | Замінено |
 |---|---|---|---|---|
-| ембед CSS | `main-css` | `27a12260-ea1b-f958-9a7f-b0e7acbbbf68` | `reference/main-css.css` (розбір [main-css.md](main-css.md)) | `styles-rem` + класи секцій; **видаляти останнім (крок 4)** після звірки |
+| ембед CSS | `main-css` | `27a12260-ea1b-f958-9a7f-b0e7acbbbf68` | `reference/main-css.css` (розбір [main-css.md](main-css.md)) | `styles-rem` + класи секцій; видалено останнім (крок 4, сесія 31) |
 | навбар | `navigation w-nav` | `72062d36-1cc9-8384-1290-b9cc4e917a3b` | лого-Lottie, крихти, бургер, меню 10 `lottie-card` | `site-nav` |
 | прелоадер | `loader` | `f79bcaeb-7490-de89-3371-7a9243d44c43` | 4 Lottie + лічильник | `section-preloader` |
 | Hero | `nav nav-dark` → `section.is-hero#hero` | `7a61b557-4dcd-92ad-1f18-47267d8315a6` | кулька, лінії, 2 тексти | `section-hero` (`#hero-next`) |
@@ -100,5 +100,15 @@ Resources — лише елемент сторінки).
    `classic-anim_wrap::before` — у `styles-rem` як `lesson-noise`; `video.is-*` — нові відео одні на смугу;
    `.w-nav-menu` — йде з `w-nav`). Метод: `*-compare.mjs` ×4 смуги до й після видалення ембеда, Δ 0. Новий коміт →
    модуль у head на новий sha → publish → усі `*-run --live`.
+   ✅ виконано 2026-10-11 (сесія 31). **Код:** `legacy-guard.js` видалено, `import` і відновлення `window.gsap` прибрано, `syncLegacy()`,
+   `guardVideo()` / `wantedVideos` (5 викликів) прибрано, коментарі гейта й `initNav()` — «our Lenis, stage 4»; тести більше не підміняють
+   `legacy-guard.js`. Коміт `87ef446` → модуль у head → publish → `coexist` / `nav` / `sound` / `footer` / `lessons --live` 1440 + 375 — 0.
+   **main-css:** `*-compare.mjs` уже не годились (порівнювали нову секцію зі старою на тій самій сторінці; hero / intro — лайв проти
+   локальної фікстури, ембеда staging не бачать) → новий `tools/record/main-css-diff.mjs`: `inventory` (кожен селектор ембеду проти DOM
+   staging з JS після прокрутки) — збіги лише в глобальних `html` (rem ×3 смуги), `::-webkit-scrollbar`, `*`; `snapshot` / `diff` (JS off,
+   rect + 31 обчислена властивість 1205 елементів і `::before/::after`, 4 смуги) до й після `remove_element`. Δ: 768 / 600 — лише `html
+   overflow` auto → visible (`overflow-y: overlay` ембеду; скрол вʼюпорта той самий); 1440 / 375 — точність rem: ембед стояв після
+   `styles-rem` і перебивав його усіченими `6.94444vw` / `26.66666vw` (99.9999 px), тепер точний `calc(10000vw / 1440)` = 100 px →
+   кожен елемент ≤ 0.05 px, накопичено до низу сторінки 1.4 px (1440) / 1.8 px (375). Класові правила ембеду не тримали нічого.
 5. Потім (окремо, етап 4): Lenis у `motion.js` (пінована версія, `lenis.on('scroll', ScrollTrigger.update)`,
    `gsap.ticker`, `prefers-reduced-motion` вимикає), `initPreloader({ lenis })` уже приймає інстанс.

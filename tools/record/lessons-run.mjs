@@ -57,10 +57,10 @@ const CLASSIC = { easing: [0.18, 0.24], delay: [0.24, 0.3] };
 // Element lookup per page: ours by data-motion roles, the live one by its classes.
 const SEL = {
   ours: {
-    impl: (id) => ({ trig: `#${id}-next [data-motion="lesson-cases"]`, head: '[data-motion="lesson-cases-head"]', track: '[data-motion="lesson-track"]', card: '[data-motion="lesson-card"]' }),
+    impl: (id) => ({ trig: `#${id} [data-motion="lesson-cases"]`, head: '[data-motion="lesson-cases-head"]', track: '[data-motion="lesson-track"]', card: '[data-motion="lesson-card"]' }),
     ex: { trig: '[data-motion="lesson-examples"]', line: '[data-motion="examples-line"]', star: '[data-motion="examples-star"]' },
     demo: { trig: '[data-motion="lesson-demo"]', video: '[data-motion="demo-video"]', line: '[data-motion="demo-line"]', tick: '[data-motion="demo-tick"]', step: '[data-motion="demo-step"]' },
-    classic: (id) => ({ trig: `#${id}-next [data-motion="lesson-classic"]`, overlay: `#${id}-next [data-motion="lesson-overlay"]` }),
+    classic: (id) => ({ trig: `#${id} [data-motion="lesson-classic"]`, overlay: `#${id} [data-motion="lesson-overlay"]` }),
     splide: { root: '[data-motion="lesson-schemes"]', track: '[data-motion="schemes-track"]', slide: '[data-motion="scheme"]', next: '[data-motion="schemes-next"]', prev: '[data-motion="schemes-prev"]', text: '[data-motion="schemes-text"]' },
   },
   live: {
@@ -355,11 +355,11 @@ if (parts.includes('media')) {
   }, id);
   rows.push('-- media (ours)');
   for (const [where, sel, f] of [
-    ['easing hero', '#easing-next [data-motion="lesson-visual"]', 0.4],
-    ['easing cases', '#easing-next [data-motion="lesson-cases"]', -0.6],
-    ['easing classic', '#easing-next [data-motion="lesson-classic"]', 0.3],
-    ['dimension hero', '#dimension-next [data-motion="lesson-visual"]', 0.4],
-    ['fade cases', '#fade-next [data-motion="lesson-cases"]', -0.6],
+    ['easing hero', '#easing [data-motion="lesson-visual"]', 0.4],
+    ['easing cases', '#easing [data-motion="lesson-cases"]', -0.6],
+    ['easing classic', '#easing [data-motion="lesson-classic"]', 0.3],
+    ['dimension hero', '#dimension [data-motion="lesson-visual"]', 0.4],
+    ['fade cases', '#fade [data-motion="lesson-cases"]', -0.6],
   ]) {
     const g = await geo(pg, sel);
     await pg.scrollTo(Math.round(g.top - vp.h * f));

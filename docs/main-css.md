@@ -1,5 +1,9 @@
 # main-css — розбір ембеду
 
+> **Ембед видалено з Home копії 2026-10-11 (сесія 31, крок 4 [legacy-removal.md](legacy-removal.md)).** Усе потрібне вже в `styles-rem`
+> (rem, scrollbar, Lenis-CSS, noise `lesson-classic::before`, Safari-mask) і в класах секцій. Звірка — `tools/record/main-css-diff.mjs`.
+> Нижче — історичний розбір; дослівна копія лишається в `reference/main-css.css`.
+
 Джерело: `div.main-css.w-embed` (Designer HtmlEmbed `27a12260-ea1b-f958-9a7f-b0e7acbbbf68`, перший child `body` Home), один `<style>`, ~190 рядків. Дослівно: `reference/main-css.css`. Інших `<style>`-ембедів у HTML Home немає. Site head: лише `preconnect`/`dns-prefetch` + Twitter pixel (без стилів); site footer і page head порожні; page footer — лише `<script>`/`<audio>` (стилів немає). Тож увесь кастомний CSS = цей ембед.
 
 ## `html { font-size }` по смугах

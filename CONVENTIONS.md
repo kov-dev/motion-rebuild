@@ -396,6 +396,34 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 
 ## Журнал
 
+### 2026-10-11 (сесія 31) — видалення старого, крок 4: код без перехідних костилів, ембед `main-css` видалено
+
+- **Код (крок 4):** `src/legacy-guard.js` видалено; у `motion.js` прибрано його `import` і відновлення `window.gsap`, `syncLegacy()` + виклик
+  в `init()`, `guardVideo()` / `wantedVideos` (у `playVideo` / `pauseVideo` / `lazyVideo` / `initLessonVisuals` / `initLessonDemo`); шапка
+  модуля без «runs next to the old script». Коментарі «old script's Lenis, mobile normalizeScroll» → «our Lenis, stage 4» у `preloader-gate.js`
+  (гейт лишається) і в `initNav()`; у `preloader.css` прибрано застаріле «Not connected to Webflow yet». Тести (`tools/record/*-run.mjs`,
+  11 файлів) більше не підміняють `legacy-guard.js`. Коміт **`87ef446`** → jsDelivr 200 → head Home (`set_page_freeform_code`, увесь
+  `src/webflow/home-head.html`, прочитано назад — збіг).
+- **Staging опубліковано агентом** 2 рази: `4d482ca7…` (модуль `87ef446`), `9836afb4…` (без `main-css`, 17:14 UTC). Обидва дійшли
+  за ≤ 20 с (curl по sha / за відсутністю `main-css w-embed`).
+- **Перевірка коду `--live`** 1440 + 375: `coexist` (без помилок, `window.gsap undefined`), `nav` / `sound` / `footer` / `lessons` — **0 прапорців**;
+  `lessons` media: відео на екрані грають, поза екраном 0 грають — `guardVideo()` справді більше не потрібен. `lessons-run.mjs` у сесії 30
+  лишився з `#<урок>-next` (впав на `null.top`) → селектори на справжні id.
+- **main-css:** `*-compare.mjs` для звірки вже не годяться (interactive / techniques / lessons / footer / nav порівнювали з **старою секцією
+  на тій самій сторінці**, hero / intro — лайв проти локальної фікстури). Новий **`tools/record/main-css-diff.mjs`**: `inventory` — кожен
+  селектор ембеду проти DOM staging з JS після прокрутки → збіги лише в `html` (rem, 3 смуги), `::-webkit-scrollbar`, `*`; жодне класове
+  правило нічого не тримає. `snapshot before` (4 смуги, JS off, 1205 елементів: rect + 31 властивість + `::before/::after`, `html`, `body`)
+  → `remove_element` `27a12260-…bf68` (дерево Body прочитано: `styles-rem` → `site-nav` → `site-sound` → `section-preloader` → `main`) →
+  publish → `snapshot after` → `diff`. **768 / 600: лише `html overflow` auto → visible** (`overflow-y: overlay` ембеду; вʼюпорт скролиться
+  так само). **1440 / 375: точність rem** — ембед стояв після `styles-rem` і перебивав його усіченими `6.94444vw` / `26.66666vw` (1rem =
+  99.9999 px), тепер працює точний `calc(10000vw / 1440)` = 100 px: кожен елемент ≤ 0.05 px, накопичено до низу сторінки 1.4 px (1440) /
+  1.8 px (375), висота документа +1 px. Рішення: прийнято (наш rem рівно макетний; на око й у тестах різниці немає).
+- **Після видалення `--live`** 1440 + 375: `coexist`, `nav`, `sound`, `footer`, `lessons`, `interactive` (shift Δ0 з лайвом, сфера, Lottie),
+  `techniques`, `resources` — **16 прогонів, 0 прапорців, 0 page errors**.
+- **Побічно:** з `main-css` пішов жорсткий URL `Texture_01.png` на бакет оригіналу (шум у `styles-rem` уже з бакета копії) — лишилось 2 постери.
+- **Resources Sort (courses):** `resources-order.mjs` — courses ✗ (зворотний), sources ✓. Досі чекає користувача.
+- **Документи:** [docs/legacy-removal.md](docs/legacy-removal.md) (крок 4 ✅), [docs/main-css.md](docs/main-css.md) (позначка «видалено»), PLAN.
+
 ### 2026-10-11 (сесія 30) — видалення старого, кроки 2–3: старі блоки видалено, справжні id
 
 - **Крок 2 виконано:** 10 `remove_element` по одному з читанням дерева після кожного — `.loader` `f79bcaeb-…4c43`, `.navigation` `72062d36-…7a3b`,
