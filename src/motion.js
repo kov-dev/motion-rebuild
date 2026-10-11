@@ -104,6 +104,7 @@ const WORDS_TIMING = {
 };
 const PHASE1 = 5.0;
 const PHASE2 = 3.23;
+const HANDOVER_FADE = 0.25; // counter and shadow fade out before the ball turns into the first disc
 
 // Phase 1: the ball bounces on its shadow, 13 frames per loop.
 function bounceLoop(ball, shadow) {
@@ -130,6 +131,20 @@ function bounceLoop(ball, shadow) {
   return tl;
 }
 
+// Resolves when the bounce is back at its apex (loop start: y 0, scale 1) and stops it there.
+// The apex is at least `min` seconds away, so whatever fades meanwhile has time to finish.
+function bounceToApex(bounce, min) {
+  const loops = bounce.duration() - bounce.time() < min ? 2 : 1;
+  let n = 0;
+  return new Promise((resolve) => {
+    bounce.eventCallback('onRepeat', () => {
+      if (++n < loops) return;
+      bounce.pause(0);
+      resolve();
+    });
+  });
+}
+
 function countTo100(counter, duration) {
   const state = { v: 0 };
   return gsap.to(state, {
@@ -141,24 +156,32 @@ function countTo100(counter, duration) {
 }
 
 // Phase 2: three discs grow from the centre, each word crosses the centre inside them.
-function wordsTimeline(scene, b) {
+// `from` is the loader ball ({ x, y, r } in viewport px): the first disc starts as that very ball and
+// drifts to the centre while it grows (the live site cut to a new disc in the centre, which read as a jump).
+function wordsTimeline(scene, b, from) {
   const t = WORDS_TIMING[b];
   const R = (Math.hypot(innerWidth, innerHeight) / 2) * 1.01;
   const vh = innerHeight;
+  const cx = innerWidth / 2;
+  const cy = vh / 2;
   const tl = gsap.timeline();
   qa('preloader-step', scene).forEach((step, i) => {
     const disc = q('preloader-disc', step);
     const words = qa('preloader-word', step); // base word + its copy inside the disc
+    const start = i === 0 && from ? from : { x: cx, y: cy, r: 0 };
     tl.fromTo(
       disc,
-      { clipPath: 'circle(0px at 50% 50%)' },
-      { clipPath: `circle(${R}px at 50% 50%)`, duration: t.disc[i][1], ease: bez(0.65, 0, 0.833, 0.833) },
+      { clipPath: `circle(${start.r}px at ${start.x}px ${start.y}px)` },
+      { clipPath: `circle(${R}px at ${cx}px ${cy}px)`, duration: t.disc[i][1], ease: bez(0.65, 0, 0.833, 0.833) },
       t.disc[i][0]
     );
+    // Live offset (k·vh), but never less than the whole line box: on tall viewports the cover-scaled
+    // word is bigger than k allows for, and its caps peeked in at the bottom edge before the start.
+    const y = Math.max(t.k[i] * vh, cy + words[0].offsetHeight / 2 + 2);
     tl.fromTo(
       words,
-      { y: t.k[i] * vh },
-      { y: -t.k[i] * vh, duration: t.word[i][1], ease: i === 0 ? bez(0.309, 0, 0.833, 0.833) : bez(0.35, 0, 0.833, 0.833) },
+      { y },
+      { y: -y, duration: t.word[i][1], ease: i === 0 ? bez(0.309, 0, 0.833, 0.833) : bez(0.35, 0, 0.833, 0.833) },
       t.word[i][0]
     );
   });
@@ -227,14 +250,24 @@ export async function initPreloader({ lenis = null } = {}) {
     heroHidden();
 
     // Phase 1, 0 → 5.0 s: bounce + counter; words never start in a fallback font.
-    const bounce = bounceLoop(q('preloader-bounce-ball', root), q('preloader-bounce-shadow', root));
+    const ball = q('preloader-bounce-ball', root);
+    const shadow = q('preloader-bounce-shadow', root);
+    const bounce = bounceLoop(ball, shadow);
     countTo100(counter, 4.0);
     await Promise.all([wait(PHASE1), document.fonts.ready]);
-    bounce.kill();
-    loader.style.display = 'none'; // instant, as on the live site
 
-    // Phase 2, 5.0 → 8.23 s: discs and words; ends on a fully dark screen.
-    await wordsTimeline(q('preloader-scene', root), band());
+    // Hand-over: the counter and the shadow fade while the ball rises to its apex and stops there.
+    gsap.to([counter, shadow], { opacity: 0, duration: HANDOVER_FADE, ease: 'power1.out' });
+    await bounceToApex(bounce, HANDOVER_FADE);
+    const r = ball.getBoundingClientRect();
+    const from = { x: r.left + r.width / 2, y: r.top + r.height / 2, r: r.width / 2 };
+    bounce.kill();
+
+    // Phase 2, ≈5.3 → 8.5 s: discs and words; ends on a fully dark screen. The loader goes in the same
+    // frame the first disc starts as the ball (same colour, same circle), so the swap is invisible.
+    const words = wordsTimeline(q('preloader-scene', root), band(), from);
+    loader.style.display = 'none';
+    await words;
 
     // Phase 3, 8.23 → 9.93 s: overlay off, the real Hero enters.
     html.classList.remove('is-preloading');
