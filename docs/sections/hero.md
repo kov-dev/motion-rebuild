@@ -115,3 +115,6 @@ section.section-hero          data-motion="theme" data-theme="dark"   semantic: 
 **Сесія 9:** знімок Designer вдався (`reference/snapshots/2026-10-09-hero-designer.png`). Лінії й обводки на ньому
 товсті, але це артефакт рендеру знімка: на staging лінія 1 px, кільце 106, кулька 18. Вихід ліній і кільця при вході
 Intro — `initHero()` у `src/motion.js` (числа вище, деталі в intro.md «План анімації»).
+
+**Сесія 33:** `hero-plate` `bottom` → 0 на всіх смугах (було 0.53 / tiny 0.37 rem = половина кільця, як `ball-bg` на лайві): між верхом кільця
+й лінією просвічував h1. Тепер плашка закінчується на осі, як у Figma (стан 3). Перевірка — `tools/record/hero-intro-check.mjs`.
