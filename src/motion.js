@@ -9,11 +9,13 @@
   - Numbers come from docs/sections/<section>.md; keep them 1:1 with the live site.
 */
 
-// Pinned: re-check the latest 3.x before stage 4 and bump in one place.
-import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/+esm';
-import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/CustomEase/+esm';
-import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger/+esm';
-import { MotionPathPlugin } from 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/MotionPathPlugin/+esm';
+// Pinned (latest stable 3.x / 1.x on 2026-10-11): bump each in one place.
+import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/+esm';
+import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/CustomEase/+esm';
+import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/ScrollTrigger/+esm';
+import { MotionPathPlugin } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/MotionPathPlugin/+esm';
+// Its base CSS (dist/lenis.css of the same version) lives in src/styles-rem.html.
+import Lenis from 'https://cdn.jsdelivr.net/npm/lenis@1.3.26/+esm';
 
 gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin);
 
@@ -42,6 +44,53 @@ const band = () => (innerWidth >= 992 ? 'desktop' : innerWidth >= 480 ? 'tablet'
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const wait = (s) => new Promise((resolve) => gsap.delayedCall(s, resolve));
+
+/* ---------- smooth scroll (script.v33 block A, docs/script-map.md) ---------- */
+
+// The live Lenis 1.0.29 options: every wheel step eases to its new target over 2 s (exponential out), no lerp.
+// Programmatic scrollTo() (menu cards) takes the same duration and ease.
+const LENIS = {
+  duration: 2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  wheelMultiplier: 1,
+  touchMultiplier: 1,
+};
+
+let lenis = null; // null: native scroll (touch-primary device or reduced motion)
+
+/**
+ * Lenis for mouse and trackpad input, as on the live site: it keyed on a non-mobile user agent, so a narrow desktop window
+ * scrolled smoothly too; here the same split is a pointer query instead of the user agent. Touch-primary devices keep the
+ * native scroll and get no ScrollTrigger.normalizeScroll() (the live mobile used it; our pins are created in DOM order,
+ * which fixed the mobile jump without it). Reduced motion: no Lenis at all. One integration: Lenis drives the window
+ * scroll from the GSAP ticker and reports each step to ScrollTrigger, no scrollerProxy.
+ */
+function initLenis() {
+  if (reducedMotion() || matchMedia('(hover: none) and (pointer: coarse)').matches) return null;
+  const l = new Lenis(LENIS);
+  l.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((time) => l.raf(time * 1000));
+  gsap.ticker.lagSmoothing(0);
+  return l;
+}
+
+/**
+ * In-page anchors (menu cards, footer links) land their section at the top: Lenis eases there (its own duration, as
+ * the live smooth anchor), the native scroll jumps. Webflow's own anchor scroll, delegated on document, is cut off by
+ * the caller: it would stop 80 px short under our fixed header and fight Lenis.
+ */
+function scrollToSection(target) {
+  if (lenis) lenis.scrollTo(target);
+  else scrollTo(0, target.getBoundingClientRect().top + scrollY);
+}
+
+const anchorTarget = (link) => {
+  try {
+    return document.querySelector(link.getAttribute('href'));
+  } catch {
+    return null;
+  }
+};
 
 /* ---------- preloader (docs/sections/preloader.md, «План анімації») ---------- */
 
@@ -1456,6 +1505,17 @@ export function initFooter() {
   const clouds = qa('ft-cloud', footer);
   const rem = (v) => () => v * remPx();
 
+  // Lesson links → their sections, as the menu cards.
+  footer.querySelectorAll('a[href^="#"]').forEach((link) =>
+    link.addEventListener('click', (e) => {
+      const target = anchorTarget(link);
+      if (!target) return;
+      e.preventDefault();
+      e.stopPropagation();
+      scrollToSection(target);
+    })
+  );
+
   gsap.matchMedia().add(
     // Every band is listed: matchMedia() skips the callback when no condition matches.
     { any: '(min-width: 0px)', reduce: '(prefers-reduced-motion: reduce)' },
@@ -1639,8 +1699,9 @@ async function initNavLogo(root) {
 
 /**
  * Menu: the toggle (a <button>, aria-expanded) opens the full-screen menu with the live a-58 / a-88 keys, locks the page
- * and paints the navbar dark; Esc and a card click close it. A card click then jumps to its section (our pin spacers are
- * in the DOM, so the target lands at the top; the live anchor missed on 375). The wheel over the open menu scrolls the
+ * (lenis.stop(), or overflow: hidden on the native scroll) and paints the navbar dark; Esc and a card click close it. A card
+ * click then scrolls to its section (scrollToSection). Our pin spacers are in the DOM, so the target lands at the top; the
+ * live anchor missed on 375. The wheel over the open menu scrolls the
  * track sideways. Card Lotties load on the first intent to open (hover / focus of the toggle) and play on hover with a
  * mouse on ≥992. Reduced motion: the cards do not slide.
  */
@@ -1705,13 +1766,15 @@ export function initNav() {
     const slide = !reducedMotion();
     if (open) {
       loadCards();
-      html.style.overflow = 'hidden';
+      if (lenis) lenis.stop();
+      else html.style.overflow = 'hidden';
       gsap.set(menu, { display: 'block' });
       // From the start state every time, as the first (instant) group of a-58.
       gsap.fromTo(menu, { opacity: 0 }, { opacity: 1, duration: MENU.fade, ease: 'none', overwrite: true });
       if (cards && slide) gsap.fromTo(cards, { x: rem(MENU.cardsX) }, { x: 0, duration: MENU.cards, ease: 'power1.inOut', overwrite: true });
     } else {
-      html.style.removeProperty('overflow');
+      if (lenis) lenis.start();
+      else html.style.removeProperty('overflow');
       gsap.to(menu, { opacity: 0, duration: MENU.fade, ease: 'none', overwrite: true, onComplete: () => gsap.set(menu, { display: 'none' }) });
       if (cards && slide) gsap.to(cards, { x: rem(MENU.cardsX), duration: MENU.cards, ease: 'power1.inOut', overwrite: true });
     }
@@ -1737,23 +1800,19 @@ export function initNav() {
     // Hover sound of the card (live #link1…#link10 → hover files), any pointer, like the live mouseenter.
     link.addEventListener('pointerenter', () => playSound(`hover${SOUND_CARD_HOVER[i] ?? i + 1}`));
     link.addEventListener('click', (e) => {
-      let target = null;
-      try {
-        target = document.querySelector(link.getAttribute('href'));
-      } catch {}
+      const target = anchorTarget(link);
       if (!target) return setOpen(false);
-      // Webflow's own anchor scroll (delegated on document) would land the target below our fixed header, 80 px short.
       e.preventDefault();
       e.stopPropagation();
-      setOpen(false);
-      scrollTo(0, target.getBoundingClientRect().top + scrollY);
+      setOpen(false); // starts Lenis again first: a stopped Lenis ignores scrollTo()
+      scrollToSection(target);
     });
     link.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && hoverable.matches && playCard(link, true));
     link.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && hoverable.matches && playCard(link, false));
   });
 
   // The open menu owns the input: the wheel scrolls the track sideways (deltaMode lines / pages scaled to px), and
-  // neither the wheel nor touches reach the page's smooth scroll (Lenis, stage 4) underneath.
+  // neither the wheel nor touches reach Lenis underneath (it listens on window; it is stopped as well).
   root.addEventListener(
     'wheel',
     (e) => {
@@ -1864,9 +1923,10 @@ export function initSound() {
 /* ---------- boot ---------- */
 
 async function init() {
+  lenis = initLenis();
   // Before the preloader: the logo eyes load while it runs, the navbar enters in its phase 3.
   initNav();
-  await initPreloader();
+  await initPreloader({ lenis });
   // Created in DOM order, so every trigger below a pin already knows its spacer.
   initHero();
   initIntro();

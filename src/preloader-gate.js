@@ -5,7 +5,7 @@
   var html = document.documentElement;
   html.classList.add('is-preloading');
 
-  // overflow: hidden stops native scrolling only; a smooth-scroll library (our Lenis, stage 4)
+  // overflow: hidden stops native scrolling only; a smooth-scroll library (our Lenis)
   // moves the page itself on wheel/touch. Registered here, before any of them, as capture
   // listeners on window, so they run first and swallow the input.
   var types = ['wheel', 'touchmove'];

@@ -4,7 +4,7 @@
 //           the dark demo inside easing and the lesson after it, Resources light through its whole pin, the footer dark from
 //           footer progress 0.25 (overlay of Resources ≥ 50 %), and back up again
 //   menu  — open / close sampled every frame in the page against the live a-58 / a-88 model (linear, cards power1.inOut),
-//           aria-expanded, html overflow, the dark scheme while open over a light section, Esc, the logo and card Lotties,
+//           aria-expanded, the page lock (html overflow, or html.lenis-stopped under Lenis), the dark scheme while open over a light section, Esc, the logo and card Lotties,
 //           hover frames (≥992), the wheel → track scrollLeft; with LIVE=<nav-menu-1440.txt> the live samples of nav-probe.mjs
 //           are fitted to the same model (their clock starts late: the offset is fitted on the cards x)
 //   links — a card click closes the menu and lands its section at the top (±2 px) with the section's scheme
@@ -211,7 +211,7 @@ const sampleToggle = (how) => p.evaluate(async (how) => {
     const lm = m(label), tm = m(top);
     res.push({
       t, display: getComputedStyle(menu).display, op: +getComputedStyle(menu).opacity, x: cm.m41, label: label.offsetHeight ? (lm.m42 / label.getBoundingClientRect().height) * 100 : null,
-      angle: (Math.atan2(tm.b, tm.a) * 180) / Math.PI, y: tm.m42, overflow: document.documentElement.style.overflow,
+      angle: (Math.atan2(tm.b, tm.a) * 180) / Math.PI, y: tm.m42, overflow: (document.documentElement.classList.contains('lenis-stopped') ? 'lenis-stopped' : document.documentElement.style.overflow),
       aria: toggle.getAttribute('aria-expanded'),
     });
     await new Promise(requestAnimationFrame);
@@ -224,7 +224,7 @@ const checkRun = (tag, open, run) => {
   const last = run.res[run.res.length - 1];
   flag(!bad.length, `${tag}: ${run.res.length} frames vs model${bad.length ? ` — ${bad.length} off, first t ${bad[0].s.t.toFixed(3)} [${bad[0].keys.map((k) => `${k} ${bad[0].s[k].toFixed(2)}`)}]` : ''}`);
   const endOk = open
-    ? last.display === 'block' && last.op === 1 && Math.abs(last.x) < 0.5 && last.aria === 'true' && last.overflow === 'hidden'
+    ? last.display === 'block' && last.op === 1 && Math.abs(last.x) < 0.5 && last.aria === 'true' && /^(hidden|lenis-stopped)$/.test(last.overflow)
     : last.display === 'none' && last.aria === 'false' && last.overflow === '';
   flag(endOk, `${tag} end: display ${last.display} op ${last.op} x ${last.x.toFixed(1)} aria ${last.aria} overflow '${last.overflow}'`);
   const hide = run.res.find((s) => s.display === 'none');
@@ -368,7 +368,7 @@ if (parts.includes('links')) {
     const r = await p.evaluate((h) => {
       const t = document.querySelector(h);
       return { top: t ? +t.getBoundingClientRect().top.toFixed(1) : null, y: scrollY, theme: t?.dataset.theme, bg: t ? getComputedStyle(t).backgroundColor : '',
-        menu: getComputedStyle(document.querySelector('[data-motion="nb-menu"]')).display, overflow: document.documentElement.style.overflow };
+        menu: getComputedStyle(document.querySelector('[data-motion="nb-menu"]')).display, overflow: (document.documentElement.classList.contains('lenis-stopped') ? 'lenis-stopped' : document.documentElement.style.overflow) };
     }, href);
     const s = await navState();
     const theme = r.theme || 'dark';
