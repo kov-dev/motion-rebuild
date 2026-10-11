@@ -64,7 +64,8 @@
   CDN студії (Amazon). Репо: `https://github.com/kov-dev/motion-rebuild` (public, бо jsDelivr роздає лише публічні; після переїзду на CDN студії можна закрити). Репо = уся папка `Projects/Motion`, `reference/recordings/` не комітиться. Коміти робить агент наприкінці сесії.
 - **Lenis лишається.** Пінована версія, одна інтеграція зі ScrollTrigger
   (`lenis.on('scroll', ScrollTrigger.update)` + `gsap.ticker`), без
-  `scrollerProxy`-костилів, `prefers-reduced-motion` вимикає smooth.
+  `scrollerProxy`-костилів, `prefers-reduced-motion` вимикає smooth. ✅ сесія 32: lenis 1.3.26 + GSAP 3.15.0,
+  лише миша/трекпад (тач — нативний скрол без `normalizeScroll`), параметри лайву (`duration 2`, expo-out).
 - **Еталон анімацій:** агент сам записує лайв відео через Playwright +
   Google Chrome ([tools/record/](tools/record/)) у
   `reference/recordings/<desktop|mobile>/<NN-section>.mp4` (не комітиться).
@@ -395,6 +396,41 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-11 (сесія 32) — етап 4: Lenis 1.3.26, GSAP 3.15.0, якорі, `lenis-run.mjs`
+
+- **Версії (npm, 2026-10-11):** lenis `latest` 1.3.26 (2.0 лише `dev`), gsap `latest` 3.15.0 (4-та гілка — `3.0.0-beta` під тегом `next`, не чіпаємо).
+  Обидві ESM з jsDelivr (`/+esm`, 200), GSAP піднято 3.13.0 → 3.15.0 в одному місці. Лайв тягне `gh/studio-freight/lenis@latest/bundled/lenis.js`
+  = **lenis 1.0.29** з `duration: 2`, easing `min(1, 1.001 − 2^(−10t))`, `wheelMultiplier 1`, `smoothTouch false` (lerp вимикається сам, бо є
+  duration). У 1.3.26 `duration` + `easing` мають пріоритет над `lerp` → ті самі опції дають ту саму криву.
+- **Код (`bcebd8f`):** `initLenis()` у `motion.js` — `new Lenis(LENIS)`, `on('scroll', ScrollTrigger.update)`, `gsap.ticker.add(t => raf(t*1000))`,
+  `lagSmoothing(0)`, без `scrollerProxy`; інстанс створюється в `init()` до `initNav()` і йде в `initPreloader({ lenis })` (stop/start навколо
+  прелоадера). Меню: `lenis.stop()/start()` замість `html overflow` (без Lenis — як було). Новий `scrollToSection()` для **карток меню і посилань
+  футера** (`ft-link` `#hero…#resources` до цього обробляв Webflow-скрол, той самий, що недолітав на 80 px): Lenis — `lenis.scrollTo(target)` з
+  тими самими 2 с / expo-out, нативно — стрибок.
+- **Рішення агента:** (1) **Lenis вмикається за вказівником, а не за шириною ≥992:** лайв ключувався на десктопний UA, тож вузьке вікно з мишею
+  там теж плавне; у нас `!(hover: none) and (pointer: coarse)` — той самий розподіл без UA-сніфінгу (на тачі 1.3.26 і так не згладжує).
+  (2) **`normalizeScroll` на тачі не ставимо** — стрибок мобайла вже закрито порядком створення pin'ів (сесія 4 / 13); нативний скрол
+  лишає інерцію й адресний рядок iOS як є. (3) **reduce → без Lenis узагалі** (не `respectReducedMotion`), створюється один раз на старті.
+- **`styles-rem`:** Lenis-CSS синхронізовано з `dist/lenis.css` 1.3.26 1:1 (`.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip }`,
+  `[data-lenis-prevent*]`, `lenis-autoToggle`; правило `scroll-behavior` прибрано — 1.3 скролить з `behavior: 'instant'`). Ембед компонента
+  `a9980c61-…` → `set_settings` `code` → прочитано назад, збіг. Head Home → модуль `bcebd8f` (`set_page_freeform_code`, прочитано назад);
+  у гейті коментар «our Lenis» без «stage 4».
+- **Staging опубліковано агентом** 1 раз (`17481d8e…`, 18:18 UTC), дійшло за ≤ 5 с (curl: sha `bcebd8f5` + `lenis-autoToggle`).
+- **Новий `tools/record/lenis-run.mjs`:** `wheel` — однаковий ввід колеса на motion.zajno.com і staging, scrollY кожен кадр від події:
+  **крок 100: 100 / 100 px, t50/t90/t99 184↔182 · 636↔634 · 1184↔1183 мс; крок 300: 187↔182 · 652↔651 · 1252↔1250; 5×100 через 60 мс:
+  500 / 500, 385↔384 · 834↔834 · 1466↔1466** — швидкість колеса 1:1 з лайвом. `state` — `html.lenis` / `lenis-stopped` під прелоадером і меню,
+  колесо в меню не рухає сторінку, після закриття +300 px; на 375 і з reduce — без `html.lenis`, меню тримає `overflow: hidden`; посилання
+  футера `#delay` → ціль top 0. `nav-run.mjs`: лок меню = `overflow hidden` **або** `html.lenis-stopped`.
+- **Перевірка `--live`** 1440 + 375 після publish: `coexist` (прелоадер тримає скрол, scrollY 0, без помилок), `nav` (links: 5 карток ±0.5 px під
+  Lenis), `sound`, `footer`, `lessons`, `interactive` (shift Δ0), `techniques`, `resources`, `lenis` (+ 1440 reduce) — **0 прапорців, 0 page errors**,
+  крім одного кадру `nav-375 close (toggle)` (t 0.195), двічі перепрогнано — 0 (на 375 Lenis немає, це джиттер кадру).
+- **Пастка / джиттер тесту:** `lessons-run --part=splide` 1440 інколи дає ⚠ на першому семплі (наші 0.31–0.37 проти лайвових 0.294, поріг
+  0.05): та сама картина з GSAP 3.13 і без `lagSmoothing(0)` — фаза кадру в момент кліку (GSAP-твін стартує в тому ж кадрі, Splide лайву —
+  на кадр пізніше), не Lenis. `interactive-run` під Lenis недоїжджає до цілі на десятки px (допуск 30, інерція 2 с) — рядки інформаційні.
+- **Resources Sort (courses):** `resources-order.mjs` — courses ✗ (зворотний), sources ✓. Досі чекає користувача.
+- **Документи:** [docs/legacy-removal.md](docs/legacy-removal.md) (крок 5 ✅), [docs/script-map.md](docs/script-map.md) (блок A, баг 1),
+  [docs/main-css.md](docs/main-css.md) (Lenis-рядок), PLAN.
 
 ### 2026-10-11 (сесія 31) — видалення старого, крок 4: код без перехідних костилів, ембед `main-css` видалено
 

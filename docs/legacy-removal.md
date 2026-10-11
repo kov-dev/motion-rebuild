@@ -112,3 +112,5 @@ Resources — лише елемент сторінки).
    кожен елемент ≤ 0.05 px, накопичено до низу сторінки 1.4 px (1440) / 1.8 px (375). Класові правила ембеду не тримали нічого.
 5. Потім (окремо, етап 4): Lenis у `motion.js` (пінована версія, `lenis.on('scroll', ScrollTrigger.update)`,
    `gsap.ticker`, `prefers-reduced-motion` вимикає), `initPreloader({ lenis })` уже приймає інстанс.
+   ✅ виконано 2026-10-11 (сесія 32), див. журнал CONVENTIONS: `initLenis()`, меню через `lenis.stop()/start()`, якорі меню й футера
+   через `scrollToSection()`, Lenis-CSS 1.3.26 у `styles-rem`, GSAP 3.13.0 → 3.15.0; `lenis-run.mjs` — колесо 1:1 з лайвом.

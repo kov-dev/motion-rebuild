@@ -11,7 +11,7 @@
 
 | Блок | Що робить | Секція | Куди в перезбірці |
 |---|---|---|---|
-| A | Детект mobile/Firefox, scrollTo(0,0) через 100 мс, Lenis (десктоп) або `normalizeScroll` (мобайл), `scrollerProxy` на body | глобально | **Код**: Lenis пінований, інтеграція без scrollerProxy, `matchMedia` замість одноразового `innerWidth` |
+| A | Детект mobile/Firefox, scrollTo(0,0) через 100 мс, Lenis (десктоп) або `normalizeScroll` (мобайл), `scrollerProxy` на body | глобально | ✅ `initLenis()` (сесія 32): lenis 1.3.26 (ESM), ті самі `duration: 2` + easing, `on('scroll', ScrollTrigger.update)` + `gsap.ticker` + `lagSmoothing(0)`, без scrollerProxy; вмикається за `pointer` (не тач), а не за UA; тач — нативний скрол без `normalizeScroll`; reduce — без Lenis |
 | B | Idle 4 с (`ifvisible`) → нескінченне похитування `.ui-slide` ±1.5% | Introduction (UI-слайдер) | ✅ `initUiIdle()` (сесія 11): власний таймер, лише коли слайдер у в'юпорті |
 | C | Кулька hero → падіння → MotionPath по SVG (`#vrtx*`) у 4 сегменти, кожен відкриває рядок інтро-тексту; на десктопі фінальний bounce у перший слайд | Hero + Introduction | **Код** (MotionPath, обчислення координат) |
 | D | 2 × `.ui`: pin, трек їде вліво, слайди розширюються 25→75vw, відео відкривається `clip-path: circle()`, передача кульки `.ui-ball` між блоками | Introduction (UI-слайдер) | ✅ `initUi()` (сесія 11), intro.md «UI-слайдер у коді» |
@@ -83,7 +83,7 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 
 ## Баги й костилі оригіналу (виправити в перезбірці, не копіювати)
 
-1. **`lenis` глобал не існує** — інстанс локальний. Усі `typeof lenis !== "undefined" ? lenis.stop() : …` ідуть у else-гілку: меню блокує скрол через `html { overflow: hidden }`, а не через Lenis. Після закриття ставиться `overflow: overlay` (нестандартне значення). У новому коді — `lenis.stop()/start()`.
+1. **`lenis` глобал не існує** — інстанс локальний. Усі `typeof lenis !== "undefined" ? lenis.stop() : …` ідуть у else-гілку: меню блокує скрол через `html { overflow: hidden }`, а не через Lenis. Після закриття ставиться `overflow: overlay` (нестандартне значення). У новому коді — `lenis.stop()/start()` (✅ сесія 32; без Lenis — `overflow: hidden` / зняття).
 2. **`e.toElement`** у `mousemove` (сфера) — нестандартне, у Firefox `undefined` → TypeError на кожен рух миші. Замінити на `e.target`.
 3. **`beforeunload`** читає `activeElement.href` без перевірки → помилка, якщо фокус не на посиланні. Плюс fade-out тіла при переході — сумнівна фіча, бо `pageshow` потім робить reload.
 4. **Неявні глобали** у сфері: `i, r, parts, pegCount, TAU, segment, angle2, x2, y2, cx2, cy2, rect, body, musicCollision, diff`. `diff` не використовується.

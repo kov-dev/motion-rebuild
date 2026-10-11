@@ -45,12 +45,12 @@
 - [ ] Компоненти: ~~navbar~~ ✅ `site-nav` (сесія 26, код — сесія 27), ~~footer~~ ✅ `site-footer` (сесія 23), ~~sound~~ ✅ `site-sound` (сесія 28), ~~lesson-section~~ ✅ (сесія 18, + `lesson-card`; сесія 19: `lesson-schemes`, `lesson-examples`, `lesson-demo`, `lesson-classic`), lottie-card
 - [x] Каркас `src/motion.js` (ES-module, GSAP 3.13.0 піновано) + `preloader-gate.js` + `preloader.css` (2026-10-09)
 - [x] Підключення до Webflow, варіант 2 «поруч зі старим» (сесія 12): сніпети вставлені в Home → Custom code (усе в `<head>`: гейт + preloader.css + модуль), staging опубліковано 2026-10-10 07:39 UTC, перевірено `coexist-run --live` (1440 і 375)
-- [ ] Збірка/мініфікація, версія в імені — крок 4 плану видалення виконано (сесія 31): `legacy-guard.js`, `syncLegacy()`, `guardVideo()` прибрано; можна після Lenis
+- [ ] Збірка/мініфікація, версія в імені — перехідні костилі прибрано (сесія 31), Lenis підключено (сесія 32); можна робити (етап 5)
 - [ ] Текстові стилі: звірити tablet/mobile lh/ls з лайвом (heading-xl, body-lg — сесія 8; text-shape, body-sm — сесія 9; display-lg, body-sm.is-strong — сесія 13; display-xl і body-lg (lh) — сесія 15; heading-md, body-md, heading-xl (точно) — сесія 18; heading-lg — сесія 19; heading-sm — сесія 22; лишився text-label)
 
 ## Етап 3 — Секції (кожна окремим проходом) 🟨
 
-Порядок: Preloader → Hero → Introduction → Interactive → Techniques → Lessons (×8 через компонент) → Resources → Footer → Navigation → Sound. **Усі секції Home пройдено (сесія 28).** Далі — видалення старого за планом [docs/legacy-removal.md](docs/legacy-removal.md): крок 1 ✅ footer code Home порожній, `script.v33` і весь старий стек знято (сесія 29) → крок 2 ✅ 10 старих блоків видалено + `legacy-hide.css` знято (сесія 30) → крок 3 ✅ справжні id `hero` / `<урок>` / `resources` + картки меню (сесія 30, `3637a98`) → крок 4 ✅ `legacy-guard.js` / `syncLegacy()` / `guardVideo()` прибрано (`87ef446`), ембед `main-css` видалено (сесія 31) → **Lenis (етап 4)**. Потім шаблони CMS, Styleguide.
+Порядок: Preloader → Hero → Introduction → Interactive → Techniques → Lessons (×8 через компонент) → Resources → Footer → Navigation → Sound. **Усі секції Home пройдено (сесія 28).** Далі — видалення старого за планом [docs/legacy-removal.md](docs/legacy-removal.md): крок 1 ✅ footer code Home порожній, `script.v33` і весь старий стек знято (сесія 29) → крок 2 ✅ 10 старих блоків видалено + `legacy-hide.css` знято (сесія 30) → крок 3 ✅ справжні id `hero` / `<урок>` / `resources` + картки меню (сесія 30, `3637a98`) → крок 4 ✅ `legacy-guard.js` / `syncLegacy()` / `guardVideo()` прибрано (`87ef446`), ембед `main-css` видалено (сесія 31) → крок 5 ✅ Lenis (етап 4, сесія 32, `bcebd8f`). **Далі — шаблони CMS (×3), Styleguide.**
 
 Для кожної секції: структура → стилі (4 смуги) → анімація (IX3 або код) →
 звірка з записом лайву → запис у CONVENTIONS.md.
@@ -70,13 +70,13 @@
 | CMS templates ×3 | ⬜ | ⬜ | ⬜ | — | ⬜ |
 | Styleguide | ⬜ | ⬜ | ⬜ | — | ⬜ |
 
-## Етап 4 — Код ⬜
+## Етап 4 — Код 🟨
 
 - [ ] Один модуль, init по `data-motion` атрибутах, кожна секція — окрема функція з guard'ом «є в DOM?»
-- [ ] Lenis + ScrollTrigger інтеграція, `prefers-reduced-motion`
+- [x] Lenis + ScrollTrigger інтеграція, `prefers-reduced-motion` — `initLenis()` (сесія 32): lenis 1.3.26, параметри лайву, лише миша/трекпад, тач нативний без `normalizeScroll`, reduce без Lenis; меню `stop()/start()`, якорі меню й футера `scrollToSection()`; `lenis-run.mjs` — колесо 1:1 з лайвом
 - [x] Звук (ті самі mp3), gtag-події sound_on/off — `initSound()` (сесія 28); gtag спрацює після перенесення GA4 (етап 6)
 - [ ] Прибрати jQuery-залежності з нашого коду (Webflow сам його вантажить, але ми не спираємось)
-- [ ] Пінити версії: GSAP (одна), Lenis, Matter.js (✅ 0.20.0, lottie-web 5.13.0 — сесія 14). Splide і будь-які інші слайдери — прибрати, замінити на GSAP/IX3
+- [ ] Пінити версії: GSAP (✅ одна, 3.15.0 — сесія 32), Lenis (✅ 1.3.26 — сесія 32), Matter.js (✅ 0.20.0, lottie-web 5.13.0 — сесія 14). Splide і будь-які інші слайдери — прибрати, замінити на GSAP/IX3
 
 ## Етап 5 — Перформанс і QA ⬜
 
