@@ -130,6 +130,9 @@ function heroHidden() {
   gsap.set(els(q('hero-ball-border'), q('hero-ball')), { scale: 0, opacity: 0 });
   gsap.set(els(qa('hero-divider')), { scaleX: 0 });
   gsap.set(els(q('hero-text')), { y: innerHeight * 0.5 });
+  // The navbar and the Sound button wait under the overlay too (live: IX2 page-load start states).
+  gsap.set(els(q('nav')), { yPercent: -200 });
+  gsap.set(els(q('sound-btn')), { scale: 0 });
 }
 
 // Phase 3: the real Hero enters (no Hero copy inside the preloader).
@@ -770,11 +773,8 @@ function initUiIdle(blocks) {
 const LOTTIE_URL = 'https://cdn.jsdelivr.net/npm/lottie-web@5.13.0/build/player/lottie_light.min.js/+esm';
 const LOTTIE_RUN = 3.43; // live IX2: one pass over the whole file (206 frames at 60 fps)
 
-// Sound state. Transition: the old Sound button (`.sound-btn-mute.is-active` = muted) until the Navigation pass.
-const soundOn = () => {
-  const mute = q('sound-state') || document.querySelector('.sound-btn-mute');
-  return !!mute && !mute.classList.contains('is-active');
-};
+// Sound state lives in the DOM: the mute line of the Sound button carries `is-on` while the sound plays (initSound()).
+const soundOn = () => !!q('sound-state')?.classList.contains('is-on');
 
 /**
  * Interactive: the row of circles pins and slides left until the last circle has passed (live block G),
@@ -852,6 +852,7 @@ async function initInteractiveLottie() {
     draw();
   };
   const wide = () => innerWidth >= 992;
+  zone.addEventListener('mouseenter', () => playSound('notRealTime'));
   zone.addEventListener('mouseenter', () => wide() && toEnd(0));
   zone.addEventListener('mouseleave', () => wide() && toEnd(undefined, reset));
   zone.addEventListener('click', () => !wide() && toEnd(0, reset));
@@ -1511,28 +1512,41 @@ const NAV_CARD_RUN = 0.67; // live a-60 / a-61: hover plays the card Lottie to i
 // Agent's fix (session 25): on the live site the navbar darkened in the middle of the light Resources pin.
 const FOOTER_THEME_AT = 0.25;
 
+// The Sound button line: this many px above the viewport bottom (live block I: `bottom-=90px`).
+const SOUND_LINE = 90;
+
 // Scheme under the navbar line ({ theme: dark | light | color, bg, crumb }) and the menu state; an open menu is always dark.
 let navScheme = { theme: 'dark' };
 let navMenuOpen = false;
 const navEyes = new Map(); // logo eyes box → its Lottie
+// Scheme under the Sound button line.
+let soundScheme = { theme: 'dark' };
 
 /**
- * Paints the navbar: two semantic variables on the root (pills, toggle lines and eye circles read them), the logo eyes
- * cross-fade (dark file on dark, the other one on light and colour), the crumb of the current lesson on colour.
+ * Paints a scheme on a root: three semantic variables (pills, lines, borders and icons read them), one tween.
+ * Returns the tween length, so the caller can match its own tweens to it.
  */
-function paintNav(instant = false) {
-  const root = q('nb');
-  if (!root) return;
-  const s = navMenuOpen ? { theme: 'dark' } : navScheme;
+function paintScheme(root, s, instant = false) {
   const core = (n) => getComputedStyle(root).getPropertyValue(`--_core---neutral-${n}`).trim();
   const dark = core(1000);
   const light = core(0);
   const bg = s.theme === 'dark' ? dark : s.theme === 'light' ? light : s.bg;
   const fg = s.theme === 'dark' ? light : dark;
   const duration = instant || reducedMotion() ? 0 : NAV_THEME_TIME;
-  const to = (target, vars) => gsap.to(target, { ...vars, duration, ease: 'power1.out', overwrite: 'auto' });
+  gsap.to(root, { '--_semantic---bg': bg, '--_semantic---foreground': fg, '--_semantic---border': fg, duration, ease: 'power1.out', overwrite: 'auto' });
+  return duration;
+}
 
-  to(root, { '--_semantic---bg': bg, '--_semantic---foreground': fg, '--_semantic---border': fg });
+/**
+ * Paints the navbar: the scheme on the root, the logo eyes cross-fade (dark file on dark, the other one on light and
+ * colour), the crumb of the current lesson on colour.
+ */
+function paintNav(instant = false) {
+  const root = q('nb');
+  if (!root) return;
+  const s = navMenuOpen ? { theme: 'dark' } : navScheme;
+  const duration = paintScheme(root, s, instant);
+  const to = (target, vars) => gsap.to(target, { ...vars, duration, ease: 'power1.out', overwrite: 'auto' });
   const eyes = s.theme === 'dark' ? 'dark' : 'light';
   qa('nb-eyes', root).forEach((box) => {
     const on = box.dataset.eyes === eyes;
@@ -1544,16 +1558,23 @@ function paintNav(instant = false) {
   qa('nb-crumb', root).forEach((c) => to(c, { opacity: +(s.theme === 'color' && c.dataset.crumb === s.crumb) }));
 }
 
+// The Sound button takes the scheme of the section under its own line.
+function paintSound(instant = false) {
+  const root = q('snd');
+  if (root) paintScheme(root, soundScheme, instant);
+}
+
 /**
- * Theme of the navbar by section: every [data-theme] gets a trigger over the navbar line (top + 1 px); the active one
- * is the deepest active (the dark demo inside the easing lesson wins over the lesson, the lesson is back after it),
- * among equals the later one (the footer over Resources). Between zones and after the last one the scheme stays.
- * Colour = the background of the section, the crumb of the lesson (its id without the transitional "-next").
- * Our pins have their spacers, so no manual offsets (the live resourcesPinLen).
+ * Theme by section, on two lines: the navbar line (top + 1 px) and the Sound button line (bottom − 90 px). Every
+ * [data-theme] gets one trigger per line; the active zone is the deepest active (the dark demo inside the easing lesson
+ * wins over the lesson, the lesson is back after it), among equals the later one (the footer over Resources). Between
+ * zones and after the last one the scheme stays. Colour = the background of the section, the crumb of the lesson (its
+ * id without the transitional "-next"). Our pins have their spacers, so no manual offsets (the live resourcesPinLen).
  */
 export function initTheme() {
-  const root = q('nb');
-  if (!root) return;
+  const nav = q('nb');
+  const sound = q('snd');
+  if (!nav && !sound) return;
   const footer = q('footer');
   const depth = (el) => {
     let d = 0;
@@ -1561,14 +1582,40 @@ export function initTheme() {
     return d;
   };
   const zones = [...document.querySelectorAll('[data-theme]')]
-    .filter((el) => !root.contains(el))
-    .map((el) => ({ el, depth: depth(el), theme: el.dataset.theme }));
+    .filter((el) => !nav?.contains(el) && !sound?.contains(el))
+    .map((el) => ({ el, depth: depth(el), theme: el.dataset.theme, st: {} }));
   if (!zones.length) return;
 
-  let painted = false;
-  const pick = () => {
+  const lines = [];
+  if (nav) {
+    lines.push({
+      name: 'nav',
+      // The footer takes over once the overlay of Resources is half black (progress 0.25), not at its own top.
+      start: (z) => (z.el === footer ? () => `top ${(1 - FOOTER_THEME_AT) * footerSpan(footer)}px` : 'top top+=1'),
+      end: 'bottom top+=1',
+      get: () => navScheme,
+      apply: (s, instant) => {
+        navScheme = s;
+        paintNav(instant);
+      },
+    });
+  }
+  if (sound) {
+    lines.push({
+      name: 'sound',
+      start: () => `top bottom-=${SOUND_LINE}px`,
+      end: `bottom bottom-=${SOUND_LINE}px`,
+      get: () => soundScheme,
+      apply: (s, instant) => {
+        soundScheme = s;
+        paintSound(instant);
+      },
+    });
+  }
+
+  const pick = (line) => {
     // Trigger callbacks can fire while the triggers are still being created.
-    const on = zones.filter((z) => z.st?.isActive);
+    const on = zones.filter((z) => z.st[line.name]?.isActive);
     if (!on.length) return;
     const z = on.reduce((a, b) => (b.depth >= a.depth ? b : a));
     const next = {
@@ -1576,23 +1623,25 @@ export function initTheme() {
       bg: z.theme === 'color' ? getComputedStyle(z.el).backgroundColor : null,
       crumb: z.theme === 'color' ? z.el.id.replace(/-next$/, '') : null,
     };
-    if (painted && next.theme === navScheme.theme && next.bg === navScheme.bg && next.crumb === navScheme.crumb) return;
-    navScheme = next;
-    paintNav(!painted);
-    painted = true;
+    const cur = line.get();
+    if (line.painted && next.theme === cur.theme && next.bg === cur.bg && next.crumb === cur.crumb) return;
+    line.apply(next, !line.painted);
+    line.painted = true;
   };
 
-  zones.forEach((z) => {
-    z.st = ScrollTrigger.create({
-      trigger: z.el,
-      start: z.el === footer ? () => `top ${(1 - FOOTER_THEME_AT) * footerSpan(footer)}px` : 'top top+=1',
-      end: 'bottom top+=1',
-      // After every pin above (Resources rebuilds its pin on a width change, later than these were created).
-      refreshPriority: -1,
-      onToggle: pick,
+  lines.forEach((line) => {
+    zones.forEach((z) => {
+      z.st[line.name] = ScrollTrigger.create({
+        trigger: z.el,
+        start: line.start(z),
+        end: line.end,
+        // After every pin above (Resources rebuilds its pin on a width change, later than these were created).
+        refreshPriority: -1,
+        onToggle: () => pick(line),
+      });
     });
+    ScrollTrigger.addEventListener('refresh', () => pick(line));
   });
-  ScrollTrigger.addEventListener('refresh', pick);
 }
 
 // Logo eyes: both Lotties load at once and loop (the live files, 7 s); the hidden one is paused by paintNav().
@@ -1696,6 +1745,8 @@ export function initNav() {
   };
 
   toggle.addEventListener('click', () => setOpen(!navMenuOpen));
+  // Click sounds (live .sound_click): the logo, the motion.ed pill and the toggle.
+  els(q('nb-logo', root), q('nb-home', root), toggle).forEach((el) => el.addEventListener('click', () => playSound('click')));
   ['pointerenter', 'focus'].forEach((t) => toggle.addEventListener(t, loadCards, { once: true }));
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || !navMenuOpen) return;
@@ -1703,7 +1754,9 @@ export function initNav() {
     toggle.focus();
   });
 
-  links.forEach((link) => {
+  links.forEach((link, i) => {
+    // Hover sound of the card (live #link1…#link10 → hover files), any pointer, like the live mouseenter.
+    link.addEventListener('pointerenter', () => playSound(`hover${SOUND_CARD_HOVER[i] ?? i + 1}`));
     link.addEventListener('click', (e) => {
       let target = null;
       try {
@@ -1735,6 +1788,98 @@ export function initNav() {
     { passive: false }
   );
   ['touchstart', 'touchmove'].forEach((t) => root.addEventListener(t, (e) => navMenuOpen && e.stopPropagation(), { passive: true }));
+}
+
+/* ---------- sound (live: Home footer inline scripts, IX2 a-130 / a-131 / a-161; docs/sections/sound.md) ---------- */
+
+const SOUND_CDN = 'https://cdn.zajno.com/dev/motion/sounds/';
+// The live <audio> set: the looping background, the click of the navbar links, ten hover files, the Not real-time hover.
+const SOUND_FILES = {
+  bg: 'motion_bg_low_vol.mp3',
+  click: 'perc_click.mp3',
+  notRealTime: '1_NOT_REAL_TIME.mp3',
+  ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => [`hover${n}`, `hover_${n}.mp3`])),
+};
+// Menu card i → hover file (live #link1…#link10 → #audioHover…: hover_1 2 3 8 5 6 7 4 9 10).
+const SOUND_CARD_HOVER = [1, 2, 3, 8, 5, 6, 7, 4, 9, 10];
+// IX2 a-130 (hide) / a-131 (show): opacity 0.2 s and scale 0.4 s together, display none after them; both linear.
+const SOUND_HIDE = { fade: 0.2, scale: 0.4 };
+
+const soundBank = new Map(); // name → HTMLAudioElement, created on the first switch-on
+const soundOf = (name) => {
+  if (!soundBank.has(name)) {
+    const a = new Audio(SOUND_CDN + SOUND_FILES[name]);
+    a.loop = name === 'bg';
+    a.preload = 'auto';
+    soundBank.set(name, a);
+  }
+  return soundBank.get(name);
+};
+
+/**
+ * Plays an effect while the sound is on. The click restarts from 0 (live), a hover plays on from where it is, so a
+ * hover that is still sounding is not cut (live `.play()` without a rewind).
+ */
+function playSound(name) {
+  if (!soundOn() || !SOUND_FILES[name]) return;
+  const a = soundOf(name);
+  if (name === 'click') a.currentTime = 0;
+  a.play().catch(() => {});
+}
+
+/**
+ * Sound button: the toggle starts / pauses the background loop, flips `is-on` on the mute line (the state the whole
+ * module reads), aria-pressed and the GA event (sound_on / sound_off, as the live inline script). The button hides
+ * while the footer is in the viewport (IX2 a-130 / a-131). Its entrance is part of heroEntrance(), its theme — of
+ * initTheme() (the Sound line).
+ */
+export function initSound() {
+  const root = q('snd');
+  const btn = root && q('sound-btn', root);
+  const state = root && q('sound-state', root);
+  if (!btn || !state) return;
+
+  const track = (on) => {
+    if (typeof window.gtag !== 'function') return;
+    window.gtag('event', on ? 'sound_on' : 'sound_off', { event_category: 'Sound', event_label: on ? 'Sound On' : 'Sound Off' });
+  };
+  const setOn = (on) => {
+    state.classList.toggle('is-on', on);
+    btn.setAttribute('aria-pressed', String(on));
+    const bg = soundOf('bg');
+    if (on) bg.play().catch(() => {});
+    else bg.pause();
+    track(on);
+  };
+  setOn(false);
+  btn.addEventListener('click', () => setOn(!soundOn()));
+
+  // Hidden over the footer. The button scales (the entrance scales it too), the root keeps the fixed box.
+  const footer = q('footer');
+  if (!footer) return;
+  let hidden = false;
+  const show = (on) => {
+    if (on === !hidden) return;
+    hidden = !on;
+    const d = reducedMotion() ? 0 : 1;
+    gsap.killTweensOf(btn);
+    if (on) {
+      gsap.set(btn, { display: 'flex' });
+      gsap.to(btn, { opacity: 1, duration: SOUND_HIDE.fade * d, ease: 'none' });
+      gsap.to(btn, { scale: 1, duration: SOUND_HIDE.scale * d, ease: 'none' });
+    } else {
+      gsap.to(btn, { opacity: 0, duration: SOUND_HIDE.fade * d, ease: 'none' });
+      gsap.to(btn, { scale: 0, duration: SOUND_HIDE.scale * d, ease: 'none', onComplete: () => hidden && gsap.set(btn, { display: 'none' }) });
+    }
+  };
+  ScrollTrigger.create({
+    trigger: footer,
+    start: 'top bottom',
+    end: 'bottom top',
+    // After the pin of Resources, as every trigger below it.
+    refreshPriority: -1,
+    onToggle: (st) => show(!st.isActive),
+  });
 }
 
 /* ---------- boot ---------- */
@@ -1769,9 +1914,9 @@ async function init() {
   initLessonSchemes();
   initResources();
   initFooter();
+  initSound();
   // Last: its triggers measure every pin above.
   initTheme();
-  // Next passes: Sound, … then one refresh.
   syncLegacy();
   ScrollTrigger.refresh();
 }

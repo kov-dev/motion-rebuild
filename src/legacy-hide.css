@@ -9,3 +9,8 @@
 .navigation {
   display: none !important;
 }
+
+/* Old Sound button (.fixed-bottom) — replaced by the site-sound component (session 28). */
+.fixed-bottom {
+  display: none !important;
+}

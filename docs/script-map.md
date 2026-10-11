@@ -64,7 +64,7 @@ ID: `#anim-ball`, `#hero`, `#introduction`, `#resources`, `#canvas`, `#vrtx`,
 | `.resources*` | `resources`, `resources-track`, `resources-arrow`, `resources-lists`, `resources-list`, `resources-header-item`, `resources-item`, `resources-image` |
 | `.nav.nav-*`, `.nav-inner` | `theme` + `data-theme="dark|light|color"` (+ `data-color-index` для уроків) |
 | nav-елементи | `nav-logo`, `nav-toggle`, `nav-menu`, `nav-track`, `nav-link`, `breadcrumbs`, `breadcrumb` |
-| `.sound-icon-wrap` / `.sound-btn-mute` | `sound-btn` / `sound-state` |
+| `.sound-icon-wrap` / `.sound-btn-mute` | `sound-btn` / `sound-state` (корінь `snd`; `is-on` на `sound-state` = звук грає; клік-звуки — `nb-logo`, `nb-home`, `nb-toggle`) — сесія 28 |
 
 ## Числа, які треба зберегти (візуально 1:1)
 
