@@ -167,7 +167,7 @@ header.site-nav  data-motion="nb"  semantic: dark (на класі)   fixed top 
 
 Компонент **`site-nav`** `daeb550f-d5e5-bb1e-57c2-ce20de27307f` (група System, без пропсів). Інстанс на Home
 `59d41228-6445-8433-dfa4-e045e757e119` — другий у Body, одразу після `styles-rem`, перед `section-preloader`. Старий `.navigation`
-лишається в DOM (його читає `script.v33`), схований правилом `src/legacy-hide.css` у head Home.
+лишався в DOM до сесії 30 (схований правилом `legacy-hide.css`); видалений у кроці 2 плану [legacy-removal.md](../legacy-removal.md).
 
 ```
 header.site-nav  data-motion="nb"                    fixed top/left 0, w 100 %, z 14, pointer-events none, semantic: dark, color foreground
@@ -251,8 +251,9 @@ header.site-nav  data-motion="nb"                    fixed top/left 0, w 100 %, 
   відкритому меню теж не спливають (старий `normalizeScroll`).
 - **Esc** закриває й повертає фокус на тогл. **Клік по картці** — `preventDefault` + **`stopPropagation`**, закрити, `scrollTo(0, top + scrollY)`.
   Пастка: без `stopPropagation` вбудований скрол Webflow до якорів (делегований на `document`) віднімає висоту fixed-шапки → ціль на 80 px нижче top.
-- **Introduction → `#hero-next`:** `#hero` на staging — **старий** Hero під нашим футером. `section-hero` отримала id `hero-next`, перша картка
-  `site-nav` — посилання `#hero-next` (MCP, сесія 27). На `hero` / `<урок>` — разом із видаленням старих секцій.
+- **Introduction → `#hero`:** до сесії 30 `#hero` на staging був **старий** Hero під нашим футером, тому `section-hero` мала id `hero-next`
+  і перша картка вела на `#hero-next` (сесія 27). Після видалення старих секцій (крок 2) усі id справжні: `hero`, `easing` … `zoom`,
+  `resources`, картки — ті самі якорі (сесія 30, крок 3).
 
 **Перевірка** — `tools/record/nav-run.mjs` (PART=theme,menu,links; `--live`, `--reduce`; `LIVE=nav-menu-1440.txt` — підгонка лайв-семплів):
 21 точка теми (усі зони, демо й урок після нього, середина pin-а Resources, футер p 0.22 / 0.28, назад угору) + тривалість твіну; меню —

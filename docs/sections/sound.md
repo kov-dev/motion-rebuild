@@ -102,7 +102,7 @@ div.site-sound  data-motion="snd"                fixed right/bottom .34rem (≤4
   `--_semantic---bg / foreground / border` на `div.site-sound`.
 - Повноширинного `fixed-bottom` немає: корінь — лише бокс кнопки в правому нижньому куті (ті самі координати).
 - `<button>` замість `div` з курсором; `aria-pressed` відображає стан. `type="button"` щоб не сабмітити форми шаблонів.
-- Старий `.fixed-bottom` ховається правилом `src/legacy-hide.css` у head Home (елементи лишаються: їх читають inline-скрипти лайву,
+- Старий `.fixed-bottom` до сесії 30 ховався правилом `legacy-hide.css` у head Home, видалений у кроці 2 [legacy-removal.md](../legacy-removal.md) (тоді елементи лишались: їх читали inline-скрипти лайву,
   `playing` там назавжди `false`, тож старі `<audio>` мовчать).
 
 ## План анімації (код)

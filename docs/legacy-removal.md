@@ -32,10 +32,11 @@ footer code Home, `main-css` ще перший ембед у Body. Інвент�
 а не дзеркало Webflow (модуль фактично живе в head). Після кроку 1 файл = порожній footer, і `coexist-run --cdn`
 бере модуль із `home-head.html`.
 
-### Старі елементи Home (Designer ID копії; `component` = сторінка `6ac8e84728488a6bd334f2e5`)
+### Старі елементи Home (Designer ID копії; `component` = сторінка `6ac8e84728488a6bd334f2e5`) — 10 блоків видалено 2026-10-11 (сесія 30, крок 2)
 
-Порядок у Body: `styles-rem` → `site-nav` → `site-sound` → `section-preloader` → **`main-css`** → **`.navigation`** →
-**`.loader`** → `main` → **`.fixed-bottom`**.
+Порядок у Body був: `styles-rem` → `site-nav` → `site-sound` → `section-preloader` → **`main-css`** → **`.navigation`** →
+**`.loader`** → `main` → **`.fixed-bottom`**. Після кроку 2: `styles-rem` → `site-nav` → `site-sound` → `section-preloader` →
+`main-css` → `main` (7 нових секцій, останній — `site-footer`). ID нижче — історичні (елементів уже немає, крім `main-css`).
 
 | Блок | Клас | element id | Що всередині | Замінено |
 |---|---|---|---|---|
@@ -82,12 +83,17 @@ Resources — лише елемент сторінки).
 2. **Видалити старі елементи**: `.loader`, `.navigation`, 7 обгорток у `main` (Hero … footer), `.fixed-bottom`
    (10 `remove_element`, по одному, з читанням `get_all_elements depth 1` після). Потім прибрати `legacy-hide.css` з
    head Home і з `src/`. Очікувано: сторінка закінчується нашим футером; `coexist-run` показує `old pins:` порожньо,
-   `marks.oldHero null`. Перевірити також `footer-run --live` (край футера = край документа).
+   `marks.oldHero null`. Перевірити також `footer-run --live` (край футера = край документа). ✅ виконано 2026-10-11 (сесія 30):
+   10 `remove_element`, head без `legacy-hide.css`, `src/legacy-hide.css` видалено; `coexist` / `nav` / `sound` / `footer --live`
+   1440 + 375 — 0 прапорців (`footer-run` навчено обрізати точки за краєм сторінки: max p 0.556 на 1440, як на лайві).
+   Порядок courses тепер перевіряє `resources-order.mjs` проти лайву (старого `#resources` на сторінці більше немає).
 3. **Справжні id**: `section-hero` `hero-next` → `hero`; 8 `lesson-section` `<урок>-next` → `<урок>`; `section-resources`
    `resources-next` → `resources`; старий `#lessons` не потрібен (на лайві на нього ніхто не посилається — перевірити
    `nav-link` старого меню: там `#link1…` без href-якорів). Картки `site-nav` (`nb-card` ×10, компонент
    `daeb550f-…307f`) → ті самі id без `-next`. У `motion.js` прибрати `replace(/-next$/, '')`. Інтро-картка веде на
-   `#hero` (як на лайві `#link1` → верх). `nav-run --live` PART=links 1440 / 375.
+   `#hero` (як на лайві `#link1` → верх). `nav-run --live` PART=links 1440 / 375. ✅ виконано 2026-10-11 (сесія 30): `set_dom_id`
+   на `section-hero` / `section-resources`, проп `Section id` на 8 інстансах (`set_component_instance_prop_values`, `type: string`),
+   10 карток `set_settings` `link` зі `scope_component_id`; `motion.js` без `replace(/-next$/)` (коміт `3637a98`, модуль у head).
 4. **Чистка коду й `main-css`**: прибрати `legacy-guard.js`, `syncLegacy()`, `guardVideo()`/`wantedVideos`, оновити
    коментарі; видалити ембед `main-css` (`27a12260-…bf68`) **після** звірки, що жодне правило не тримає нову секцію
    (кандидати з [main-css.md](main-css.md): `html font-size` — покрито `styles-rem`; scrollbar — покрито; noise

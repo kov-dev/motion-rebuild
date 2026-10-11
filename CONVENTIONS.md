@@ -22,7 +22,7 @@
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
 | Копія: компоненти | `styles-rem` `a9980c61-abfe-00d6-e200-dd0d361b35be` (група System), інстанси — перші в Body Styleguide і Home (`f968ef53-6a5f-a95f-36ad-0bdbb5b6b688`) · `lesson-section` `d5e7e221-35f7-91c5-dee2-9f546f061f62` і `lesson-card` `ced33071-48b2-67a1-9aa0-8c8ef29e9556` (група Lessons, сесія 18) · `lesson-schemes` `351eeca4-68ac-7398-7bde-b899033e7b95`, `lesson-examples` `9ddff661-a2e2-e75d-4cb9-525dcb9f2dcd`, `lesson-demo` `92eadc1c-5b69-d7bc-a693-ad3bc52ee46c` (слот Extras easing), `lesson-classic` `f42e65c0-edaa-a1e0-2c1d-ec0fecccf5d4` (слот After easing і delay; варіант delay `6e0b570a-f804-b832-c7ae-16cc31f718d8`) — сесія 19 · `site-footer` `4ecddcd8-b434-4aca-e41a-0503bfda4bd9` (група System, без пропсів) — сесія 23 · `site-nav` `daeb550f-d5e5-bb1e-57c2-ce20de27307f` (група System, без пропсів), інстанс на Home `59d41228-6445-8433-dfa4-e045e757e119` — другий у Body після `styles-rem` (сесія 26) · `site-sound` `4c8b61f7-7454-e271-9379-4149c1e6a6e9` (група System, без пропсів), інстанс на Home `8e7f1721-6349-c296-60c9-725f100c4019` — третій у Body, після `site-nav` (сесія 28) |
-| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`, перед старим Hero; id `hero-next` — сесія 27) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) · `section-lessons` `7ed4e6ea-6542-fa7a-6e65-0defdfa4304c` (одразу після `section-techniques`, 8 інстансів `lesson-section`, id `<урок>-next`) · `section-resources` `3bac52ac-b16e-2485-d6be-b553324fcfc3` (одразу після `section-lessons`, id `resources-next`; Collection List courses `898bc600-2573-264c-dec9-67b335000f9b`, sources `8b16de03-df05-b6ec-1acc-29ea5180e0eb`) · інстанс `site-footer` `0b1d1fec-de0e-2091-a1a9-e96419bad760` (одразу після `section-resources`) |
+| Копія: Home, нові секції | `section-preloader` `ff274689-184c-625c-d2e5-4eceb58da2f9` (другий у Body, після `styles-rem`) · `section-hero` `1e2ce484-6c13-e35c-cb6f-99262c1d94e1` (перший у `main` `7a61b557-…15a5`; id `hero` — сесія 30, до того `hero-next`) · `section-intro` `d320b4f4-8f76-79fa-a9ef-f7d30f54e19d` (одразу після `section-hero`) · `section-interactive` `3095ad5f-48ed-2091-d3c6-2b60b3f2e45c` (одразу після `section-intro`) · `section-techniques` `73d76e61-75fc-00a8-3343-779a29468215` (одразу після `section-interactive`) · `section-lessons` `7ed4e6ea-6542-fa7a-6e65-0defdfa4304c` (одразу після `section-techniques`, 8 інстансів `lesson-section`, проп `Section id` = `easing` … `zoom` — сесія 30, до того `<урок>-next`; елементи інстансів `48f03689-…ed2b` easing, `6a61bba9-…a08a` delay, `a4efa8dd-…0ec3` fade, `68083031-…48da` morph, `eaef8e8e-…9191` masking, `116e890a-…d647` dimension, `0a9e7420-…c523` parallax, `7ff5a0db-…6543` zoom) · `section-resources` `3bac52ac-b16e-2485-d6be-b553324fcfc3` (одразу після `section-lessons`, id `resources` — сесія 30, до того `resources-next`; Collection List courses `898bc600-2573-264c-dec9-67b335000f9b`, sources `8b16de03-df05-b6ec-1acc-29ea5180e0eb`) · інстанс `site-footer` `0b1d1fec-de0e-2091-a1a9-e96419bad760` (одразу після `section-resources`) |
 | Копія: режими `semantic` | Base (light) = `base`, `dark` = `mode-ddc1ad08-…` (id `base` можна ставити явно, напр. на вкладений шар) |
 | Копія: breakpoints | `main` (база) · `medium` ≤991 · `small` ≤767 · `tiny` ≤479 |
 | Figma файл | `KJQjG15P2P3SkXwrJJxLOp` (`Motion (DEV)`) — фрейми посекційно, див. [docs/FIGMA.md](docs/FIGMA.md) |
@@ -395,6 +395,40 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-11 (сесія 30) — видалення старого, кроки 2–3: старі блоки видалено, справжні id
+
+- **Крок 2 виконано:** 10 `remove_element` по одному з читанням дерева після кожного — `.loader` `f79bcaeb-…4c43`, `.navigation` `72062d36-…7a3b`,
+  7 обгорток у `main` (Hero `7a61b557-…15a6`, Intro `…15b7`, Interactive `…1613`, Techniques `…1639`, `#lessons` `…164c`, `#resources` `…18e1`,
+  футер `f5e85485-…e47c`), `.fixed-bottom` `a3fe06d1-…4a01`. Body тепер: `styles-rem` → `site-nav` → `site-sound` → `section-preloader` →
+  `main-css` → `main` (7 нових секцій). Head Home без `legacy-hide.css` (`set_page_freeform_code`, прочитано назад), `src/legacy-hide.css`
+  видалено, `src/webflow/home-head.html` синхронізовано. CMS не чіпалось.
+- **Перевірка кроку 2 `--live`** (копія `tools/record/` у scratchpad, Chrome): `coexist-run` 1440 / 375 — `old pins:` порожньо, `marks.oldHero null`,
+  `no page errors`; `nav-run` 1440 / 375 (theme, menu, links) — 0; `sound-run` 1440 / 375 — 0; `footer-run` 375 — 0, 1440 — спершу 3 прапорці
+  «asked 0.6 / 0.8 / 1, reached 0.556» при Δ 0 до моделі: наш футер тепер край документа (як на motion.zajno.com, max p ≈ 0.556 на 1440) —
+  `footer-run.mjs` навчено обрізати точки за краєм сторінки (та сама логіка, що була для старого футера) → 0 прапорців.
+- **Крок 3 виконано:** `set_dom_id` `section-hero` → `hero`, `section-resources` → `resources`; проп `Section id` на 8 інстансах `lesson-section`
+  → `easing` … `zoom` (`set_component_instance_prop_values`, `values: [{ prop_id, type: "string", string_value }]`); 10 карток `nb-card`
+  у компоненті `site-nav` → `#hero`, `#easing` … `#zoom`, `#resources` (`set_settings` `link` `static_link` зі `scope_component_id`; читати
+  налаштування всередині компонента теж лише зі `scope_component_id`, інакше «Element not found»). Усе прочитано назад. `motion.js`:
+  `initTheme()` крихта = `z.el.id` без `replace(/-next$/)`. Коміт **`3637a98`** → jsDelivr 200 одразу → модуль у head Home на новий sha
+  (прочитано назад). `nav-run.mjs` / `sound-run.mjs`: ключ зони = id без `-next` (працює до й після кроку 3).
+- **Staging опубліковано агентом** 2 рази (задачі `75edb820…` — крок 2, 16:28 UTC; `548cd975…` — крок 3). Обидві дійшли за ≤ 60 с
+  (`cf-cache-status: MISS` із `?v=<ts>`). На сторінці 11 id (`hero`, 8 уроків, `resources`, `nb-menu`), 20 href-якорів без `-next`.
+- **Перевірка кроку 3:** `nav-run --live` PART=links 1440 / 375 — **0 прапорців** (5 кліків по картках → ціль top ±0.5 px, крихти `easing` /
+  `delay` / `dimension` зі справжніх id, схема секції); PART=theme 1440 — 0 (регресія крихти після прибирання `replace`), 0 page errors.
+- **Resources Sort (courses) — досі не поставлено** (`get_settings` → `sort: []`, staging 196 / 197 ORDER list1 на старті сесії; MCP записати
+  `created-on` не вміє — сесія 25). **Рішення агента:** крок 2 зроблено без Sort, бо еталон порядку — лайв: новий `tools/record/resources-order.mjs`
+  порівнює обидва списки staging ↔ motion.zajno.com (скрипти заблоковано, природний DOM-порядок); зараз courses ✗ (зворотний), sources ✓.
+  `resources-compare.mjs` ORDER-перевірка більше не працює (старого `#resources` на сторінці немає), решта його порівнянь — теж, бо
+  вони проти старої секції на тій самій сторінці; статика Resources уже звірена (сесія 22). **Від користувача:** Designer → Collection List
+  `res-list` (courses) → Sort → Created On, Oldest first → publish → `node resources-order.mjs` → 0 прапорців.
+- **Документи:** [docs/legacy-removal.md](docs/legacy-removal.md) (кроки 2–3 ✅, історичні ID), таблиця ID вище (id секцій, елементи 8 інстансів),
+  navigation.md / sound.md (згадки `legacy-hide.css` → історія).
+- **Пастки:** (1) `data_sites_tool` не має статусу задачі публікації — перевіряти staging curl-ом по маркеру (sha модуля, id); (2) `query_elements`
+  зі `style` шукає підрядком (`nav` ловить `f-navigation`) — для «що лишилось» зручніше запит за `element_id` кожного блоку; (3) у `data_element_tool`
+  `scope_component_id` — усередині запиту (`queries[].scope_component_id`), не на дії; (4) `get_all_elements depth 1` не показує дітей `main` —
+  для обгорток треба depth 2 або запит за ID.
 
 ### 2026-10-11 (сесія 29) — план видалення старого, крок 1: footer code Home порожній
 
