@@ -396,6 +396,26 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 
 ## Журнал
 
+### 2026-10-11 (сесія 29) — план видалення старого, крок 1: footer code Home порожній
+
+- **План** — [docs/legacy-removal.md](docs/legacy-removal.md): інвентар footer code (13 позицій, кому потрібен, чим замінено), Designer ID
+  10 старих блоків копії (`main-css` `27a12260-…bf68`, `.navigation` `72062d36-…7a3b`, `.loader` `f79bcaeb-…4c43`, 7 обгорток у `main`
+  `7a61b557-…15a6` / `…15b7` / `…1613` / `…1639` / `…164c` / `…18e1` і `f5e85485-…e47c`, `.fixed-bottom` `a3fe06d1-…4a01`), що й коли
+  прибирати в `src/` (`legacy-guard.js`, `syncLegacy()`, `guardVideo()`, `legacy-hide.css`, `-next`), порядок 4 кроків + Lenis окремо.
+- **Крок 1 виконано:** footer code Home → один HTML-коментар (`set_page_freeform_code`, прочитано назад). Знято: GSAP 3.10/3.11 (5 файлів),
+  Lenis `@latest`, Splide, `ifvisible`, Matter 0.18, `script.v33`, Finsweet autovideo, 6 inline-скриптів, 13 `<audio>`. Повна копія —
+  `reference/home-footer-legacy-2026-10-11.html`. Head Home без змін (гейт, preloader.css, legacy-hide.css, модуль `a82e952`).
+  `src/webflow/home-footer.html` = той самий коментар (раніше там був лише рядок модуля — сніпет для `coexist-run --cdn`, не дзеркало Webflow).
+- **Staging опубліковано агентом** 1 раз (задача `c5dbe6e8…`, 10:39 UTC). Пастка: Cloudflare віддавав HIT ~5 хв; grep по `script.v33`
+  ловив і коментарі — перевіряти по `script.v33.min.js` / `<audio`.
+- **Перевірка `--live`:** `coexist-run --live` 1440 / 375 — preloader тримає скрол, `globals: window.gsap undefined`, `old pins:` порожньо, нові секції (hero / intro / ui) анімуються під колесом і тачем, `no page errors`; `nav-run --live` 1440 / 375 (theme, menu, links) — **0 прапорців**; `sound-run --live` 1440 / 375 (enter, theme, footer, toggle) — **0 прапорців, 0 page errors**, `legacy <audio> elements on the page: 0`. Скрипти запускались із копії `tools/record/` у scratchpad (`npm i playwright@1`, Chrome).
+- **Наслідки кроку 1 (очікувані):** `window.gsap` / `window.ScrollTrigger` = `undefined` (наш модуль ESM); старі секції під нашим футером
+  статичні; **на десктопі скрол нативний** — наш Lenis ще не підключений (етап 4, іде після кроку 4). Старі `.loader` / `.navigation` /
+  `.fixed-bottom` ще в DOM (крок 2).
+- **Resources Sort (courses):** `resources-compare` на staging — 196 / 197 на 1440 і 768, `ORDER list1` (курси досі у зворотному порядку) →
+  Sort у Designer ще не поставлено. MCP sort не бачить (`query_settings` value_type `sort` → 0). **Чекає дії користувача; зробити до
+  кроку 2** — після видалення старого `#resources` порівнювати порядок буде ні з чим (compare бере старий список на тій самій сторінці).
+
 ### 2026-10-11 (сесія 28) — Sound: лайв-зонд, компонент `site-sound`, `initSound()`, тема на двох лініях, підключення
 
 - **Лайв-зонд** `tools/record/sound-probe.mjs` (новий: struct / enter / scan / footer / click, 1440 / 768 / 375) → `docs/sections/sound.md`.

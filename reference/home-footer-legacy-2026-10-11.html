@@ -1,0 +1,123 @@
+<!-- Home page footer custom code of the copy as read back on 2026-10-11 (session 29) right before it was emptied.
+     Identical to the live site's Home footer code. Kept for reference only; nothing here is loaded any more. -->
+<!-- GSAP libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/MotionPathPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/CustomEase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/Observer.min.js"></script>
+<!-- Lenis smooth scroll -->
+<script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@latest/bundled/lenis.js"></script>
+<!-- Splide slider -->
+<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@2.4.21/dist/js/splide.min.js"></script>
+<!-- -->
+<script src="https://cdn.zajno.com/dev/motion/ifvisible.min.js"></script>
+<!-- Matter JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js" integrity="sha512-5T245ZTH0m0RfONiFm2NF0zcYcmAuNzcGyPSQ18j8Bs5Pbfhp5HP1hosrR8XRt5M3kSRqzjNMYpm2+it/AUX/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- Introduction section with path -->
+<script src="https://cdn.zajno.com/dev/motion/script.v33.min.js"></script>
+<!-- lazy load video bg -->
+<script defer src="https://cdn.jsdelivr.net/npm/@finsweet/attributes-autovideo@1/autovideo.js"></script>
+<!-- clear achor link -->
+
+<!-- lottie resize -->
+<script>
+var Webflow=Webflow||[];Webflow.push(function(){window.addEventListener("resize",function(){window.Webflow.require("lottie").lottie.resize()})});
+</script>
+<!-- Loader -->
+<script>
+    function startCounting(initialValue, targetValue, element, duration) {
+  let currentValue = initialValue || 0;
+  const totalIntervals = Math.ceil((duration * 1000) / 50);
+  const incrementPerInterval = (targetValue - currentValue) / totalIntervals;
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        let currentInterval = 0;
+
+        const intervalId = setInterval(() => {
+          element.textContent = Math.round(currentValue);
+
+          if (currentInterval >= totalIntervals) {
+            clearInterval(intervalId);
+          } else {
+            currentValue += incrementPerInterval;
+            currentInterval++;
+          }
+        }, 50);
+      }
+    });
+  });
+
+  observer.observe(element);
+}
+
+const initialValue = 0;
+const targetValue = 100;
+const durationInSeconds = 4;
+
+const loaderCounterElement = document.querySelector('.loader-counter');
+
+startCounting(initialValue, targetValue, loaderCounterElement, durationInSeconds);
+</script>
+<!-- Splide Slider -->
+<script>
+	window.onresize=function(){screen.width>991&&$(".splide__arrow--next").click()};let mySplide=new Splide(".splide2",{perPage:3,perMove:1,direction:"ltr",fixedWidth:"3.45rem",fixedHeight:"3.45rem",gap:"0.32rem",focus:0,type:"slide",arrows:"slider",pagination:!1,speed:600,dragAngleThreshold:60,waitForTransition:!0,updateOnMove:!0,trimSpace:!1,breakpoints:{991:{perPage:2,perMove:1,fixedWidth:"3.45rem",fixedHeight:"3.45rem",gap:"0.32rem",focus:0},767:{focus:0},479:{perPage:1,perMove:1,fixedWidth:"2.28rem",fixedHeight:"2.28rem",gap:"0.24rem",focus:0}}}).mount();function slideChange(){let e=$(".splide__slide.is-active:not(.splide__slide--clone)");setTimeout(()=>{$(".hero_text").text(e.find(".text1").text())},400)}mySplide.on("move",function(){slideChange()}),slideChange(),$(".arrow-icon.next").click(function(){$(".splide__arrow--next").click()}),$(".arrow-icon.prev").click(function(){$(".splide__arrow--prev").click()});
+</script>
+<!-- Clear achor link -->
+<script>
+	var Webflow=Webflow||[];Webflow.push(function(){$("a").click(function(){setTimeout(function(){history.replaceState(null,null," ")},0)})});
+</script>
+<!-- Passive event listeners -->
+<script>
+	jQuery.event.special.touchstart={setup:function(e,t,n){this.addEventListener("touchstart",n,{passive:!t.includes("noPreventDefault")})}},jQuery.event.special.touchmove={setup:function(e,t,n){this.addEventListener("touchmove",n,{passive:!t.includes("noPreventDefault")})}};
+</script>
+<!-- audio -->
+<audio id="audio" loop><source src="https://cdn.zajno.com/dev/motion/sounds/motion_bg_low_vol.mp3" type="audio/mp3" /></audio>
+<audio id="audioClick2"><source src="https://cdn.zajno.com/dev/motion/sounds/perc_click.mp3" type="audio/mp3"/></audio>
+<audio id="audioHover"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_1.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover2"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_2.mp3" type="audio/mp3"/></audio>
+<audio id="audioHover3"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_3.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover4"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_8.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover5"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_5.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover6"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_6.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover7"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_7.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover8"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_4.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover9"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_9.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover10"><source src="https://cdn.zajno.com/dev/motion/sounds/hover_10.mp3" type="audio/mp3" /></audio>
+<audio id="audioHover11"><source src="https://cdn.zajno.com/dev/motion/sounds/1_NOT_REAL_TIME.mp3" type="audio/mp3" /></audio>
+<script>
+	const audioElement=document.getElementById("audio"),PlayButton=document.querySelector(".sound-btn-wrap");let playing=!1;$(document).ready(function(){$(".sound-btn-wrap").click(function(){playing?(audio.pause(),playing=!1,$(this).querySelector(".sound-btn-wrap")):(audio.play(),playing=!0,$(this).querySelector(".sound-btn-wrap"))})});
+	const audioElement3=document.getElementById("audioClick2"),soundLinks=document.querySelectorAll(".sound_click");soundLinks.forEach(e=>{e.addEventListener("click",function(){playing&&(audioElement3.currentTime=0,audioElement3.play())})});
+	const audioElement4=document.getElementById("audioHover"),playSun3=document.getElementById("link1");playSun3.addEventListener("mouseenter",function(){playing&&audioElement4.play()});
+	const audioElement5=document.getElementById("audioHover2"),playSun4=document.getElementById("link2");playSun4.addEventListener("mouseenter",function(){playing&&audioElement5.play()});
+	const audioElement6=document.getElementById("audioHover3"),playSun5=document.getElementById("link3");playSun5.addEventListener("mouseenter",function(){playing&&audioElement6.play()});
+	const audioElement7=document.getElementById("audioHover4"),playSun6=document.getElementById("link4");playSun6.addEventListener("mouseenter",function(){playing&&audioElement7.play()});
+	const audioElement8=document.getElementById("audioHover5"),playSun7=document.getElementById("link5");playSun7.addEventListener("mouseenter",function(){playing&&audioElement8.play()});
+	const audioElement9=document.getElementById("audioHover6"),playSun8=document.getElementById("link6");playSun8.addEventListener("mouseenter",function(){playing&&audioElement9.play()});
+	const audioElement10=document.getElementById("audioHover7"),playSun9=document.getElementById("link7");playSun9.addEventListener("mouseenter",function(){playing&&audioElement10.play()});
+	const audioElement11=document.getElementById("audioHover8"),playSun10=document.getElementById("link8");playSun10.addEventListener("mouseenter",function(){playing&&audioElement11.play()});
+	const audioElement12=document.getElementById("audioHover9"),playSun11=document.getElementById("link9");playSun11.addEventListener("mouseenter",function(){playing&&audioElement12.play()});
+	const audioElement13=document.getElementById("audioHover10"),playSun12=document.getElementById("link10");playSun12.addEventListener("mouseenter",function(){playing&&audioElement13.play()});
+	const audioElement14=document.getElementById("audioHover11"),playSun13=document.getElementById("notrealtime");playSun13.addEventListener("mouseenter",function(){playing&&audioElement14.play()});
+</script>
+<!--  -->
+<script>
+  $(".sound-btn-mute").addClass("is-active");
+  $(".sound-btn-wrap").on("click",function() {
+  $(".sound-btn-mute").toggleClass("is-active")
+
+    if($(".sound-btn-mute").hasClass("is-active")) {
+      gtag('event', 'sound_off', {
+    'event_category': 'Sound',
+    'event_label': 'Sound Off',
+    });
+    } else {
+      gtag('event', 'sound_on', {
+    'event_category': 'Sound',
+    'event_label': 'Sound On',
+    });
+  	}
+  });
+</script>
