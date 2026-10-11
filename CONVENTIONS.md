@@ -396,6 +396,42 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 
 ## Журнал
 
+### 2026-10-11 (сесія 28) — Sound: лайв-зонд, компонент `site-sound`, `initSound()`, тема на двох лініях, підключення
+
+- **Лайв-зонд** `tools/record/sound-probe.mjs` (новий: struct / enter / scan / footer / click, 1440 / 768 / 375) → `docs/sections/sound.md`.
+  Знахідки: кнопка 48×44 на всіх смугах (Figma 768/375 — 40×34, ігноруємо), відступ 34 / 34 / 22; в'їзд scale 0 → 1 за 0.6 с разом із
+  навбаром; ховання над футером (IX2 `a-130` / `a-131`, тригер — верх футера = низ в'юпорта): opacity 0.2 с + scale 0.4 с **лінійно**,
+  display none після; тема по лінії `bottom−90px` — та сама послідовність, що в навбара (кнопка перемикається раніше); стартовий стан —
+  **вимкнено** (`.sound-btn-mute.is-active`), фон кнопки при вмиканні не міняється (правило `.sound-icon-wrap.is-active` мертве); звук —
+  13 `<audio>` з inline-скриптів: фон loop (pause без перемотки), клік `perc_click` на лого / motion.ed / тогл, hover карток
+  `hover_1 2 3 8 5 6 7 4 9 10`, `1_NOT_REAL_TIME` на Not real-time; gtag `sound_on` / `sound_off` через dataLayer.
+- **Верстка:** компонент **`site-sound`** `4c8b61f7-7454-e271-9379-4149c1e6a6e9` (System), інстанс третім у Body після `site-nav`:
+  `div.site-sound[data-motion=snd]` (fixed right/bottom .34rem, ≤479 right .22rem, z 11, режим `semantic: dark`) → `button.snd-btn`
+  (`data-motion=sound-btn`, `aria-pressed`) → HtmlEmbed `snd-icon` + `snd-mute[data-motion=sound-state]` з комбо `is-on` (opacity 0,
+  transition .4 с). Класи зі змінними `semantic` / `border-1`, як у `nb-pill`. Старий `.fixed-bottom` — правило в `legacy-hide.css`.
+  У `site-nav` додано ролі `nb-logo` / `nb-home` (клік-звуки).
+- **Код** (`src/motion.js`): `initSound()` — тогл (`is-on`, `aria-pressed`, фон play / pause, gtag лише через глобальний `gtag()`),
+  `playSound(name)` (ліниві `Audio`, клік з перемоткою, hover без), ховання над футером (`ScrollTrigger` `top bottom` / `bottom top`,
+  `onToggle`); hover-звуки в `initNav()` (картки за лайвовим порядком) і `initInteractiveLottie()`; `soundOn()` читає `is-on` на
+  `[data-motion=sound-state]` (сфера без змін). **Тема винесена в спільне:** `paintScheme(root, scheme)`; `initTheme()` будує тригери на
+  **двох лініях** (`nav` top+1 з футером від прогресу 0.25; `sound` bottom−90) з однією вибіркою «найглибша активна зона».
+  `heroHidden()` тепер ставить і `nav` yPercent −200 / `sound-btn` scale 0 під оверлеєм (лайв — стартові стани IX2).
+- **Перевірка:** `tools/record/sound-run.mjs` (новий: enter / theme / footer / toggle) — 1440 / 768 / 600 / 375, `--reduce` 1440 / 375,
+  `--live` 1440 / 375: **0 прапорців** (в'їзд разом із навбаром, 20 точок теми + твін ≈ 0.4 с, ховання / показ покадрово проти моделі
+  `a-130` / `a-131` і межа ±20 px, тогл + gtag + 4 звуки + тиша при вимкненому). `nav-run --live` PART=theme 1440 — 0 (регресія теми).
+- **Hостинг і Webflow:** коміт `a82e952` → jsDelivr (200 одразу); head Home: правило `.fixed-bottom` + модуль `a82e952`
+  (`set_page_freeform_code`, прочитано назад), `src/webflow/home-head.html` / `home-footer.html` синхронізовано.
+- **Staging опубліковано агентом** 2 рази (задачі `349f7267…` — розмітка, `d6a78ba4…` — модуль).
+- **Рішення агента:** (1) аудіо не в DOM і не вантажаться до першого ввімкнення (лайв тягне metadata 13 файлів на старті); (2) стан звуку —
+  комбо `is-on` на лінії-ембеді, читається всім модулем; (3) `aria-label` сталий, стан в `aria-pressed`; (4) hover-звук на будь-який
+  `pointerenter`; (5) кнопка 48×44 на всіх смугах за лайвом.
+- **Пастки:** (1) `element_builder` не вставляє «after» інстансу компонента (`Cannot insert elements directly into a component instance`) —
+  вставляти «before» наступного елемента; (2) `settings.attributes` в `element_builder` не працює навіть для DOM — атрибути через
+  `set_attributes`; (3) зонд лайву: `scrollToY` колесом із порогом 8 px під Lenis може не сходитись годинами — спершу нативний `scrollTo`,
+  потім ≤ 20 підштовхувань; (4) у тестах мобільні смуги семплять ~30 fps — вікно моделі `[t−50, t+70]` мс; `display: none` читається як
+  `transform: none` (scale 1); (5) footer code копії перевизначає `gtag()` на `dataLayer` — у тесті перехоплювати обидва.
+- **Resources Sort:** courses — досі `sort: []` (не перевірялось цього разу). **Чекає дії користувача.**
+
 ### 2026-10-10 (сесія 27) — Navigation: `initNav()`, `initTheme()`, `nav-run.mjs`, підключення
 
 - **Код** (`src/motion.js`): `initTheme()` — кожен `[data-theme]` → `ScrollTrigger` `top top+=1` / `bottom top+=1`, `refreshPriority -1`, активна =
