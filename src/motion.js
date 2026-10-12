@@ -998,14 +998,25 @@ export function initUi() {
 // Snap pad inside an open window (units) and the pause after the last scroll input before the snap (s).
 const UI_SNAP_PAD = 0.5;
 const SNAP_IDLE = 0.18;
+// Snap glide (Lenis): average speed in viewport heights per second and the duration limits (s). The glide starts at
+// the speed the scroll already has and comes to rest without a bump (session 45: the old 2 s exponential snap started
+// at ~7× its average speed, up to 4000 px/s, and threw the ball back over the hand-over).
+const SNAP_SPEED = 0.9;
+const SNAP_TIME = [0.45, 2.4];
+
+/**
+ * Glide progress for a snap that starts with slope s (current speed × duration / distance, 0…4) and ends with zero
+ * speed and zero deceleration: f(0) = 0, f′(0) = s, f(1) = 1, f′(1) = f″(1) = 0; f′(t) = (1 − t)²·(s + (12 − 4s)·t) ≥ 0.
+ */
+const glide = (s) => (t) => s * t + (6 - 3 * s) * t ** 2 + (3 * s - 8) * t ** 3 + (3 - s) * t ** 4;
 
 /**
  * Scroll snap between rest states (UI slider, easing demo). Each snap is { st, units, rests: [[from, to], …] } in
  * units of its ScrollTrigger. A scroll that comes to rest inside the range but outside every rest window (in the
  * slider: the panel has folded into its dot, the next one has not opened yet; in the demo: the line between two ticks)
  * carries on to the nearest rest in the direction of the last scroll. With Lenis the destination is known as soon as
- * the input stops (its target), so the snap takes over the running ease; native scroll (touch) waits until the scroll
- * and the finger are still. Reduced motion jumps.
+ * the input stops (its target), so the snap takes over the running ease at its current speed (glide()); native scroll
+ * (touch) waits until the scroll and the finger are still. Reduced motion jumps.
  */
 function initScrollSnap(snaps, reduce) {
   if (!snaps.length) return () => {};
@@ -1028,11 +1039,30 @@ function initScrollSnap(snaps, reduce) {
     return y - prev[1] < next[0] - y ? prev[1] : next[0];
   };
 
+  // Scroll speed of the running Lenis ease, px/s (signed), from its per-frame scroll events.
+  let speed = 0;
+  let trackY = lenis?.animatedScroll ?? 0;
+  let trackT = performance.now();
+  const track = () => {
+    const now = performance.now();
+    const dt = (now - trackT) / 1000;
+    if (dt > 0) speed = dt > 0.1 ? 0 : (lenis.animatedScroll - trackY) / dt;
+    trackY = lenis.animatedScroll;
+    trackT = now;
+  };
+
   const go = (y) => {
     if (reduce) scrollTo(0, y);
     else if (lenis) {
-      const d = Math.abs(y - lenis.animatedScroll);
-      lenis.scrollTo(y, { duration: gsap.utils.clamp(0.6, 1.4, d / innerHeight), easing: LENIS.easing });
+      const from = lenis.animatedScroll;
+      const d = Math.abs(y - from);
+      if (d < 1) return;
+      // Current speed towards the target (0 if the scroll is still or runs away from it).
+      const v = performance.now() - trackT > 100 ? 0 : Math.max(0, speed * Math.sign(y - from));
+      let duration = gsap.utils.clamp(SNAP_TIME[0], SNAP_TIME[1], d / (SNAP_SPEED * innerHeight));
+      // A fast scroll close to its rest: shorten the glide so it does not overshoot (slope ≤ 4).
+      if ((v * duration) / d > 4) duration = (4 * d) / v;
+      lenis.scrollTo(y, { duration, easing: glide((v * duration) / d) });
     } else scrollTo({ top: y, behavior: 'smooth' });
   };
 
@@ -1046,6 +1076,7 @@ function initScrollSnap(snaps, reduce) {
     // Every new input moves Lenis' target; once it stops moving, the target is where the scroll will rest.
     let target = lenis.targetScroll;
     const onScroll = () => {
+      track();
       if (lenis.targetScroll === target) return;
       target = lenis.targetScroll;
       arm(() => {
