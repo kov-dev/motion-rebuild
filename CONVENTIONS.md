@@ -297,7 +297,7 @@ Inktrap 700. 13 `.otf` не заливаємо.
 
 | Клас | Тег | Роль | Замінює |
 |---|---|---|---|
-| `body` | body | шрифт `font-display`, `bg`/`foreground`, режим `semantic: dark` (сесія 38; на Styleguide `sg-page` ставить `base`). **Ставиться руками** (WEBFLOW-BASE §3.4; MCP не міняє клас Body) | `.body-wrap`, `.body` |
+| `body` | body | шрифт `font-display`, фон `core/neutral-1000`, текст `foreground`, **без режиму** (base; сесія 39 — режим `dark` інвертував уроки й Resources). Один клас для Home і Styleguide. **Ставиться руками** (WEBFLOW-BASE §3.4; MCP не міняє клас Body) | `.body-wrap` (видалено, сесія 39), `.body` |
 | `styles-rem` | embed (компонент, клас `code-embed`) | ✅ створено: rem-правило 3 смуги + scrollbar + Lenis-CSS, канон [src/styles-rem.html](src/styles-rem.html). Noise `::before` і вибір `video.is-*` — у проході Lessons (прив'язані до блоків) | `main-css` (Home) + ембед Styleguide |
 | `site-nav` | nav | навбар (компонент) | `navigation w-nav` |
 | `section-preloader` · `section-hero` · `section-intro` · `section-interactive` · `section-techniques` · `section-lessons` | section | секції Home | `loader`, `section is-*` |
@@ -402,6 +402,27 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-12 (сесія 39) — Body Home на `.body`, режим `dark` знято, `.body-wrap` видалено; хвиля 2 ассетів перевірена
+
+- **Body Home:** користувач замінив `body-wrap` на `body` у Designer. Staging опубліковано, знімок `main-css-diff` Home
+  проти s38 дав **1689 прапорців на смугу.** Режим `semantic: dark` на `.body` успадкувало все дерево: тексти й тики
+  8 уроків стали `#fdfcfa`, Resources інвертувався (фон, шторки, таби, крапки). Rect — 0 змін.
+  **Пастка:** режим змінних, поставлений на Body, діє на всю сторінку. Висновок сесії 38 «`foreground` видимо нічого
+  не змінить» перевіряли лише на Styleguide, де `sg-page` сам ставить `base`.
+- **Виправлення:** `remove_style_variable_mode` на `.body`, фон = `core/neutral-1000`. Повторний знімок: **10 прапорців
+  на смугу, усі очікувані** (`#333` → `#0c0b0b` у Body, `main`, `section-lessons`, ембеді `styles-rem` і його
+  псевдоелементах; тексту там немає). Styleguide: лише Body і порожній ембед, `styleguide-check` 4 смуги — 0.
+  `lessons-run` / `resources-run --live` 1440 / 375 — 0 прапорців, 0 page errors (lessons 375: разовий прапорець за
+  таймінгом, повтор — 0). Опублікований `.body` = `background-color: var(--_core---neutral-1000)` + `font-display` + `foreground`.
+- **`.body-wrap` видалено** (`remove_style`). У HTML `/`, `/styleguide`, `/lesson/*`, 404 і в `src/` — 0 входжень. Стилів 324.
+- **Хвиля 2 ассетів** ([docs/asset-cleanup.md](docs/asset-cleanup.md)): 65 ID звірено з HTML staging, 34 CSS / JS / Lottie,
+  `src/` і CMS (14 `fileId` + `video-link-2`). Контрольні ID знайдено. **`Texture_01.png` `…f383` тепер вживається**
+  (шум у `styles-rem`) і лишається. До видалення 64 (38.6 MB), бекап метаданих —
+  `reference/asset-cleanup-deleted-2026-10-12-wave2.json`. `delete_asset` знову заблокував класифікатор дозволів.
+- **Staging опубліковано агентом 2 рази** (задачі `d0b57bf1…`, `3b4ab9e6…`; CSS `…shared.fb8c44ffd.min.css`).
+- **Перевірки запускались** з копії `tools/record/` у scratchpad (`npm i playwright@1`). Знімки s38 лежали в scratchpad
+  сесії 38 (`…/4fd80fb5…/scratchpad/s38/snap/`).
 
 ### 2026-10-12 (сесія 38) — чистка стилів копії: −425 невживаних класів, один клас Body
 
