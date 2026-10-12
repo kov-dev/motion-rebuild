@@ -17,7 +17,7 @@
 | Оригінал: CMS collections | Courses `6434148c0a05bcc47b7855d2` (10), Lessons `6434148c0a05bc1c877855d3` (8), Resources `6434148c0a05bc63f47855d4` (4); primary cmsLocaleId `653ada98e882f528b36a90ff` |
 | **Копія (робоча)** | `Motion rebuild` — **`6ac8e84728488a6bd334f2fe`**, staging `https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io` (індексація вимкнена, створена 2026-10-09 з копіюванням hosting/SEO/integration settings) |
 | Копія: Home | `6ac8e84728488a6bd334f2e5` |
-| Копія: Styleguide | `6ac8e84728488a6bd334f2e9` |
+| Копія: Styleguide | `6ac8e84728488a6bd334f2e9` — Body: `styles-rem` → `main.sg-page` `dfbc755b-40cc-35f5-666e-5ba1f1572584` (сесія 37, дерево й ID — docs/sections/styleguide.md); head = `src/webflow/styleguide-head.html` (`noindex`) |
 | Копія: CMS templates | Lessons `6ac8e84728488a6bd334f2e7`, Resources `6ac8e84728488a6bd334f2e8`, Courses `6ac8e84728488a6bd334f2e6` |
 | Копія: CMS collections | Courses `6ac8e84728488a6bd334f2f8` (10), Lessons `6ac8e84728488a6bd334f2f9` (8), Resources `6ac8e84728488a6bd334f2fa` (4); cmsLocaleId `6ac8e84728488a6bd334f2fc`. Картинки CMS уже в бакеті копії (`cdn.prod.website-files.com/6ac8e84728488a6bd334f2fb/…`) |
 | Копія: Variables | `core` `collection-cd80b580-4fd2-62b4-d7d1-57eddb084b67` (1 режим) · `semantic` `collection-0955f3bd-7147-ca75-39d5-f418a8d07264` (Base mode = light, `dark` `mode-ddc1ad08-4ab7-f9d4-1eeb-25e3a26ab76a`) · `type` `collection-0e5cebe5-0907-8476-c9f6-588218361070` (Base mode = desktop, `tablet` `mode-3d1cb45c-aab6-c53d-6792-2247e767d6b4` авто на ≤991, `mobile` `mode-1791d012-a630-d7f0-e6c8-068fc958c1ab` авто на ≤479). Порожня `Base collection` `collection-2b410466-…` — видалити руками |
@@ -369,6 +369,12 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 читає блок E `script.v33`. Ролі `data-motion`: `resources`, `res-clouds`, `res-cloud`, `res-pin`, `res-track`, `res-shutter`, `res-stack`, `res-tab`,
 `res-count`, `res-lists`, `res-list` (+ `data-list`), `res-item`, `res-name`, `res-image`, `res-overlay`. Дерево — docs/sections/resources.md «Збірка в копії».
 
+**Styleguide (створено, сесія 37):** `sg-page`, `sg-cover`, `sg-section`, `sg-head`, `sg-muted`, `sg-divider`, `sg-group`, `sg-grid`, `sg-swatch`,
+`sg-chip` (+ `is-neutral-0/800/1000`, `is-lesson-<урок>` ×8, `is-classic-easing/delay`, `is-bg/foreground/border` — фон = змінна), `sg-modes`,
+`sg-mode` (+ `is-dark`), `sg-spec`, `sg-spec-meta`, `sg-sample`, `sg-bands`, `sg-band` (+ `is-tablet` / `is-mobile` — режим `type` на класі), `sg-shape`
+(+ `is-radius-8` / `is-radius-full`), `sg-board` (`transform` тримає `position: fixed` кореня компонента, `semantic: dark`), `sg-rules`. Лише для
+сторінки Styleguide. `.body` (Body Styleguide) переведено на змінні. Дерево — docs/sections/styleguide.md «Збірка в копії».
+
 **Navigation (створено, сесія 26):** компонент `site-nav` — `site-nav` (режим `dark`), `nb-bar`, `nb-panel`, `nb-start`, `nb-logo`, `nb-eye-bg`
 (+ `is-left` / `is-right`), `nb-eyes` (+ `is-light`), `nb-pill`, `nb-pill.nb-toggle`, `nb-crumbs`, `nb-crumb` (+ `is-easing` … `is-zoom`, кольори
 `extra-lesson-*`), `nb-toggle-label-wrap`, `nb-toggle-label` (+ `is-close`), `nb-toggle-icon`, `nb-toggle-line`, `nb-menu`, `nb-scroller`, `nb-track`,
@@ -396,6 +402,30 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-12 (сесія 37) — Styleguide: звірка, рішення, перебудова як довідник системи
+
+- **Звірка** лайв ↔ копія ↔ `docs/styleguide-audit.md`: копія = лайв + дубль rem-ембеда (перебивав точні значення `styles-rem`)
+  + 2 тестові блоки сесії 6. Лайв `/styleguide` — 200, **без `noindex` і в sitemap** (sitemap лайву = `/` і `/styleguide`).
+  Старі класи стайлгайда на новому Home не живе жоден. Розбір — [docs/sections/styleguide.md](docs/sections/styleguide.md).
+- **Рішення агента (внутрішня сторінка):** живий довідник нової системи; URL лишається (200), у head `noindex`
+  (`src/webflow/styleguide-head.html`); `site-nav` / `site-sound` / `site-footer` як «одяг» сторінки **не потрібні**
+  (`motion.js` тут немає, на лайві їх теж нема) — замість цього інстанси на дошках `sg-board` у розділі Components
+  (`transform` на дошці тримає `position: fixed` кореня всередині). Розділів Spacing / Icons / Motion немає — у Motion немає
+  таких токенів.
+- **Верстка:** `main.sg-page` — Color (core: 3 neutral, 8 уроків з текстом уроку = пара фон ↔ текст, 2 classic; semantic —
+  панелі light / dark поруч), Typography (12 стилів зі специфікацією + 3 колонки смуг через режим `type` на класі), Shape,
+  Components, Rules. 37 класів `sg-*` (кольори / радіуси / рамки — змінні), `.body` на змінних. Прибрано: дубль ембеда,
+  тестові блоки, увесь `.styleguide-wrapper` (з OG-тримачем і стрілками Splide), комбо `sg-section.is-dark`. Ассет OG
+  `6ac8e84728488a6bd334f430` лишився в бібліотеці (потрібен на етапі 6).
+- **Нова перевірка** `tools/record/styleguide-check.mjs`: перший прогін — переповнення 7 px на 768 (`display-xl` поруч з
+  описом у рядку типографіки) → рядок `sg-spec` стовпчиком з medium, а не з small. Підсумок 1440 / 768 / 600 / 375 — **0 прапорців**.
+- **Staging опубліковано агентом 2 рази** (задачі `34eaee96…`, `5b8f1ed4…`).
+- **Пастки:** (1) whtml з `class="a b"`, де `b` не існує як комбо `a`, створив би нове комбо — тому підписи `sg-muted`
+  — обгорткою, а не другим класом; наявні комбо (`body-sm is-strong`, `sg-chip is-*`, створені заздалегідь) перевикористовуються.
+  (2) `create_style` з порожнім `properties` створює комбо — так зроблено `sg-mode.is-dark`, `sg-band.is-*` під режими.
+- **Відкрите:** перемикач Page settings → «Sitemap indexing» для `/styleguide` (MCP не пише) — етап 6; Body Home (`.body-wrap`)
+  і Styleguide (`.body`) звести до одного класу в проході чистки стилів.
 
 ### 2026-10-12 (сесія 36) — тач ×1.5 на iPad, шаблони CMS: редирект `/lesson/*`, deep-link на Home
 
