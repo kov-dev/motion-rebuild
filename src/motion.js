@@ -2048,7 +2048,11 @@ async function init() {
   ScrollTrigger.refresh();
   if (deep) {
     // Under the overlay, once every pin spacer is in: the section lands at the top, as from a menu card.
-    if (lenis) lenis.scrollTo(deep, { immediate: true, force: true });
+    // Lenis clamps to its cached limit, measured before the pin spacers grew the page (seen: #resources short of 15k px).
+    if (lenis) {
+      lenis.resize();
+      lenis.scrollTo(deep, { immediate: true, force: true });
+    }
     else scrollTo(0, deep.getBoundingClientRect().top + scrollY);
     ScrollTrigger.update();
     reveal?.();
