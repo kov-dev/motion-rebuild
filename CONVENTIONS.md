@@ -397,6 +397,26 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 
 ## Журнал
 
+### 2026-10-12 (сесія 36) — тач ×1.5 на iPad, шаблони CMS: редирект `/lesson/*`, deep-link на Home
+
+- **Тач-множник піну ≥992 (рішення користувача):** ×1.5 замість ×3 — константа `UI_TOUCH_WIDE` у `src/motion.js` (≤991 лишається
+  лайвове ×3). iPad 1366: 11 065 px на блок (було 22 130), 1194: 9 672. `ui-run.mjs` читає константу з коду. Прогони: локально
+  ipad / ipad11 / 768 / 375 — 0 прапорців; `--live` 1440 / ipad / 375 — 0.
+- **Шаблони CMS:** верстати нічого — усі три порожні (лише Body) і в оригіналі, і в копії. Лайв: `/lesson/<slug>` = 200 і порожня
+  сторінка, `/resources/*` і `/course-items/*` = 404 (сторінки колекцій вимкнені). Розбір — [docs/sections/cms-templates.md](docs/sections/cms-templates.md).
+  **Рішення користувача:** `/lesson/<slug>` → `/#<секція>`; Resources / Courses лишаються 404. Head шаблону Lessons =
+  `src/webflow/lesson-template-head.html` (`noindex`, `canonical /`, `location.replace` з мапою 4 слагів), записано через
+  `set_page_freeform_code`, прочитано назад.
+- **Deep-link на Home (видима зміна, погоджено разом із редиректом):** лайв ігнорував хеш. `deepLinkTarget()` + гілка `deep` в
+  `initPreloader()`: без інтро, Hero одразу в кінцевому стані, заслін тримається inline до кінця `init()` (піни + шрифти), потім
+  стрибок до секції й згасання 0.4 с. **Пастка:** Lenis обрізає `scrollTo` своїм закешованим `limit` (висота до пін-спейсерів) —
+  `/#resources` раз сів на 49 083 замість 64 661 → `lenis.resize()` перед стрибком.
+- **Нова перевірка** `tools/record/deeplink-run.mjs`: 1440 / ipad / 768 / 375 + `--reduce` + `--live` (з трьома `/lesson/*`) — 0
+  прапорців. Регресія `--live`: preloader-handover, hero-intro-check 1440, nav-run 1440 / 375 — 0.
+- **Webflow:** Home head → модуль `086130a` (через проміжний `4563d92`), head шаблону Lessons. **Staging опубліковано агентом 2 рази**
+  (06:47 і 06:54 UTC), дійшло (curl: `motion-rebuild@086130a`, `/lesson/zoom` віддає заглушку).
+- Відкрите для запуску: `video-link-2` уроку easing вказує в бакет оригіналу.
+
 ### 2026-10-11 (сесія 35) — `ui-run.mjs` під широку схему, причина «пін +0», iPad landscape і reduced motion
 
 - **Причина «пін +0» на 768 / 375:** старий `ui-run.mjs` блокував запити старого стеку регуляркою з `lenis`, а з сесії 32 наш модуль сам
