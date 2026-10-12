@@ -1,0 +1,13 @@
+<meta name="robots" content="noindex">
+<link rel="canonical" href="/">
+<script>
+// Lessons Template head (canonical source: src/webflow/lesson-template-head.html).
+// The live /lesson/<slug> pages were empty; every lesson lives on Home as a section, so the
+// URL is kept and sends the visitor there: motion.js handles the hash (deepLinkTarget).
+// Slugs that differ from the section ids are mapped; a new lesson with an equal slug needs nothing.
+(function () {
+  var ids = { 'the-basics-of-easing': 'easing', 'offset-and-delay': 'delay', 'fade-in-fade-out': 'fade', 'transform-morph': 'morph' };
+  var slug = location.pathname.replace(/\/+$/, '').split('/').pop();
+  location.replace('/#' + (ids[slug] || slug));
+})();
+</script>

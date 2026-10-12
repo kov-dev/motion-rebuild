@@ -222,10 +222,28 @@ function heroShown() {
 }
 
 /**
+ * Section of a deep link (/#zoom — the /lesson/<slug> template redirects here, session 36), or null. The live site
+ * ignored the hash and always opened on Hero.
+ */
+function deepLinkTarget() {
+  let id = '';
+  try {
+    id = decodeURIComponent(location.hash.slice(1));
+  } catch {
+    return null;
+  }
+  if (!id || id === 'hero') return null;
+  const el = document.getElementById(id);
+  return el && !q('nb')?.contains(el) ? el : null;
+}
+
+/**
  * Runs the preloader and resolves once Hero has fully entered (≈9.93 s on the live site).
  * Other section modules start after it, then ScrollTrigger.refresh().
+ * With a deep link there is no intro: Hero is set as after its entrance and the overlay stays up (inline, past the
+ * gate class) while the sections build their pins; it resolves to `reveal`, which init() calls after the jump.
  */
-export async function initPreloader({ lenis = null } = {}) {
+export async function initPreloader({ lenis = null, deep = null } = {}) {
   const root = q('preloader');
   const html = document.documentElement;
   if (!root || !html.classList.contains('is-preloading')) return;
@@ -239,6 +257,15 @@ export async function initPreloader({ lenis = null } = {}) {
   const counter = q('preloader-counter', root);
 
   try {
+    if (deep) {
+      heroShown();
+      counter.textContent = '100';
+      gsap.set(root, { display: 'block', position: 'fixed', inset: 0, height: '100%', zIndex: 1000 });
+      await document.fonts.ready; // the pins measure text
+      return () =>
+        gsap.to(root, { opacity: 0, duration: 0.4, ease: 'none', onComplete: () => gsap.set(root, { clearProps: 'all' }) });
+    }
+
     if (reducedMotion()) {
       heroShown();
       counter.textContent = '100';
@@ -558,6 +585,9 @@ function blockOrigin(block) {
 // Wide slider schedule, timeline units (the pin scrolls UI_UNIT_PX·vw per unit).
 const UI_UNITS = { lead: 3, heading: 5, shift: 4, hold: 6, close: 2, move: 3, expand: 4, tail: 4 };
 const UI_UNIT_PX = 0.12;
+// Touch screens ≥992 (iPad landscape) scroll the wide pin 1.5× longer, so a flick does not skip slides (user, session 36;
+// the live ×3 made one block ≈ 21 screens at 1366). ≤991 keeps the live ×3.
+const UI_TOUCH_WIDE = 1.5;
 // Seconds a panel takes to open from its dot / fold back into it (≤991: the live 0.7 both ways).
 const UI_OPEN = 0.6;
 const UI_CLOSE = 0.5;
@@ -666,7 +696,7 @@ export function initUi() {
         let units = 0;
         const pinLength = () =>
           wide
-            ? units * UI_UNIT_PX * vw() * (c.touch ? 3 : 1)
+            ? units * UI_UNIT_PX * vw() * (c.touch ? UI_TOUCH_WIDE : 1)
             : // Live: vw + vw·n + 0.5·vw·n + 0.25·vw, ×3 on touch screens.
               (vw() * (1 + 1.5 * n) + 0.25 * vw()) * (c.touch ? 3 : 1);
 
@@ -2000,7 +2030,8 @@ async function init() {
   lenis = initLenis();
   // Before the preloader: the logo eyes load while it runs, the navbar enters in its phase 3.
   initNav();
-  await initPreloader({ lenis });
+  const deep = deepLinkTarget();
+  const reveal = await initPreloader({ lenis, deep });
   // Created in DOM order, so every trigger below a pin already knows its spacer.
   initHero();
   initIntro();
@@ -2015,6 +2046,13 @@ async function init() {
   // Last: its triggers measure every pin above.
   initTheme();
   ScrollTrigger.refresh();
+  if (deep) {
+    // Under the overlay, once every pin spacer is in: the section lands at the top, as from a menu card.
+    if (lenis) lenis.scrollTo(deep, { immediate: true, force: true });
+    else scrollTo(0, deep.getBoundingClientRect().top + scrollY);
+    ScrollTrigger.update();
+    reveal?.();
+  }
 }
 
 init();

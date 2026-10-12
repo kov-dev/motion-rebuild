@@ -4,7 +4,7 @@
 // and panel centres in viewport widths, open/closed panels, the heading gone, the pin length — and that exactly one
 // ball is on screen through the hand-over between the blocks. ≤991 (live scheme, unchanged): compares what is on
 // screen with motion.zajno.com at the same timeline units (panel rects, open clip, heading, dots).
-// Touch bands use a touch context (hover: none, pointer: coarse), so the pin is ×3; `ipad` = 1366×1024 landscape.
+// Touch bands use a touch context (hover: none, pointer: coarse), so the wide pin is ×UI_TOUCH_WIDE (narrow ×3); `ipad` = 1366×1024 landscape.
 // Usage: UI_OUT=<shots-dir> node ui-run.mjs [--live] [--reduce] [1440|1280|ipad|ipad11|768|375 ...] (default 1440 768 375)
 import { chromium } from 'playwright';
 import fs from 'node:fs';
@@ -32,6 +32,7 @@ const VPS = [
 const src = fs.readFileSync(`${ROOT}/src/motion.js`, 'utf8');
 const U = Function(`return ${src.match(/const UI_UNITS = (\{[^}]+\})/)[1]}`)();
 const UNIT_PX = +src.match(/const UI_UNIT_PX = ([\d.]+)/)[1];
+const TOUCH_WIDE = +src.match(/const UI_TOUCH_WIDE = ([\d.]+)/)[1];
 
 // Steady points of one wide block with n panels: [unit, label, expectations].
 // Centres are × vw; `open` lists the panels that must be open, every other panel must be a dot or off screen.
@@ -159,7 +160,7 @@ async function runWide(p, vp, out) {
   const flag = (s) => { flags++; rows.push(`  ⚠ ${s}`); };
   const r = await p.evaluate(ranges);
   const touch = await p.evaluate(() => matchMedia('(hover: none) and (pointer: coarse)').matches);
-  const k = touch ? 3 : 1;
+  const k = touch ? TOUCH_WIDE : 1;
   rows.push(`== ${vp.n} ${vp.w}×${vp.h} wide${touch ? ' touch' : ''}${reduce ? ' reduce' : ''}: pins ${r.map((x) => `${x.top}+${x.len} (n ${x.n})`).join(', ')}`);
   const wait = reduce ? 500 : 1100;
 
