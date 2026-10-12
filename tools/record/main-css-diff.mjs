@@ -9,6 +9,7 @@
 // Usage: node main-css-diff.mjs <out-dir> snapshot <tag> [1440|768|600|375 …]   → <out-dir>/<tag>-<band>.json
 //        node main-css-diff.mjs <out-dir> diff <tagA> <tagB> [bands…]          → Δ per element, 0 = identical
 //        node main-css-diff.mjs <out-dir> inventory [bands…]                   → selectors with matches
+// PAGE=styleguide (env) — snapshot / inventory another staging path instead of Home (session 38, style cleanup)
 import { chromium } from 'playwright';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 const [out, mode, ...rest] = process.argv.slice(2);
@@ -20,13 +21,13 @@ const bandsOf = (a) => (a.length ? a : ['1440', '768', '600', '375']);
 const PROPS = ['display', 'position', 'visibility', 'opacity', 'transform', 'overflow-x', 'overflow-y', 'clip-path', '-webkit-mask-image',
   'pointer-events', 'z-index', 'font-size', 'line-height', 'letter-spacing', 'text-decoration-line', 'color', 'background-color',
   'background-image', 'border-top-width', 'border-top-color', 'width', 'height', 'top', 'left', 'animation-name', 'transition-property',
-  'transition-duration', 'user-select', 'scroll-behavior', 'scrollbar-width', '-webkit-tap-highlight-color'];
+  'transition-duration', 'font-family', 'font-weight', 'user-select', 'scroll-behavior', 'scrollbar-width', '-webkit-tap-highlight-color'];
 
 const open = async (b, band, js) => {
   const vp = VPS[band];
   const ctx = await b.newContext({ viewport: { width: vp.w, height: vp.h }, javaScriptEnabled: js, ...(vp.m ? { isMobile: true, hasTouch: true, userAgent: UA } : {}) });
   const p = await ctx.newPage();
-  await p.goto(STAGING + '?nocache=' + Date.now(), { waitUntil: 'load', timeout: 120000 });
+  await p.goto(STAGING + (process.env.PAGE || '') + '?nocache=' + Date.now(), { waitUntil: 'load', timeout: 120000 });
   await p.waitForTimeout(1500);
   return { ctx, p };
 };

@@ -297,7 +297,7 @@ Inktrap 700. 13 `.otf` не заливаємо.
 
 | Клас | Тег | Роль | Замінює |
 |---|---|---|---|
-| `body` | body | шрифт `font-display`, `bg`/`foreground`. **Ставиться руками** (WEBFLOW-BASE §3.4) | `.body-wrap`, `.body` |
+| `body` | body | шрифт `font-display`, `bg`/`foreground`, режим `semantic: dark` (сесія 38; на Styleguide `sg-page` ставить `base`). **Ставиться руками** (WEBFLOW-BASE §3.4; MCP не міняє клас Body) | `.body-wrap`, `.body` |
 | `styles-rem` | embed (компонент, клас `code-embed`) | ✅ створено: rem-правило 3 смуги + scrollbar + Lenis-CSS, канон [src/styles-rem.html](src/styles-rem.html). Noise `::before` і вибір `video.is-*` — у проході Lessons (прив'язані до блоків) | `main-css` (Home) + ембед Styleguide |
 | `site-nav` | nav | навбар (компонент) | `navigation w-nav` |
 | `section-preloader` · `section-hero` · `section-intro` · `section-interactive` · `section-techniques` · `section-lessons` | section | секції Home | `loader`, `section is-*` |
@@ -402,6 +402,30 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 `example-video-1…6`, `progress-bar_title-1…3`).
 
 ## Журнал
+
+### 2026-10-12 (сесія 38) — чистка стилів копії: −425 невживаних класів, один клас Body
+
+- **Інвентар** ([docs/style-cleanup.md](docs/style-cleanup.md)): 750 стилів (487 базових + 263 комбо). Вживання рахували
+  так: опублікований HTML (`/`, `/styleguide`, `/lesson/*`, 404) + дерева Designer Home, Styleguide і **всіх 10 компонентів**
+  (`scope_component_id`; елемент, прихований пропсом, у HTML не потрапляє). HTML і Designer збіглися. Комбо-стани, які ставить
+  JS (`.res-image.is-active`, `.res-name.is-active`, `.snd-mute.is-on`), лишились. IX3 — 0, `data-w-id` на сторінках — 0;
+  у `src/` невживані класи трапляються лише в коментарях. Невживаних **425** (245 + 180), усі — імена старої збірки, з нашої
+  системи жодного. Звірка з styleguide-audit §5: 23 з 24 «мертвих» є в списку, 24-й (`overflow-hidden`) був лише комбо `.body.overflow-hidden`.
+- **Бекап:** усі 750 стилів з властивостями (4 смуги + псевдостани) → `reference/styles/copy-styles-2026-10-12.json`.
+- **Видалення:** `remove_style`, спершу комбо від найглибших, пакетами по 50. **Пастка:** приблизно після 55 дій за раз
+  Webflow відповідає `429 Too Many Requests` (решта дій пакета падає) — пакети ≤ 50 і свіжий `get_styles` між ними;
+  `remove_style` бере display-ім'я (`Text Span`, `Div Block 4`, `Image`, `Link`, `2`, `overflow hidden`), а не слаг селектора.
+  Після: **325 стилів**, усі вживані живі, невживаних 0.
+- **Перевірка:** `main-css-diff.mjs` доповнено `PAGE=<path>` (знімати не лише Home) і властивостями `font-family` / `font-weight`;
+  контрольний повтор «до» — 0 (шуму немає). Опублікований CSS: 1613 → 954 правил, 157 → 93 KB; прибрано 659 правил, і кожне —
+  лише для видалених класів, нових 0, змінилось 1 (`.body`). Знімок JS off «після»: Home 1205 елементів × 4 смуги — **0 прапорців**;
+  Styleguide — лише Body і ембед `styles-rem` (успадкований колір), `sg-page` перекриває сторінку повністю. З JS `--live` 1440 / 375:
+  nav, resources, footer, sound — **0 прапорців, 0 page errors**; `styleguide-check` 4 смуги — 0.
+- **Body:** `.body` отримав режим `semantic: dark` → фон `#0c0b0b`, текст `#fdfcfa`, шрифт `font-display` — те саме, що дає Home
+  `.body-wrap` (колір `#333` від тегу там успадковують лише 3 обгортки без тексту). **Пастка:** `set_style` на Body відповідає
+  «This element doesn't support styles» — клас Body міняється лише руками в Designer. Home ще на `.body-wrap` → **користувач:**
+  Home → Body → `body-wrap` замінити на `body`; потім агент знімає Home «після» і видаляє `.body-wrap`.
+- **Staging опубліковано агентом 1 раз** (задача `df3941d7…`, новий CSS `…shared.e8826afe9.min.css`).
 
 ### 2026-10-12 (сесія 37) — Styleguide: звірка, рішення, перебудова як довідник системи
 
