@@ -6,7 +6,8 @@
 // Parts (--part=a,b; default all):
 //   impl     — Implementation of easing, fade and zoom: title scale, cards 2/3 y, track xPercent
 //   examples — examples row xPercent and the odd/even stars y
-//   demo     — demo state: visible video, line width, lit ticks, lit step titles
+//   demo     — demo state against the old IX2 steps (live). Off by default since session 42: the demo line now follows
+//              the scroll with a snap to the ticks — tools/record/demo-run.mjs checks it
 //   classic  — classic wrapper + overlay background alpha (easing, delay)
 //   splide   — schemes slider: each «next» click sampled every frame (x as a fraction of the step, active circle, caption
 //              swap time), disabled arrows, one «prev»; ours against the live Splide
@@ -19,7 +20,7 @@ import { readFileSync } from 'node:fs';
 const args = process.argv.slice(2);
 const live = args.includes('--live');
 const noRef = args.includes('--no-ref');
-const parts = (args.find((a) => a.startsWith('--part='))?.split('=')[1] || 'impl,examples,demo,classic,splide,media').split(',');
+const parts = (args.find((a) => a.startsWith('--part='))?.split('=')[1] || 'impl,examples,classic,splide,media').split(',');
 const [root, out, only = '1440'] = args.filter((a) => !a.startsWith('--'));
 const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const LIVE = 'https://motion.zajno.com/';

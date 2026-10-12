@@ -969,7 +969,7 @@ export function initUi() {
         }
       });
 
-      const unsnap = initUiSnap(snaps, c.reduce);
+      const unsnap = initScrollSnap(snaps, c.reduce);
 
       return () => {
         unsnap();
@@ -997,16 +997,17 @@ export function initUi() {
 
 // Snap pad inside an open window (units) and the pause after the last scroll input before the snap (s).
 const UI_SNAP_PAD = 0.5;
-const UI_SNAP_IDLE = 0.18;
+const SNAP_IDLE = 0.18;
 
 /**
- * Snap between slides: a scroll that comes to rest inside the slider where nothing is open (the panel has folded into
- * its dot, the next one has not opened yet, or the dot is on its way to the next block) carries on to the nearest rest
- * state in the direction of the last scroll: the next panel open, or back to the previous one. With Lenis the
- * destination is known as soon as the input stops (its target), so the snap takes over the running ease; native
- * scroll (touch) waits until the scroll and the finger are still. Reduced motion jumps.
+ * Scroll snap between rest states (UI slider, easing demo). Each snap is { st, units, rests: [[from, to], …] } in
+ * units of its ScrollTrigger. A scroll that comes to rest inside the range but outside every rest window (in the
+ * slider: the panel has folded into its dot, the next one has not opened yet; in the demo: the line between two ticks)
+ * carries on to the nearest rest in the direction of the last scroll. With Lenis the destination is known as soon as
+ * the input stops (its target), so the snap takes over the running ease; native scroll (touch) waits until the scroll
+ * and the finger are still. Reduced motion jumps.
  */
-function initUiSnap(snaps, reduce) {
+function initScrollSnap(snaps, reduce) {
   if (!snaps.length) return () => {};
   const px = ({ st, units }, u) => (u === Infinity ? Infinity : st.start + (u / units) * (st.end - st.start));
 
@@ -1038,7 +1039,7 @@ function initUiSnap(snaps, reduce) {
   let timer = null;
   const arm = (check) => {
     timer?.kill();
-    timer = gsap.delayedCall(UI_SNAP_IDLE, check);
+    timer = gsap.delayedCall(SNAP_IDLE, check);
   };
 
   if (lenis) {
@@ -1273,6 +1274,8 @@ export function initTechniques() {
 
 // Same catch-up as Techniques: every lesson trigger has IX2 smoothing 90.
 const LESSONS_SCRUB = 1;
+// The demo line is tied tighter to the scroll than the IX2 ports (Lenis already eases the wheel).
+const DEMO_SCRUB = 0.3;
 
 // IX2 scroll progress as ScrollTrigger positions. 0: the trigger top at the viewport bottom (startsEntering) or at
 // max(vh − h, 0); 1: its top at −h·(1 − endOffset), i.e. its bottom at h·endOffset from the viewport top.
@@ -1289,9 +1292,10 @@ const CASES_KEYS = {
   small: { entering: true, endOffset: 0.26, title: [0.23, 0.3], card2: [0.3, 0.44], card3: null, track: [0.48, 0.74, -178] },
 };
 
-// Demo: state i (video i, line width) starts at DEMO_STEPS[i − 1] of the progress; the live IX2 jumps within 1 %.
-const DEMO_STEPS = [0.17, 0.345, 0.51, 0.675, 0.835];
-const DEMO_LINE = [16.7, 33.33, 50.03, 66.63, 83.35, 100];
+// Demo: six states, each rests with the progress line on its tick ((i + 1) / 6); the line runs between the ticks with
+// the scroll, the video swaps halfway. Crossfade / tick / title transitions (s).
+const DEMO_STATES = 6;
+const DEMO_FADE = { video: 0.35, tick: 0.25, step: 0.4 };
 
 // Classic: the wrapper and the overlay over Implementation go transparent → black. Easing first, then delay.
 const CLASSIC_WINDOWS = [[0.18, 0.24], [0.24, 0.3]];
@@ -1485,16 +1489,28 @@ export function initLessons() {
 }
 
 /**
- * Demo (easing): six states over the sticky block, as the live IX2 steps: one video visible and playing, the progress
- * line at 1/6 per state, tick i lit from state i, step titles 2 and 3 lit from states 2 and 4. No tweening, as live.
+ * Demo (easing): six states over the sticky part of the block (top at the top → bottom at the bottom). The progress
+ * line follows the scroll from the first tick (state 0, 1/6) to the end (state 5); a state rests with the line on its
+ * tick, the video crossfades halfway between two ticks, a tick lights up when the line reaches it, step titles 2 and 3
+ * from states 2 and 4. A scroll that stops between two ticks is carried on to the next one in its direction
+ * (initScrollSnap()). Only the visible video plays. Was: IX2 steps with hard cuts at 17 / 35 / 51 / 68 / 84 %.
  */
 function initLessonDemo(demo) {
   const videos = qa('demo-video', demo);
   const steps = qa('demo-step', demo);
   const ticks = qa('demo-tick', demo);
   const line = q('demo-line', demo);
+  const reduce = reducedMotion();
+  const last = DEMO_STATES - 1;
   let state = -1;
   let inView = false;
+
+  if (!reduce) {
+    videos.forEach((el) => (el.style.transition = `opacity ${DEMO_FADE.video}s`));
+    ticks.forEach((el) => (el.style.transition = `height ${DEMO_FADE.tick}s cubic-bezier(0.22, 1, 0.36, 1)`));
+    steps.forEach((el) => (el.style.transition = `color ${DEMO_FADE.step}s`));
+  }
+  if (line) gsap.set(line, { width: '100%', transformOrigin: '0 50%', scaleX: 1 / DEMO_STATES });
 
   const playActive = () =>
     videos.forEach((v, i) => {
@@ -1506,10 +1522,15 @@ function initLessonDemo(demo) {
     state = s;
     videos.forEach((v, i) => v.classList.toggle('is-active', i === s));
     steps.forEach((el, j) => el.classList.toggle('is-active', s >= 2 * j));
-    ticks.forEach((el, j) => el.classList.toggle('is-on', s >= j));
-    if (line) line.style.width = `${DEMO_LINE[s]}%`;
-    if (videos[s + 1]) setVideoSrc(videos[s + 1]); // the next state is one step away
+    // The neighbours are half a step away: buffer them so the crossfade never shows an empty frame.
+    [videos[s + 1], videos[s - 1]].forEach((v) => v && setVideoSrc(v, 'auto'));
     playActive();
+  };
+  // u: 0 … last, the state position along the scroll.
+  const render = (u) => {
+    if (line) gsap.set(line, { scaleX: (u + 1) / DEMO_STATES });
+    ticks.forEach((el, j) => el.classList.toggle('is-on', u >= j - 0.001));
+    apply(Math.min(last, Math.round(u)));
   };
 
   watchVideoBand();
@@ -1522,18 +1543,20 @@ function initLessonDemo(demo) {
     playActive();
   }).observe(demo);
 
-  const at = (p) => DEMO_STEPS.filter((x) => p >= x).length;
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: demo,
-      ...ix2Range(demo, false, 0.2),
-      scrub: reducedMotion() ? true : LESSONS_SCRUB,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: reduce ? true : DEMO_SCRUB,
       invalidateOnRefresh: true,
     },
-    onUpdate: () => apply(at(tl.progress())),
+    onUpdate: () => render(tl.progress() * last),
   });
   tl.set({}, {}, 1);
-  apply(0);
+  render(0);
+
+  initScrollSnap([{ st: tl.scrollTrigger, units: last, rests: [...Array(DEMO_STATES).keys()].map((i) => [i, i]) }], reduce);
 }
 
 /**
