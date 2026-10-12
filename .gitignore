@@ -5,3 +5,4 @@ reference/recordings/
 
 # Reference renders from the designer (large, not for the public repo)
 *.mp4
+media-faststart/

@@ -1312,7 +1312,12 @@ const videoSrc = (v) => {
 };
 const setVideoSrc = (v, preload = 'metadata') => {
   const src = videoSrc(v);
-  if (!src || v.dataset.loaded === src) return;
+  if (!src) return;
+  if (v.dataset.loaded === src) {
+    // Same file, asked to buffer: raise preload (was ignored, so a video set to 'metadata' never buffered ahead).
+    if (preload === 'auto' && v.preload !== 'auto') v.preload = 'auto';
+    return;
+  }
   const resume = v.dataset.loaded && !v.paused;
   v.dataset.loaded = src;
   v.preload = preload;
@@ -1342,14 +1347,15 @@ function watchVideoBand() {
 }
 
 /**
- * Lazy videos instead of Finsweet autovideo: the band's file is set half a viewport ahead (metadata only, the poster
- * stays under the video), the video plays while on screen and pauses off it.
+ * Lazy videos instead of Finsweet autovideo: the band's file is set and buffered half a viewport ahead (Firefox shows
+ * nothing until it has buffered, metadata alone left the cards empty for seconds), the video plays while on screen
+ * and pauses off it.
  */
 function lazyVideo(videos) {
   if (!videos.length) return;
   watchVideoBand();
   const near = new IntersectionObserver(
-    (entries) => entries.forEach((e) => e.isIntersecting && (setVideoSrc(e.target), near.unobserve(e.target))),
+    (entries) => entries.forEach((e) => e.isIntersecting && (setVideoSrc(e.target, 'auto'), near.unobserve(e.target))),
     { rootMargin: '50% 0px' }
   );
   const seen = new IntersectionObserver((entries) =>
@@ -1535,7 +1541,7 @@ function initLessonDemo(demo) {
 
   watchVideoBand();
   new IntersectionObserver(
-    (entries, io) => entries.forEach((e) => e.isIntersecting && (setVideoSrc(videos[Math.max(state, 0)]), io.disconnect())),
+    (entries, io) => entries.forEach((e) => e.isIntersecting && (setVideoSrc(videos[Math.max(state, 0)], 'auto'), io.disconnect())),
     { rootMargin: '50% 0px' }
   ).observe(demo);
   new IntersectionObserver((entries) => {
@@ -1785,6 +1791,16 @@ function initResourcesStack(pin, listEls) {
   const rows = listEls.map((l) => qa('res-item', l));
   const images = rows.map((list) => list.map((row) => q('res-image', row)));
   images.flat().forEach((img) => img && stackEl.append(img));
+  // The CMS images are loading="lazy" and hidden (opacity 0) in the stack: Firefox fetched each one only once the
+  // pin was on screen, so a hovered row showed nothing for a while. Load them all one viewport ahead (≈20 KB each).
+  new IntersectionObserver(
+    (entries, io) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      images.flat().forEach((img) => img && (img.loading = 'eager'));
+      io.disconnect();
+    },
+    { rootMargin: '100% 0px' }
+  ).observe(pin);
 
   let stack = [];
   let turn = 0; // index into RES_STACK_TURN of the last pushed image
