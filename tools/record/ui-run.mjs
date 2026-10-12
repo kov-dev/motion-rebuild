@@ -33,11 +33,13 @@ const src = fs.readFileSync(`${ROOT}/src/motion.js`, 'utf8');
 const U = Function(`return ${src.match(/const UI_UNITS = (\{[^}]+\})/)[1]}`)();
 const UNIT_PX = +src.match(/const UI_UNIT_PX = ([\d.]+)/)[1];
 const TOUCH_WIDE = +src.match(/const UI_TOUCH_WIDE = ([\d.]+)/)[1];
+const LAND = +src.match(/const UI_LAND = ([\d.]+)/)[1];
 
 // Steady points of one wide block with n panels: [unit, label, expectations].
 // Centres are × vw; `open` lists the panels that must be open, every other panel must be a dot or off screen.
-function wideSchedule(n, final) {
-  const pts = [[U.lead / 2, 'rest', { open: [], dots: [[0, 5 / 6]], heading: 'in' }]];
+// The first block's lead holds the Hero ball's landing (UI_LAND units): its rest point comes after it.
+function wideSchedule(n, final, first) {
+  const pts = [[first ? (LAND + U.lead) / 2 : U.lead / 2, 'rest', { open: [], dots: [[0, 5 / 6]], heading: 'in' }]];
   let t = U.lead + 1 + U.shift;
   const opens = [t];
   for (let i = 1; i < n; i++) {
@@ -129,6 +131,8 @@ async function openPage(b, vp, url, local) {
     reducedMotion: reduce ? 'reduce' : 'no-preference',
   });
   const p = await ctx.newPage();
+  // The walk stops between slides on purpose: the slider snap (snap-run.mjs) is off.
+  await p.addInitScript(() => document.addEventListener('DOMContentLoaded', () => (document.documentElement.dataset.motionSnap = 'off')));
   const errs = [];
   p.on('pageerror', (e) => errs.push(String(e)));
   // A failed ESM import (e.g. a blocked CDN dependency) is not a pageerror: watch failed requests too.
@@ -165,7 +169,7 @@ async function runWide(p, vp, out) {
   const wait = reduce ? 500 : 1100;
 
   for (const [j, blk] of r.entries()) {
-    const sch = wideSchedule(blk.n, j === r.length - 1);
+    const sch = wideSchedule(blk.n, j === r.length - 1, j === 0);
     const expLen = sch.units * UNIT_PX * vp.w * k;
     if (Math.abs(blk.len - expLen) > 2) flag(`B${j} pin ${blk.len} ≠ ${Math.round(expLen)} (${sch.units} u × ${UNIT_PX}·vw × ${k})`);
     const y = (u) => blk.top + (u / sch.units) * blk.len;

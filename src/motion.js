@@ -466,12 +466,6 @@ export function initIntro() {
         const rest = heroBallRest(ball);
         return { x: target.x - rest.x, y: target.y - rest.y };
       };
-      // Ball centre resting on top of the first heading line, in the ball's translate space.
-      const hitY = () => {
-        const heading = q('ui-text', block);
-        const top = uiNaturalCentre(heading, block).y - heading.offsetHeight / 2;
-        return top - ball.offsetHeight / 2 - heroBallRest(ball).y;
-      };
       const segment = (start, end) => () => ({ path: path.getAttribute('d'), matrix: toBall(), start, end });
 
       const stops = INTRO_STOPS[b];
@@ -497,10 +491,12 @@ export function initIntro() {
         },
         onUpdate: () => sync(),
       });
+      // Desktop: the landing runs on its own trigger (below), which owns the hand-over.
+      let landing = null;
       const sync = () => {
         const t = tl.time();
         marks.forEach((m, i) => setText(i, t >= m));
-        handOver(tl.progress() === 1);
+        handOver((landing || tl).progress() === 1);
       };
       // ScrollTrigger.refresh() reverts the inline styles of matchMedia animations to measure and restores them
       // afterwards, which can undo state sets made during it: drop the caches and re-apply after every refresh.
@@ -508,6 +504,7 @@ export function initIntro() {
         shown.fill(null);
         handed = null;
         sync();
+        landing?.resync();
       };
       ScrollTrigger.addEventListener('refresh', resync);
 
@@ -518,23 +515,133 @@ export function initIntro() {
         .to(ball, { motionPath: segment(stops[1], stops[2]), duration: 14 })
         .to(ball, { motionPath: segment(stops[2], stops[3]), duration: 27 });
 
-      // Desktop: fall onto the rising heading, bounce off its top and arc over to the first dot right of it.
+      // Desktop: the path ends on the first heading line; the ball bounces along it and hops off into the first dot.
+      // The live site kept the last 10 units for its `bounce` landing: they stay empty, so the path keeps its pace.
       if (b === 'desktop' && block) {
-        const apex = () => hitY() - 0.12 * innerHeight;
-        tl.fromTo(ball, { y: () => at(1).y }, { y: hitY, duration: 4, ease: 'power2.in' })
-          .fromTo(ball, { x: () => at(1).x }, { x: () => land().x, duration: 6, ease: 'power1.inOut' })
-          .fromTo(ball, { y: hitY }, { y: apex, duration: 2.5, ease: 'power2.out' }, '<')
-          // Settles into the dot (the video): it stops there, so the swap to the dot is invisible.
-          .fromTo(ball, { y: apex }, { y: () => land().y, duration: 3.5, ease: 'power1.inOut' }, '>');
+        tl.set({}, {}, drop + 66 + 10);
+        landing = initIntroLanding({ ball, block, introTl: tl, pathEnd: drop + 66, from: () => at(1), land, sync });
       }
 
       return () => {
         ScrollTrigger.removeEventListener('refresh', resync);
+        landing?.kill();
         handOver(false);
         gsap.set(ball, { clearProps: 'x,y' });
       };
     }
   );
+}
+
+// Desktop landing on the first heading line: hop heights × vw (each about 45 % of the previous), the apex of the last
+// hop off the line, and the share of the way to the dot the bounces cover (the last contact stays on the first line).
+const LAND_HOPS = [0.085, 0.038, 0.017];
+const LAND_LAST = 0.03;
+const LAND_CONTACT = 0.62;
+
+/**
+ * Desktop landing (live: a two-hop `bounce` ease; motion video: the ball ends in the first dot right of the heading).
+ * The path ends on the first heading line; the ball bounces along it in shrinking hops (gravity parabolas, so a steady
+ * scroll reads as physics) and the last hop carries it off the line into the first dot (5/6 vw), easing to a stop there.
+ * Own scrubbed trigger: from where the live landing started (the path end) to UI_LAND units into the first ui pin, so
+ * the bounces get about a viewport of scroll. While the block is pinned its heading stands still on screen: the ball's
+ * document y follows the pin. Owns the hand-over to the dot (progress 1).
+ */
+function initIntroLanding({ ball, block, introTl, pathEnd, from, land, sync }) {
+  const st = introTl.scrollTrigger;
+  const heading = q('ui-text', block);
+  const sineInOut = gsap.parseEase('sine.inOut');
+  const sineOut = gsap.parseEase('sine.out');
+  const power2Out = gsap.parseEase('power2.out');
+
+  // Trajectory in the ball's translate space (document y, before the pin), as y(τ) parabolas with g = 1.
+  let geo = null;
+  const measure = () => {
+    const p0 = from();
+    const d = land();
+    const vw = innerWidth;
+    // Ball centre on the line-box top: it sits on the cap tops, as at the path end.
+    const floor = uiNaturalCentre(heading, block).y - heading.offsetHeight / 2 - heroBallRest(ball).y;
+    const segs = [];
+    // A free fall first if the path ends above the line.
+    if (floor - p0.y > 1) {
+      const h = floor - p0.y;
+      segs.push({ T: Math.sqrt(2 * h), y: (s) => p0.y + h * s * s });
+    }
+    // Rise from y0 to the apex, fall to the line: each half is a parabola of its own height.
+    const hop = (y0, apex, y1, slow = 1, settle = null) => {
+      const up = Math.sqrt(2 * Math.max(y0 - apex, 0));
+      const down = Math.sqrt(2 * Math.abs(y1 - apex)) * slow;
+      const T = up + down;
+      segs.push({
+        T,
+        y: (s) => {
+          const t = s * T;
+          if (t < up) return apex + (y0 - apex) * ((up - t) / up) ** 2;
+          const k = (t - up) / down;
+          return apex + (y1 - apex) * (settle ? settle(k) : k * k);
+        },
+      });
+    };
+    LAND_HOPS.forEach((h, i) => hop(i === 0 && floor - p0.y <= 1 ? p0.y : floor, floor - h * vw, floor));
+    const bounceT = segs.reduce((a, s) => a + s.T, 0);
+    // The hop off the line: up like the others, then eased into the dot so the swap to the dot does not jump.
+    hop(floor, floor - LAND_LAST * vw, d.y, 1.4, sineInOut);
+    const T = segs.reduce((a, s) => a + s.T, 0);
+    const xc = p0.x + (d.x - p0.x) * LAND_CONTACT;
+    return { segs, T, bounceT, x0: p0.x, xc, dx: d.x };
+  };
+
+  const at = (u) => {
+    geo ||= measure();
+    const { segs, T, bounceT, x0, xc, dx } = geo;
+    let t = u * T;
+    const x = t < bounceT ? x0 + (xc - x0) * (t / bounceT) : xc + (dx - xc) * power2Out((t - bounceT) / (T - bounceT));
+    let y = 0;
+    for (const s of segs) {
+      if (t <= s.T || s === segs[segs.length - 1]) {
+        y = s.y(Math.min(t / s.T, 1));
+        break;
+      }
+      t -= s.T;
+    }
+    return { x, y };
+  };
+
+  const proxy = { u: 0 };
+  const apply = () => {
+    // u = 0 belongs to the path while the intro timeline is still on it (a jump back must not pin the ball here).
+    if (proxy.u <= 0 && introTl.time() < pathEnd) return;
+    const p = at(proxy.u);
+    const lst = tl.scrollTrigger;
+    const scroll = lst.start + proxy.u * (lst.end - lst.start);
+    gsap.set(ball, { x: p.x, y: p.y + Math.max(0, scroll - st.end) });
+  };
+
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      start: () => st.start + (pathEnd / introTl.duration()) * (st.end - st.start),
+      end: () => st.end + uiLandPx(),
+      scrub: true,
+      invalidateOnRefresh: true,
+    },
+    onUpdate: () => {
+      apply();
+      sync();
+    },
+  });
+  tl.fromTo(proxy, { u: 0 }, { u: 1, duration: 1, immediateRender: false });
+
+  const reset = () => (geo = null);
+  ScrollTrigger.addEventListener('refreshInit', reset);
+  return {
+    progress: () => tl.progress(),
+    resync: () => {
+      geo = null;
+      apply();
+    },
+    kill: () => ScrollTrigger.removeEventListener('refreshInit', reset),
+  };
 }
 
 // Bottom clouds settle while the art leaves the viewport: 78→100 % of its pass (IX2 a-127 / a-156).
@@ -583,11 +690,18 @@ function blockOrigin(block) {
 }
 
 // Wide slider schedule, timeline units (the pin scrolls UI_UNIT_PX·vw per unit).
-const UI_UNITS = { lead: 3, heading: 5, shift: 4, hold: 6, close: 2, move: 3, expand: 4, tail: 4 };
+// lead: the pinned heading with its dot before the heading leaves; in the first block the Hero ball lands during it.
+const UI_UNITS = { lead: 4, heading: 5, shift: 4, hold: 6, close: 2, move: 3, expand: 4, tail: 4 };
 const UI_UNIT_PX = 0.12;
 // Touch screens ≥992 (iPad landscape) scroll the wide pin 1.5× longer, so a flick does not skip slides (user, session 36;
 // the live ×3 made one block ≈ 21 screens at 1366). ≤991 keeps the live ×3.
 const UI_TOUCH_WIDE = 1.5;
+// The Hero ball lands UI_LAND units into the first pin and rests in its dot for the rest of the lead.
+const UI_LAND = 3;
+const touchScreen = () => matchMedia('(hover: none) and (pointer: coarse)').matches;
+// Scroll length of one wide timeline unit.
+const uiUnitPx = (touch = touchScreen()) => UI_UNIT_PX * innerWidth * (touch ? UI_TOUCH_WIDE : 1);
+const uiLandPx = () => UI_LAND * uiUnitPx();
 // Seconds a panel takes to open from its dot / fold back into it (≤991: the live 0.7 both ways).
 const UI_OPEN = 0.6;
 const UI_CLOSE = 0.5;
@@ -681,6 +795,7 @@ export function initUi() {
       const resyncs = [];
       const onRefresh = () => resyncs.forEach((f) => f());
       ScrollTrigger.addEventListener('refresh', onRefresh);
+      const snaps = [];
 
       blocks.forEach((block, j) => {
         const track = q('ui-track', block);
@@ -696,7 +811,7 @@ export function initUi() {
         let units = 0;
         const pinLength = () =>
           wide
-            ? units * UI_UNIT_PX * vw() * (c.touch ? UI_TOUCH_WIDE : 1)
+            ? units * uiUnitPx(c.touch)
             : // Live: vw + vw·n + 0.5·vw·n + 0.25·vw, ×3 on touch screens.
               (vw() * (1 + 1.5 * n) + 0.25 * vw()) * (c.touch ? 3 : 1);
 
@@ -737,8 +852,8 @@ export function initUi() {
             tl.fromTo(row, { x: vwf(from) }, { x: vwf(at), duration }, start);
           };
 
-          // The ball rests beside the heading for a moment, then the heading leaves to the left while the first
-          // dot rides from 5/6 to 1/3 and opens there.
+          // The ball lands and rests beside the heading for a moment (initIntroLanding()), then the heading leaves to
+          // the left while the first dot rides from 5/6 to 1/3 and opens there.
           if (heading) tl.fromTo(heading, { x: 0 }, { x: () => -vw(), duration: U.heading }, U.lead);
           move(-UI_WIDE.step, U.lead + 1, U.shift);
           let t = U.lead + 1 + U.shift;
@@ -787,6 +902,17 @@ export function initUi() {
           units = t;
         }
         tl.set({}, {}, units);
+        // Rest states for the snap, in timeline units: the heading with its dot, then every panel while it is open
+        // (a little inside, so the panel has surely opened); the final panel of the page stays open past the pin end.
+        const lead = wide ? UI_UNITS.lead : UI_SNAP_PAD;
+        snaps.push({
+          st: tl.scrollTrigger,
+          units,
+          rests: [
+            [0, lead],
+            ...windows.map(([r0, r1], i) => [r0 + UI_SNAP_PAD, panels[i] === finalPanel ? Infinity : Math.min(r1, units) - UI_SNAP_PAD]),
+          ],
+        });
 
         // Hand-over to the next block: from the pin end until the next block pins (one block height later).
         const next = blocks[j + 1];
@@ -843,7 +969,10 @@ export function initUi() {
         }
       });
 
+      const unsnap = initUiSnap(snaps, c.reduce);
+
       return () => {
+        unsnap();
         ScrollTrigger.removeEventListener('refresh', onRefresh);
         open.forEach((on, panel) => {
           gsap.set(panel, { clearProps: 'clipPath,width,marginRight' });
@@ -864,6 +993,97 @@ export function initUi() {
   );
 
   initUiIdle(blocks);
+}
+
+// Snap pad inside an open window (units) and the pause after the last scroll input before the snap (s).
+const UI_SNAP_PAD = 0.5;
+const UI_SNAP_IDLE = 0.18;
+
+/**
+ * Snap between slides: a scroll that comes to rest inside the slider where nothing is open (the panel has folded into
+ * its dot, the next one has not opened yet, or the dot is on its way to the next block) carries on to the nearest rest
+ * state in the direction of the last scroll: the next panel open, or back to the previous one. With Lenis the
+ * destination is known as soon as the input stops (its target), so the snap takes over the running ease; native
+ * scroll (touch) waits until the scroll and the finger are still. Reduced motion jumps.
+ */
+function initUiSnap(snaps, reduce) {
+  if (!snaps.length) return () => {};
+  const px = ({ st, units }, u) => (u === Infinity ? Infinity : st.start + (u / units) * (st.end - st.start));
+
+  // Where a scroll resting at y should go, or null if y is a rest state or outside the slider.
+  const targetFor = (y, dir) => {
+    // Test hook: the storyboard checks stop between slides on purpose.
+    if (document.documentElement.dataset.motionSnap === 'off') return null;
+    const first = snaps[0].st;
+    const last = snaps[snaps.length - 1].st;
+    if (y < first.start || y > last.end) return null;
+    const rests = snaps.flatMap((s) => s.rests.map(([a, b]) => [px(s, a), px(s, b)]));
+    if (rests.some(([a, b]) => y >= a - 1 && y <= b + 1)) return null;
+    const prev = rests.filter(([, b]) => b < y).pop();
+    const next = rests.find(([a]) => a > y);
+    if (!prev || !next) return prev ? prev[1] : next ? next[0] : null;
+    if (dir > 0) return next[0];
+    if (dir < 0) return prev[1];
+    return y - prev[1] < next[0] - y ? prev[1] : next[0];
+  };
+
+  const go = (y) => {
+    if (reduce) scrollTo(0, y);
+    else if (lenis) {
+      const d = Math.abs(y - lenis.animatedScroll);
+      lenis.scrollTo(y, { duration: gsap.utils.clamp(0.6, 1.4, d / innerHeight), easing: LENIS.easing });
+    } else scrollTo({ top: y, behavior: 'smooth' });
+  };
+
+  let timer = null;
+  const arm = (check) => {
+    timer?.kill();
+    timer = gsap.delayedCall(UI_SNAP_IDLE, check);
+  };
+
+  if (lenis) {
+    // Every new input moves Lenis' target; once it stops moving, the target is where the scroll will rest.
+    let target = lenis.targetScroll;
+    const onScroll = () => {
+      if (lenis.targetScroll === target) return;
+      target = lenis.targetScroll;
+      arm(() => {
+        if (lenis.isStopped) return; // the menu is open
+        const y = targetFor(lenis.targetScroll, lenis.direction);
+        if (y !== null) go(y);
+      });
+    };
+    lenis.on('scroll', onScroll);
+    return () => {
+      timer?.kill();
+      lenis.off('scroll', onScroll);
+    };
+  }
+
+  let lastY = scrollY;
+  let dir = 0;
+  let touching = false;
+  const check = () => {
+    if (touching) return;
+    const y = targetFor(scrollY, dir);
+    if (y !== null && Math.abs(y - scrollY) > 1) go(y);
+  };
+  const onScroll = () => {
+    if (scrollY !== lastY) dir = Math.sign(scrollY - lastY);
+    lastY = scrollY;
+    arm(check);
+  };
+  const onTouch = (e) => {
+    touching = e.type === 'touchstart';
+    if (!touching) arm(check);
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  ['touchstart', 'touchend', 'touchcancel'].forEach((e) => addEventListener(e, onTouch, { passive: true }));
+  return () => {
+    timer?.kill();
+    removeEventListener('scroll', onScroll);
+    ['touchstart', 'touchend', 'touchcancel'].forEach((e) => removeEventListener(e, onTouch));
+  };
 }
 
 // Idle hint (live block B): after 4 s without input the panels sway ±1.5 %, any input stops them.

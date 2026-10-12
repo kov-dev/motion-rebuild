@@ -1,8 +1,12 @@
-// Hero ball → first ui dot hand-over with the local src/motion.js: samples ±400 px around the first pin start, down and up.
+// Hero ball → first ui dot hand-over with the local src/motion.js: samples ±400 px around the swap, down and up.
+// The swap is at the first pin start (≤991) or UI_LAND wide units into the pin (≥992, the ball lands beside the heading).
 // Usage: node ui-handover.mjs 1440 1280 768 375   (counts frames with 0 or 2 balls and the jump at the swap)
 import { chromium } from 'playwright';
 import fs from 'fs';
 const SRC = '/Users/mac/Claude/Projects/Motion/src';
+const SRC_JS = fs.readFileSync(`${SRC}/motion.js`, 'utf8');
+const LAND = +SRC_JS.match(/const UI_LAND = ([\d.]+)/)[1];
+const UNIT_PX = +SRC_JS.match(/const UI_UNIT_PX = ([\d.]+)/)[1];
 const VPS = { 1440: [1440, 750], 1280: [1280, 800], 768: [768, 1024], 375: [375, 812] };
 const b = await chromium.launch({ channel: 'chrome' });
 for (const key of process.argv.slice(2)) {
@@ -20,7 +24,8 @@ for (const key of process.argv.slice(2)) {
     const st = ScrollTriggerStart();
     function ScrollTriggerStart() { const b = document.querySelector('[data-motion="ui"]'); const sp = b.parentElement; return (sp.classList.contains('pin-spacer') ? sp : b).getBoundingClientRect().top + scrollY; }
     return st;
-  });
+  }) + (w >= 992 ? LAND * UNIT_PX * w : 0);
+  await p.evaluate(() => (document.documentElement.dataset.motionSnap = 'off'));
   const sample = () => p.evaluate(() => {
     const vis = (el) => { const cs = getComputedStyle(el); return cs.visibility !== 'hidden' && +cs.opacity > 0.01; };
     const c = (r) => [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2)];
