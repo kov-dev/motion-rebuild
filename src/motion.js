@@ -67,11 +67,57 @@ let lenis = null; // null: native scroll (touch-primary device or reduced motion
  */
 function initLenis() {
   if (reducedMotion() || matchMedia('(hover: none) and (pointer: coarse)').matches) return null;
-  const l = new Lenis(LENIS);
+  const l = new Lenis({ ...LENIS, virtualScroll: (data) => limitWheel(l, data) });
   l.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => l.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
   return l;
+}
+
+// Speed limit (session 48, user: a hard flick broke the scroll animations, pins were entered with a jolt). Each wheel
+// step restarts the 2 s exponential ease towards Lenis' target, so the scroll speed is ≈ 3.5 × the lead (target −
+// current position) per second: capping the lead caps the speed. Leads × vh: anywhere, inside a pin (its
+// time-based parts — panel clips, video fades — keep up), and at a pin's start or end, where the cap eases in over
+// SPEED_EDGE_ZONE so the scroll brakes before the pin catches the section instead of stopping it dead.
+const SPEED_LEAD = 1;
+const SPEED_LEAD_PIN = 0.5;
+const SPEED_LEAD_EDGE = 0.25;
+const SPEED_EDGE_ZONE = 1;
+
+// Lead cap (px) at document scroll y.
+function leadCap(y, pins) {
+  const vh = innerHeight;
+  let cap = SPEED_LEAD;
+  for (const st of pins) {
+    if (y > st.start && y < st.end) cap = Math.min(cap, SPEED_LEAD_PIN);
+    const d = Math.min(Math.abs(y - st.start), Math.abs(y - st.end)) / (SPEED_EDGE_ZONE * vh);
+    if (d < 1) cap = Math.min(cap, SPEED_LEAD_EDGE + (SPEED_LEAD - SPEED_LEAD_EDGE) * d * d * (3 - 2 * d));
+  }
+  return cap * vh;
+}
+
+/**
+ * Lenis virtualScroll hook: trims a wheel step so the lead stays under the cap along the whole way to the new target
+ * (the smallest cap on that way, so the brake starts before a pin edge). A trimmed step keeps a sign and a hair of
+ * length: Lenis still takes the event (a zero step would fall through to the native scroll) and restarts the ease
+ * towards the same target, which the exponential ease does without a change of speed. A step against the lead is free.
+ */
+function limitWheel(l, data) {
+  if (!data.event.type.includes('wheel') || !data.deltaY || l.isStopped) return true;
+  const dir = Math.sign(data.deltaY);
+  const from = l.animatedScroll;
+  const lead = (l.targetScroll - from) * dir;
+  if (lead < 0) return true;
+  const pins = ScrollTrigger.getAll().filter((st) => st.pin);
+  const capOn = (len) => {
+    let cap = Infinity;
+    for (let i = 0; i <= 8; i++) cap = Math.min(cap, leadCap(from + (dir * len * i) / 8, pins));
+    return cap;
+  };
+  let len = lead + Math.abs(data.deltaY);
+  for (let i = 0; i < 6; i++) len = Math.min(len, capOn(len));
+  data.deltaY = dir * Math.max(len - lead, 0.01);
+  return true;
 }
 
 /**
@@ -83,6 +129,11 @@ function scrollToSection(target) {
   if (lenis) lenis.scrollTo(target);
   else scrollTo(0, target.getBoundingClientRect().top + scrollY);
 }
+
+// anticipatePin is for the native scroll, which runs ahead of the main thread; under Lenis the scroll and the pins
+// update in the same frame, and anticipating made the section jump 12–16 px (more on a fast scroll) into place one
+// frame before its pin start (session 48).
+const pinAhead = () => (lenis ? 0 : 1);
 
 const anchorTarget = (link) => {
   try {
@@ -741,6 +792,9 @@ const touchScreen = () => matchMedia('(hover: none) and (pointer: coarse)').matc
 // Scroll length of one wide timeline unit.
 const uiUnitPx = (touch = touchScreen()) => UI_UNIT_PX * innerWidth * (touch ? UI_TOUCH_WIDE : 1);
 const uiLandPx = () => UI_LAND * uiUnitPx();
+// Every wide move (heading out, conveyor steps, the last panel widening) starts and stops gently instead of taking
+// the scroll speed at once (session 48); the widening shares it with its conveyor step, so the panel's left edge holds.
+const UI_MOVE_EASE = 'sine.inOut';
 // Seconds a panel takes to open from its dot / fold back into it (≤991: the live 0.7 both ways).
 const UI_OPEN = 0.6;
 const UI_CLOSE = 0.5;
@@ -863,7 +917,7 @@ export function initUi() {
           scrollTrigger: {
             trigger: block,
             pin: true,
-            anticipatePin: 1,
+            anticipatePin: pinAhead(),
             start: 'top top',
             end: () => `+=${pinLength()}`,
             scrub: true,
@@ -892,12 +946,12 @@ export function initUi() {
           const move = (d, start, duration) => {
             const from = at;
             at += d;
-            tl.fromTo(row, { x: vwf(from) }, { x: vwf(at), duration }, start);
+            tl.fromTo(row, { x: vwf(from) }, { x: vwf(at), duration, ease: UI_MOVE_EASE }, start);
           };
 
           // The ball lands and rests beside the heading for a moment (initBallLanding()), then the heading leaves to
           // the left while the first dot rides from 5/6 to 1/3 and opens there.
-          if (heading) tl.fromTo(heading, { x: 0 }, { x: () => -vw(), duration: U.heading }, U.lead);
+          if (heading) tl.fromTo(heading, { x: 0 }, { x: () => -vw(), duration: U.heading, ease: UI_MOVE_EASE }, U.lead);
           move(-UI_WIDE.step, U.lead + 1, U.shift);
           let t = U.lead + 1 + U.shift;
           const opens = [t];
@@ -917,7 +971,7 @@ export function initUi() {
           const grow = 1 - UI_WIDE.panel;
           const dx = 0.5 - centre + UI_WIDE.expandStep - grow / 2; // the box grows rightwards from its left edge
           move(-UI_WIDE.expandStep, t, U.expand);
-          tl.fromTo(last, { width: vwf(UI_WIDE.panel), x: 0 }, { width: vw, x: vwf(dx), duration: U.expand }, t);
+          tl.fromTo(last, { width: vwf(UI_WIDE.panel), x: 0 }, { width: vw, x: vwf(dx), duration: U.expand, ease: UI_MOVE_EASE }, t);
           t += U.expand;
           // Then it folds into the centre dot, which the ui-ball takes over (not the final panel of the page).
           t += 1;
@@ -1272,7 +1326,7 @@ export function initInteractive() {
     scrollTrigger: {
       trigger: pin,
       pin: true,
-      anticipatePin: 1,
+      anticipatePin: pinAhead(),
       scrub: 1,
       start: 'top top',
       end: () => `+=${shift()}`,
@@ -1841,7 +1895,7 @@ export function initResources() {
             scrollTrigger: {
               trigger: pin,
               pin: true,
-              anticipatePin: 1,
+              anticipatePin: pinAhead(),
               start: 'top top',
               end: `+=${total}`,
               // Reduced motion: the pin stays (the track is reachable only through it), without the catch-up.
