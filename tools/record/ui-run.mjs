@@ -37,9 +37,10 @@ const LAND = +src.match(/const UI_LAND = ([\d.]+)/)[1];
 
 // Steady points of one wide block with n panels: [unit, label, expectations].
 // Centres are × vw; `open` lists the panels that must be open, every other panel must be a dot or off screen.
-// The first block's lead holds the Hero ball's landing (UI_LAND units): its rest point comes after it.
-function wideSchedule(n, final, first) {
-  const pts = [[first ? (LAND + U.lead) / 2 : U.lead / 2, 'rest', { open: [], dots: [[0, 5 / 6]], heading: 'in' }]];
+// A block's lead holds the ball's landing (UI_LAND units; the Hero ball on the first block, the previous block's
+// ui-ball on the others since session 47, not with reduced motion): its rest point comes after it.
+function wideSchedule(n, final, landed) {
+  const pts = [[landed ? (LAND + U.lead) / 2 : U.lead / 2, 'rest', { open: [], dots: [[0, 5 / 6]], heading: 'in' }]];
   let t = U.lead + 1 + U.shift;
   const opens = [t];
   for (let i = 1; i < n; i++) {
@@ -169,7 +170,7 @@ async function runWide(p, vp, out) {
   const wait = reduce ? 500 : 1100;
 
   for (const [j, blk] of r.entries()) {
-    const sch = wideSchedule(blk.n, j === r.length - 1, j === 0);
+    const sch = wideSchedule(blk.n, j === r.length - 1, j === 0 || !reduce);
     const expLen = sch.units * UNIT_PX * vp.w * k;
     if (Math.abs(blk.len - expLen) > 2) flag(`B${j} pin ${blk.len} ≠ ${Math.round(expLen)} (${sch.units} u × ${UNIT_PX}·vw × ${k})`);
     const y = (u) => blk.top + (u / sch.units) * blk.len;
@@ -204,10 +205,11 @@ async function runWide(p, vp, out) {
       if (['rest', 'open 0', 'wide'].includes(label)) await p.screenshot({ path: `${out}/ui-${vp.n}-B${j}-${label.replace(' ', '')}.png` });
     }
 
-    // Hand-over into the next block: one ball all the way, landing on the next block's first dot (5/6).
+    // Hand-over into the next block: one ball all the way, landing on the next block's first dot (5/6) — UI_LAND
+    // units into its pin after the bounces on its heading (reduced motion: at the pin start).
     if (j === r.length - 1) break;
     const h0 = blk.top + blk.len;
-    const h1 = r[j + 1].top;
+    const h1 = r[j + 1].top + (reduce ? 0 : LAND * UNIT_PX * vp.w * k);
     let prev = null;
     for (const q of [0.01, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 0.99, 1]) {
       await go(p, h0 + q * (h1 - h0), reduce ? 300 : 600);

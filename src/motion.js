@@ -521,7 +521,22 @@ export function initIntro() {
       // The live site kept the last 10 units for its `bounce` landing: they stay empty, so the path keeps its pace.
       if (b === 'desktop' && block) {
         tl.set({}, {}, drop + 66 + 10);
-        landing = initIntroLanding({ ball, block, introTl: tl, pathEnd: drop + 66, from: () => at(1), land, sync });
+        const pathEnd = drop + 66;
+        const st = tl.scrollTrigger;
+        // From where the live landing started (the path end) to UI_LAND units into the first ui pin, so the bounces
+        // get about a viewport of scroll; u = 0 belongs to the path while the timeline is still on it.
+        landing = initBallLanding({
+          ball,
+          block,
+          origin: () => heroBallRest(ball),
+          from: () => at(1),
+          land,
+          start: () => st.start + (pathEnd / tl.duration()) * (st.end - st.start),
+          end: () => st.end + uiLandPx(),
+          pinStart: () => st.end,
+          idle: () => tl.time() < pathEnd,
+          onUpdate: sync,
+        });
       }
 
       return () => {
@@ -534,29 +549,46 @@ export function initIntro() {
   );
 }
 
-// Desktop landing on the first heading line: hop heights × vw (each about 45 % of the previous), the apex of the last
+// Landing on the first heading line (≥992): hop heights × vw (each about 45 % of the previous), the apex of the last
 // hop off the line, and the share of the way to the dot the bounces cover (the last contact stays on the first line).
 const LAND_HOPS = [0.085, 0.038, 0.017];
 const LAND_LAST = 0.03;
 const LAND_CONTACT = 0.62;
 
-// Heading lines rise out of their masks on the ball's hits (user idea, session 46): yPercent still hidden after hit 1
-// and hit 2 (45 % of the line box leaves ≈ 70 % of the caps: half-leading and mask padding); later hits press the
-// line under the ball down by a share of its height.
-const HIT_REVEAL = [45, 0];
-const HIT_PRESS = [0.07, 0.035];
+// Heading lines rise out of their masks on the ball's hits (user idea, sessions 46–47): the share of the cap height
+// shown after hit 1, 2, 3; every next line lags by HIT_CASCADE of it and starts HIT_STAGGER s later. Hits past the
+// reveal press the line under the ball down by a share of its height. HIT_PAD: room above and below a line's mask
+// for the overshoot and the press, × font size.
+const HIT_SHOW = [0.5, 0.8, 1];
+const HIT_CASCADE = 0.08;
+const HIT_STAGGER = 0.11;
+const HIT_PRESS = [0.07];
+const HIT_PAD = 0.12;
 
 /**
- * The first ui heading split into masked lines that the landing ball knocks up: every line slides up from under its
- * mask like the Intro pills, line by line from the top. `set(n)` takes the number of hits so far; a new hit animates
- * (hits past the reveal press the first line, where the ball stands), a lower count or `instant` only re-states.
+ * A ui heading split into masked lines that the landing ball knocks up: every line slides up from under its mask like
+ * the Intro pills, line by line from the top. `set(n)` takes the number of hits so far; a new hit animates (hits past
+ * the reveal press the first line, where the ball stands), a lower count or `instant` only re-states.
  */
 function initHeadingHits(heading) {
   const title = heading.querySelector('h1, h2, h3, p') || heading;
   let hits = 0;
   let lines = [];
   let masks = [];
-  const level = (n) => (n <= 0 ? 100 : HIT_REVEAL[Math.min(n, HIT_REVEAL.length) - 1]);
+  let levels = []; // yPercent per hit count (0 = hidden) and line
+  // yPercent that leaves `show` of the cap height above the mask bottom.
+  const measure = () => {
+    const cs = getComputedStyle(title);
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const m = ctx.measureText('H');
+    const L = lines[0]?.offsetHeight || parseFloat(cs.lineHeight);
+    const fs = parseFloat(cs.fontSize);
+    const capTop = (L - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent;
+    const at = (show) => (show >= 1 ? 0 : gsap.utils.clamp(0, 100, ((L + HIT_PAD * fs - capTop - show * m.actualBoundingBoxAscent) / L) * 100));
+    levels = [lines.map(() => 100), ...HIT_SHOW.map((s) => lines.map((_, i) => at(s >= 1 ? 1 : s - i * HIT_CASCADE * s)))];
+  };
+  const level = (n) => levels[Math.min(n, levels.length - 1)];
   const split = SplitText.create(title, {
     type: 'lines',
     mask: 'lines',
@@ -565,9 +597,11 @@ function initHeadingHits(heading) {
       gsap.killTweensOf(els(lines, masks));
       lines = self.lines;
       masks = self.masks;
-      // Room for the overshoot and the press, so the mask never cuts the glyphs.
-      gsap.set(masks, { paddingBlock: '0.12em', marginBlock: '-0.12em', y: 0 });
-      gsap.set(lines, { yPercent: level(hits) });
+      measure();
+      // The masks clip with clip-path, reaching past the box for the overshoot and the press: padding with negative
+      // margins would add a line gap, since the margins of neighbouring masks collapse.
+      gsap.set(masks, { overflow: 'visible', clipPath: `inset(-${HIT_PAD}em -${HIT_PAD}em)`, y: 0 });
+      gsap.set(lines, { yPercent: (i) => level(hits)[i] });
     },
   });
   const set = (n, instant = false) => {
@@ -576,25 +610,26 @@ function initHeadingHits(heading) {
     hits = n;
     if (instant) {
       gsap.killTweensOf(els(lines, masks));
-      gsap.set(lines, { yPercent: level(n) });
+      gsap.set(lines, { yPercent: (i) => level(n)[i] });
       gsap.set(masks, { y: 0 });
       return;
     }
     const up = n > prev;
     if (level(n) !== level(prev)) {
+      const full = n >= HIT_SHOW.length;
       gsap.to(lines, {
-        yPercent: level(n),
-        duration: up ? (n === 1 ? 0.55 : 0.75) : 0.35,
-        ease: up ? (n === 1 ? 'power3.out' : 'back.out(2)') : 'power2.in',
-        stagger: { each: up ? 0.07 : 0.04, from: up ? 'start' : 'end' },
+        yPercent: (i) => level(n)[i],
+        duration: up ? (full ? 0.75 : 0.55) : 0.35,
+        ease: up ? (full ? 'back.out(2)' : 'power3.out') : 'power2.in',
+        stagger: { each: up ? HIT_STAGGER : 0.04, from: up ? 'start' : 'end' },
         // Lines carry only this tween; true also drops the not yet started staggered parts of the previous one.
         overwrite: true,
       });
     }
     // A press only for a single hit on the revealed heading (a jump over several hits just reveals it). It moves the
     // first line's mask, not the line: two transform tweens on one element would overwrite each other.
-    if (up && n === prev + 1 && prev >= HIT_REVEAL.length) {
-      const d = HIT_PRESS[Math.min(n - HIT_REVEAL.length, HIT_PRESS.length) - 1] * lines[0].offsetHeight;
+    if (up && n === prev + 1 && prev >= HIT_SHOW.length) {
+      const d = HIT_PRESS[Math.min(n - HIT_SHOW.length, HIT_PRESS.length) - 1] * lines[0].offsetHeight;
       gsap.killTweensOf(masks[0]);
       gsap
         .timeline()
@@ -602,37 +637,49 @@ function initHeadingHits(heading) {
         .to(masks[0], { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.35)' });
     }
   };
-  return { set, revert: () => split.revert() };
+  // Document x where the first line's glyphs end, without the heading's own GSAP x.
+  const lineEnd = () => {
+    const r = document.createRange();
+    r.selectNodeContents(lines[0] || title);
+    return r.getBoundingClientRect().right + scrollX - gsap.getProperty(heading, 'x');
+  };
+  return { set, lineEnd, revert: () => split.revert() };
 }
 
 /**
- * Desktop landing (live: a two-hop `bounce` ease; motion video: the ball ends in the first dot right of the heading).
- * The path ends on the first heading line; the ball bounces along it in shrinking hops (gravity parabolas, so a steady
- * scroll reads as physics) and the last hop carries it off the line into the first dot (5/6 vw), easing to a stop there.
- * Own scrubbed trigger: from where the live landing started (the path end) to UI_LAND units into the first ui pin, so
- * the bounces get about a viewport of scroll. While the block is pinned its heading stands still on screen: the ball's
- * document y follows the pin. Owns the hand-over to the dot (progress 1).
+ * A ball lands on the first line of a ui block's heading (≥992; live: a two-hop `bounce` ease; motion video: the ball
+ * ends in the first dot right of the heading). It falls onto the line, bounces along it in shrinking hops (gravity
+ * parabolas, so a steady scroll reads as physics) and the last hop carries it off the line into the first dot (5/6 vw),
+ * easing to a stop there; every contact knocks the heading lines up (initHeadingHits()). Own scrubbed trigger, which
+ * ends UI_LAND units into the block's pin; while the block is pinned its heading stands still on screen, so the ball's
+ * document y follows the pin. The landing owns the hand-over to the dot (progress 1).
+ *   origin()       document point of the ball's translate (0, 0)
+ *   from(), land() start and the first dot, translate space
+ *   start(), end() scroll range; pinStart() the scroll where the block pins
+ *   carry          the ball starts standing still on screen: its fall takes the scroll's speed
+ *   idle()         at progress 0 the ball still belongs to whoever brought it (nothing is set, no hits)
  */
-function initIntroLanding({ ball, block, introTl, pathEnd, from, land, sync }) {
-  const st = introTl.scrollTrigger;
+function initBallLanding({ ball, block, origin, from, land, start, end, pinStart, carry = false, idle = () => false, onUpdate }) {
   const heading = q('ui-text', block);
+  const hits = heading && initHeadingHits(heading);
   const sineInOut = gsap.parseEase('sine.inOut');
-  const sineOut = gsap.parseEase('sine.out');
   const power2Out = gsap.parseEase('power2.out');
 
   // Trajectory in the ball's translate space (document y, before the pin), as y(τ) parabolas with g = 1.
   let geo = null;
-  const measure = () => {
+  const build = (v0) => {
+    const o = origin();
     const p0 = from();
     const d = land();
     const vw = innerWidth;
-    // Ball centre on the line-box top: it sits on the cap tops, as at the path end.
-    const floor = uiNaturalCentre(heading, block).y - heading.offsetHeight / 2 - heroBallRest(ball).y;
+    // Ball centre on the line-box top: it sits on the cap tops.
+    const floor = uiNaturalCentre(heading, block).y - heading.offsetHeight / 2 - o.y;
     const segs = [];
-    // A free fall first if the path ends above the line.
+    // A fall first if the ball starts above the line (with the speed it carries in).
     if (floor - p0.y > 1) {
       const h = floor - p0.y;
-      segs.push({ T: Math.sqrt(2 * h), y: (s) => p0.y + h * s * s });
+      const T = Math.sqrt(v0 * v0 + 2 * h) - v0;
+      segs.push({ T, y: (s) => p0.y + v0 * s * T + (s * T) ** 2 / 2 });
     }
     // Rise from y0 to the apex, fall to the line: each half is a parabola of its own height.
     const hop = (y0, apex, y1, slow = 1, settle = null) => {
@@ -649,16 +696,24 @@ function initIntroLanding({ ball, block, introTl, pathEnd, from, land, sync }) {
         },
       });
     };
-    // Contacts with the line, in trajectory time: the path end if it is already on the line, then every fall's end.
-    const hits = segs.length ? [] : [0];
-    LAND_HOPS.forEach((h, i) => hop(i === 0 && floor - p0.y <= 1 ? p0.y : floor, floor - h * vw, floor));
-    segs.reduce((a, s) => (hits.push(a + s.T), a + s.T), 0);
-    const bounceT = hits[hits.length - 1];
+    // Contacts with the line, in trajectory time: the start if it is already on the line, then every fall's end.
+    const contacts = segs.length ? [] : [0];
+    LAND_HOPS.forEach((h, i) => hop(i === 0 && !segs.length ? p0.y : floor, floor - h * vw, floor));
+    segs.reduce((a, s) => (contacts.push(a + s.T), a + s.T), 0);
+    const bounceT = contacts[contacts.length - 1];
     // The hop off the line: up like the others, then eased into the dot so the swap to the dot does not jump.
     hop(floor, floor - LAND_LAST * vw, d.y, 1.4, sineInOut);
     const T = segs.reduce((a, s) => a + s.T, 0);
-    const xc = p0.x + (d.x - p0.x) * LAND_CONTACT;
-    return { segs, T, bounceT, x0: p0.x, xc, dx: d.x, hits: hits.map((t) => t / T) };
+    // The bounces stay over the first line's glyphs.
+    const right = hits ? hits.lineEnd() - o.x - ball.offsetWidth / 2 : Infinity;
+    const xc = Math.min(p0.x + (d.x - p0.x) * LAND_CONTACT, Math.max(right, p0.x));
+    return { segs, T, bounceT, x0: p0.x, xc, dx: d.x, hits: contacts.map((t) => t / T) };
+  };
+  const measure = () => {
+    let g = build(0);
+    // Standing still on screen = moving down the document with the scroll: px of scroll per trajectory unit.
+    if (carry) for (let i = 0; i < 8; i++) g = build((end() - start()) / g.T);
+    return g;
   };
 
   const at = (u) => {
@@ -679,34 +734,29 @@ function initIntroLanding({ ball, block, introTl, pathEnd, from, land, sync }) {
 
   const proxy = { u: 0 };
   const apply = () => {
-    // u = 0 belongs to the path while the intro timeline is still on it (a jump back must not pin the ball here).
-    if (proxy.u <= 0 && introTl.time() < pathEnd) return;
-    const p = at(proxy.u);
     const lst = tl.scrollTrigger;
+    // Gone while a matchMedia revert rewinds the timeline.
+    if (!lst || (proxy.u <= 0 && idle())) return;
+    const p = at(proxy.u);
     const scroll = lst.start + proxy.u * (lst.end - lst.start);
-    gsap.set(ball, { x: p.x, y: p.y + Math.max(0, scroll - st.end) });
+    gsap.set(ball, { x: p.x, y: p.y + Math.max(0, scroll - pinStart()) });
   };
 
-  // Hits so far knock the heading lines up (none while the intro timeline is still on the path).
-  const hits = heading && initHeadingHits(heading);
+  // Hits so far knock the heading lines up (none while the ball still belongs to the previous animation).
   const knock = (instant = false) => {
     if (!hits) return;
-    // Hit times come from the trajectory apply() measured; until it has, only "still on the path" is known.
-    if (introTl.time() < pathEnd) hits.set(0, instant);
+    // Hit times come from the trajectory apply() measured; until it has, only "not landing yet" is known.
+    if (proxy.u <= 0 && idle()) hits.set(0, instant);
     else if (geo) hits.set(geo.hits.filter((h) => proxy.u >= h - 1e-6).length, instant);
   };
 
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
-    scrollTrigger: {
-      start: () => st.start + (pathEnd / introTl.duration()) * (st.end - st.start),
-      end: () => st.end + uiLandPx(),
-      scrub: true,
-      invalidateOnRefresh: true,
-    },
+    scrollTrigger: { start, end, scrub: true, invalidateOnRefresh: true },
     onUpdate: () => {
       apply();
-      sync();
+      knock();
+      onUpdate?.();
     },
   });
   tl.fromTo(proxy, { u: 0 }, { u: 1, duration: 1, immediateRender: false });
@@ -881,6 +931,10 @@ export function initUi() {
       const onRefresh = () => resyncs.forEach((f) => f());
       ScrollTrigger.addEventListener('refresh', onRefresh);
       const snaps = [];
+      // Wide: the ui-ball of a block lands on the next block's heading like the Hero ball on the first one.
+      const landings = [];
+      const landed = new Set();
+      const ballLands = wide && !c.reduce;
 
       blocks.forEach((block, j) => {
         const track = q('ui-track', block);
@@ -937,7 +991,7 @@ export function initUi() {
             tl.fromTo(row, { x: vwf(from) }, { x: vwf(at), duration }, start);
           };
 
-          // The ball lands and rests beside the heading for a moment (initIntroLanding()), then the heading leaves to
+          // The ball lands and rests beside the heading for a moment (initBallLanding()), then the heading leaves to
           // the left while the first dot rides from 5/6 to 1/3 and opens there.
           if (heading) tl.fromTo(heading, { x: 0 }, { x: () => -vw(), duration: U.heading }, U.lead);
           move(-UI_WIDE.step, U.lead + 1, U.shift);
@@ -987,14 +1041,15 @@ export function initUi() {
           units = t;
         }
         tl.set({}, {}, units);
-        // Rest states for the snap, in timeline units: the heading with its dot, then every panel while it is open
-        // (a little inside, so the panel has surely opened); the final panel of the page stays open past the pin end.
+        // Rest states for the snap, in timeline units: the heading with its dot (once the ui-ball has landed there:
+        // a snap into the pin start would stop it mid-hop), then every panel while it is open (a little inside, so
+        // the panel has surely opened); the final panel of the page stays open past the pin end.
         const lead = wide ? UI_UNITS.lead : UI_SNAP_PAD;
         snaps.push({
           st: tl.scrollTrigger,
           units,
           rests: [
-            [0, lead],
+            [landed.has(block) ? UI_LAND : 0, lead],
             ...windows.map(([r0, r1], i) => [r0 + UI_SNAP_PAD, panels[i] === finalPanel ? Infinity : Math.min(r1, units) - UI_SNAP_PAD]),
           ],
         });
@@ -1014,12 +1069,54 @@ export function initUi() {
           if (nextLanding) gsap.set(nextLanding, { opacity: m === 2 ? 1 : 0 });
         };
 
+        // The next block pins one block height after this pin ends.
+        const nextPin = () => tl.scrollTrigger.end + block.offsetHeight;
+        // Document point of the dot (no own x/y) as laid out in the flow, this block where its pin releases it.
+        const dotOrigin = () => {
+          const from = blockRelCentre(dot, block);
+          const o = blockOrigin(block);
+          return { x: o.x + from.x, y: o.y + tl.scrollTrigger.end - tl.scrollTrigger.start + from.y };
+        };
+        // Offset from the dot to the centre of the next block's first panel, both as laid out in the flow.
+        const target = () => {
+          const o = dotOrigin();
+          const to = uiNaturalCentre(q('ui-slide', next), next, panelRestWidth());
+          return { x: to.x - o.x, y: to.y - o.y };
+        };
+
+        if (dot && ballLands) {
+          gsap.set(dot, { x: 0, y: 0, xPercent: 50, yPercent: -50 }); // the CSS centring, kept relative
+          // The centre dot falls from where the pin left it onto the next heading's first line, bounces along it
+          // and hops into the next block's first dot UI_LAND units into its pin, like the Hero ball (session 47).
+          let landing = null; // onUpdate may run before the assignment
+          landing = initBallLanding({
+            ball: dot,
+            block: next,
+            origin: dotOrigin,
+            from: () => ({ x: 0, y: 0 }),
+            land: target,
+            start: () => tl.scrollTrigger.end,
+            end: () => nextPin() + uiLandPx(),
+            pinStart: nextPin,
+            carry: true,
+            onUpdate: () => landing && handState(landing.progress()),
+          });
+          landings.push(landing);
+          landed.add(next);
+          resyncs.push(() => {
+            mode = null;
+            handState(landing.progress());
+            landing.resync();
+          });
+          return;
+        }
+
         const ho = gsap.timeline({
           defaults: { ease: 'none', immediateRender: false },
           scrollTrigger: {
             trigger: block,
             start: () => tl.scrollTrigger.end,
-            end: () => tl.scrollTrigger.end + block.offsetHeight,
+            end: nextPin,
             scrub: true,
             invalidateOnRefresh: true,
           },
@@ -1032,18 +1129,10 @@ export function initUi() {
         if (!dot) return;
         gsap.set(dot, { x: 0, y: 0, xPercent: 50, yPercent: -50 }); // the CSS centring, kept relative
 
-        // Offset from the dot to the centre of the next block's first panel, both as laid out in the flow
-        // (this block where its pin releases it).
-        const target = () => {
-          const from = blockRelCentre(dot, block);
-          const o = blockOrigin(block);
-          o.y += tl.scrollTrigger.end - tl.scrollTrigger.start;
-          const to = uiNaturalCentre(q('ui-slide', next), next, panelRestWidth());
-          return { x: to.x - o.x - from.x, y: to.y - o.y - from.y };
-        };
         if (wide) {
-          // Live: drop near the viewport bottom (½vh + the space under the heading + one ball), then bounce
-          // up into the first dot of the next block while drifting right; here it ends exactly on that dot.
+          // Reduced motion (otherwise the ball lands, above). Live: drop near the viewport bottom (½vh + the space
+          // under the heading + one ball), then bounce up into the first dot of the next block while drifting right;
+          // here it ends exactly on that dot.
           const drop = () => innerHeight / 2 + (innerHeight - (heading?.offsetHeight || 0)) / 2 + dot.offsetHeight;
           ho.fromTo(dot, { y: 0 }, { y: drop, duration: 0.45 })
             .fromTo(dot, { x: 0 }, { x: () => target().x, duration: 0.7 })
@@ -1058,6 +1147,7 @@ export function initUi() {
 
       return () => {
         unsnap();
+        landings.forEach((l) => l.kill());
         ScrollTrigger.removeEventListener('refresh', onRefresh);
         open.forEach((on, panel) => {
           gsap.set(panel, { clearProps: 'clipPath,width,marginRight' });
