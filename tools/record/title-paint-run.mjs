@@ -1,4 +1,4 @@
-// Scroll paint of the Hero statement (initHeroTitle, session 49): words start grey and turn white in reading order
+// Scroll paint of the Hero statement (initHeroTitle, session 49): letters start grey and turn white in reading order
 // as their line rises through the lower half of the viewport.
 // Checks per band: the split keeps the line layout; nothing is painted while the title is below the paint front;
 // paint never runs ahead of reading order; a line is fully white before it reaches the Hero axis (it goes under the
@@ -26,6 +26,7 @@ const VPS = [
   { n: '375', w: 375, h: 812, touch: true },
 ];
 const DIM = 0.2;
+// Every letter of a line is white once the line has risen one line height past the front.
 
 const b = await chromium.launch({ channel: 'chrome' });
 let total = 0;
@@ -51,15 +52,21 @@ for (const vp of VPS) {
   }
   // Line layout of the unsplit title, read before the module splits it.
   await p.addInitScript(() => {
-    document.addEventListener('DOMContentLoaded', () => {
+    // After the fonts: a fallback-font layout breaks lines differently. The module splits later (after the preloader).
+    document.addEventListener('DOMContentLoaded', () => document.fonts.ready.then(() => {
       const h1 = document.querySelector('[data-motion="hero-title"]');
       if (!h1) return;
       const rg = document.createRange();
       rg.selectNodeContents(h1);
       const top = h1.getBoundingClientRect().top;
-      window.__lines0 = [...new Set([...rg.getClientRects()].filter((x) => x.width).map((x) => Math.round(x.top - top)))];
+      const rects = [...rg.getClientRects()].filter((x) => x.width);
+      window.__lines0 = [...new Set(rects.map((x) => Math.round(x.top - top)))];
+      window.__widths0 = window.__lines0.map((t) => {
+        const rs = rects.filter((x) => Math.round(x.top - top) === t);
+        return Math.max(...rs.map((x) => x.right)) - Math.min(...rs.map((x) => x.left));
+      });
       window.__h0 = h1.offsetHeight;
-    });
+    }));
   });
   await p.goto(STAGING, { waitUntil: 'load', timeout: 90000 });
   await p.waitForFunction(() => !document.documentElement.classList.contains('is-preloading'), null, { timeout: 30000 });
@@ -75,14 +82,19 @@ for (const vp of VPS) {
     const h1 = document.querySelector('[data-motion="hero-title"]');
     if (!h1) return null;
     const axis = document.querySelector('[data-motion="hero-ball-wrap"]').getBoundingClientRect();
-    const words = [...h1.querySelectorAll('div')].map((w) => {
+    // Painted units: the leaf split elements (letters; words are only their wrappers).
+    const words = [...h1.querySelectorAll('div')].filter((d) => !d.querySelector('div')).map((w) => {
       const r = w.getBoundingClientRect();
-      return { t: w.textContent, top: r.top, bottom: r.bottom, o: +getComputedStyle(w).opacity };
+      return { t: w.textContent, top: r.top, bottom: r.bottom, left: r.left, right: r.right, o: +getComputedStyle(w).opacity };
     });
     const top = h1.getBoundingClientRect().top;
     const lines = [...new Set(words.map((w) => Math.round(w.top - top)))];
+    const widths = lines.map((t) => {
+      const ws = words.filter((w) => Math.round(w.top - top) === t);
+      return Math.max(...ws.map((w) => w.right)) - Math.min(...ws.map((w) => w.left));
+    });
     return { y: scrollY, vh: innerHeight, axis: axis.top + axis.height / 2, top, h: h1.offsetHeight, words, lines,
-      lines0: window.__lines0, h0: window.__h0, color: getComputedStyle(h1).color };
+      lines0: window.__lines0, widths0: window.__widths0, widths, h0: window.__h0, color: getComputedStyle(h1).color };
   });
 
   let g = await read();
@@ -99,7 +111,12 @@ for (const vp of VPS) {
     const steps1 = g.lines.map((v) => v - g.lines[0]);
     const sameLines = steps0.length === steps1.length && steps0.every((v, i) => Math.abs(v - steps1[i]) <= 1);
     if (!sameLines || Math.abs(g.h - g.h0) > 1) flag(`layout changed: lines ${JSON.stringify(g.lines0)} → ${JSON.stringify(g.lines)}, h ${g.h0} → ${g.h}`);
-    else rows.push(`  layout: ${g.lines.length} lines, h ${g.h} — same as unsplit; ${g.words.length} words`);
+    else rows.push(`  layout: ${g.lines.length} lines, h ${g.h} — same as unsplit; ${g.words.length} letters`);
+    // Splitting into letters drops kerning: every line keeps its width within 1 % of the unsplit one.
+    const dw = (g.widths0 || []).map((w, i) => (g.widths[i] ?? 0) - w);
+    const worst = dw.reduce((m, d, i) => (Math.abs(d) / g.widths0[i] > Math.abs(m.d) / (m.w || 1) ? { d, w: g.widths0[i] } : m), { d: 0, w: 1 });
+    if (Math.abs(worst.d) > worst.w * 0.01) flag(`line width changed by ${worst.d.toFixed(1)} px of ${worst.w.toFixed(0)}`);
+    else rows.push(`  line widths: max Δ ${Math.max(...dw.map(Math.abs)).toFixed(1)} px`);
     // 2. At load the title is below the front: all grey.
     const lit0 = g.words.filter((w) => w.o > DIM + 0.01).length;
     if (lit0) flag(`at load ${lit0} words already painted`);

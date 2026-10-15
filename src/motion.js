@@ -391,57 +391,94 @@ export function initHero() {
   });
 }
 
-// Scroll paint of the Hero statement (session 49, user idea; not on the live site): the words start grey and turn
-// white one by one, in reading order, as their line rises through the lower half of the viewport. The upper half is
-// behind the black plate over the Hero axis, so a line is fully white well before it goes under it.
+// Scroll paint of the Hero statement (session 49, user idea; not on the live site): the letters start grey and turn
+// white one by one, in reading order, as their line rises through the lower half of the viewport — a wave running left
+// to right along the line while the line rises one line height, then the next line. The upper half of the viewport is
+// behind the black plate over the Hero axis, so a line is white well before it goes under it.
 const TITLE_PAINT = {
-  dim: 0.2, // opacity of a word not yet painted
-  front: 0.85, // a line starts to paint when its top reaches this share of the viewport height…
-  band: 0.2, // …and is white after rising this share of the viewport height (at least one line height)
-  word: 0.4, // one word's fade, as a share of the band; the rest staggers the words left to right
+  dim: 0.2, // opacity of a letter not yet painted
+  front: 0.85, // a line starts to paint when its top reaches this share of the viewport height
+  char: 0.25, // one letter's fade, as a share of the line's wave; the rest staggers the letters left to right
 };
+
+// Splits words into inline-block letters without moving a glyph: separate boxes lose the pair kerning of the shaped
+// word (lines grew up to 3 % and wrapped differently), so each letter gets the left margin that puts it back at its
+// glyph's place in the unsplit word. All words are measured before any is split: a split word reflows the ones after it.
+function splitLetters(words) {
+  const r = document.createRange();
+  const glyphs = words.map((word) => {
+    const text = word.firstChild;
+    if (!text || text.nodeType !== 3) return null;
+    const x0 = word.getBoundingClientRect().left;
+    return [...text.data].map((_, i) => {
+      r.setStart(text, i);
+      r.setEnd(text, i + 1);
+      return r.getBoundingClientRect().left - x0;
+    });
+  });
+  const letters = words.map((word, k) => {
+    if (!glyphs[k]) return [];
+    const els = [...word.textContent].map((ch) => {
+      const el = document.createElement('div');
+      el.style.display = 'inline-block';
+      el.textContent = ch;
+      return el;
+    });
+    word.replaceChildren(...els);
+    return els;
+  });
+  // Offsets inside a word do not depend on where the word sits, so margins can be set word by word.
+  letters.forEach((els, k) => {
+    const x0 = words[k].getBoundingClientRect().left;
+    const shift = els.map((el, i) => glyphs[k][i] - (el.getBoundingClientRect().left - x0));
+    els.forEach((el, i) => (el.style.marginLeft = `${shift[i] - (i ? shift[i - 1] : 0)}px`));
+  });
+  return letters.flat();
+}
 
 export function initHeroTitle() {
   const title = q('hero-title');
   if (!title || reducedMotion()) return;
-  // autoSplit: re-split (and rebuild the timeline returned from onSplit) once the fonts load and on width changes.
+  // autoSplit: re-split (and rebuild the timeline returned from onSplit) once the fonts load and on width changes;
+  // the revert restores the original text, letters included.
   SplitText.create(title, {
     type: 'words',
     autoSplit: true,
     onSplit({ words }) {
-      if (!words.length) return;
-      gsap.set(words, { opacity: TITLE_PAINT.dim });
+      const chars = splitLetters(words);
+      if (!chars.length) return;
+      gsap.set(chars, { opacity: TITLE_PAINT.dim });
       const top = title.getBoundingClientRect().top;
-      const lineH = parseFloat(getComputedStyle(title).lineHeight) || words[0].offsetHeight;
-      const band = Math.max(lineH, innerHeight * TITLE_PAINT.band);
-      // Timeline time = scroll px past the start, so every word is placed by its own geometry.
+      // One line's wave lasts exactly one line height of scroll, so lines never overlap.
+      const lineH = parseFloat(getComputedStyle(title).lineHeight) || chars[0].offsetHeight;
+      // Timeline time = scroll px past the start, so every letter is placed by its own geometry.
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
           trigger: title,
           start: () => `top ${TITLE_PAINT.front * 100}%`,
-          end: () => `+=${title.offsetHeight + band}`,
+          end: () => `+=${title.offsetHeight}`,
           scrub: true,
           invalidateOnRefresh: true,
         },
       });
-      // Lines of the centred text: each word is staggered by its place inside its own line.
+      // Lines of the centred text: each letter is staggered by its place inside its own line.
       const lines = new Map();
-      for (const w of words) {
-        const r = w.getBoundingClientRect();
-        const key = Math.round(r.top - top);
+      for (const c of chars) {
+        const b = c.getBoundingClientRect();
+        const key = Math.round(b.top - top);
         if (!lines.has(key)) lines.set(key, []);
-        lines.get(key).push({ w, l: r.left, r: r.right });
+        lines.get(key).push({ c, l: b.left, r: b.right });
       }
-      for (const [y, ws] of lines) {
-        const left = ws[0].l;
-        const width = ws.at(-1).r - left || 1;
-        for (const { w, l } of ws) {
+      for (const [y, cs] of lines) {
+        const left = cs[0].l;
+        const width = cs.at(-1).r - left || 1;
+        for (const { c, l } of cs) {
           const f = (l - left) / width;
-          tl.to(w, { opacity: 1, duration: band * TITLE_PAINT.word }, y + f * band * (1 - TITLE_PAINT.word));
+          tl.to(c, { opacity: 1, duration: lineH * TITLE_PAINT.char }, y + f * lineH * (1 - TITLE_PAINT.char));
         }
       }
-      tl.set({}, {}, title.offsetHeight + band); // timeline length = trigger length: 1 px of scroll = 1 unit
+      tl.set({}, {}, title.offsetHeight); // timeline length = trigger length: 1 px of scroll = 1 unit
       return tl;
     },
   });
