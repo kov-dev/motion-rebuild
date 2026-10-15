@@ -74,6 +74,7 @@
 ## Етап 4 — Код 🟨
 
 - [ ] Один модуль, init по `data-motion` атрибутах, кожна секція — окрема функція з guard'ом «є в DOM?»
+- [x] Фарбування слів h1 Hero на скрол (сесія 49, ідея користувача): `initHeroTitle()` SplitText words, сірі → білі в порядку читання, `title-paint-run.mjs`, `f483a06`
 - [x] Контроль швидкості скролу (сесія 48): `limitWheel()` — стеля «запасу» Lenis 1 vh / 0.5 vh у піні / 0.25 vh на краях пінів, без `anticipatePin` під Lenis, плавні кроки слайдера ≥992 (`d241a3a`); `scroll-flick.mjs`. Далі (на вибір користувача): м'який пін геометрією, тач
 - [x] Lenis + ScrollTrigger інтеграція, `prefers-reduced-motion` — `initLenis()` (сесія 32): lenis 1.3.26, параметри лайву, лише миша/трекпад, тач нативний без `normalizeScroll`, reduce без Lenis; меню `stop()/start()`, якорі меню й футера `scrollToSection()`; `lenis-run.mjs` — колесо 1:1 з лайвом
 - [x] Звук (ті самі mp3), gtag-події sound_on/off — `initSound()` (сесія 28); gtag спрацює після перенесення GA4 (етап 6)
