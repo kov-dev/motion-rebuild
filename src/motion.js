@@ -14,11 +14,10 @@ import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/+esm';
 import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/CustomEase/+esm';
 import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/ScrollTrigger/+esm';
 import { MotionPathPlugin } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/MotionPathPlugin/+esm';
-import { SplitText } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/SplitText/+esm';
 // Its base CSS (dist/lenis.css of the same version) lives in src/styles-rem.html.
 import Lenis from 'https://cdn.jsdelivr.net/npm/lenis@1.3.26/+esm';
 
-gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin, SplitText);
+gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin);
 
 // Landing eases of the live site (script.v33 block C), used by intro and ui.
 CustomEase.create('bounce', 'M0,0 C0.05222,-0.59802 0.31828,-1.38625 0.55039,0 0.65208,-0.78892 0.94566,-0.58262 1,1');
@@ -498,7 +497,6 @@ export function initIntro() {
         const t = tl.time();
         marks.forEach((m, i) => setText(i, t >= m));
         handOver((landing || tl).progress() === 1);
-        landing?.knock();
       };
       // ScrollTrigger.refresh() reverts the inline styles of matchMedia animations to measure and restores them
       // afterwards, which can undo state sets made during it: drop the caches and re-apply after every refresh.
@@ -555,113 +553,34 @@ const LAND_HOPS = [0.085, 0.038, 0.017];
 const LAND_LAST = 0.03;
 const LAND_CONTACT = 0.62;
 
-// Heading lines drop into their masks from above on the ball's hits, all lines at once (user, sessions 46–47: the ball
-// knocks the text down): the share of the cap height shown after hit 1, 2. Hits past the reveal press the line under
-// the ball down by a share of its height. HIT_PAD: room above and below a line's mask for the overshoot and the press,
-// × font size.
-const HIT_SHOW = [0.7, 1];
-const HIT_PRESS = [0.07, 0.035];
-const HIT_PAD = 0.12;
-
-/**
- * A ui heading split into masked lines that the landing ball knocks down: every line drops into its mask from above,
- * its top edge showing first, so the cut runs where the ball hits. `set(n)` takes the number of hits so far; a new hit animates (hits past
- * the reveal press the first line, where the ball stands), a lower count or `instant` only re-states.
- */
-function initHeadingHits(heading) {
+// Document x where the first line of a ui heading's text ends, without the heading's own GSAP x.
+// (Sessions 46–47 revealed the heading lines on the ball's hits with SplitText; removed by the user, see 688f7b8.)
+function firstLineEnd(heading) {
   const title = heading.querySelector('h1, h2, h3, p') || heading;
-  let hits = 0;
-  let lines = [];
-  let masks = [];
-  let levels = []; // yPercent per hit count (0 = hidden)
-  // yPercent (negative: above) that leaves `show` of the cap height, from the cap bottom up, below the clip top.
-  const measure = () => {
-    const cs = getComputedStyle(title);
-    const ctx = document.createElement('canvas').getContext('2d');
-    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    const m = ctx.measureText('H');
-    const L = lines[0]?.offsetHeight || parseFloat(cs.lineHeight);
-    const fs = parseFloat(cs.fontSize);
-    const capTop = (L - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent;
-    const pad = HIT_PAD * fs;
-    const capH = m.actualBoundingBoxAscent;
-    const at = (show) => (show >= 1 ? 0 : -((capTop + capH + pad - show * capH) / L) * 100);
-    // Hidden: the whole line box above the clip, padding included.
-    levels = [-((L + pad) / L) * 100, ...HIT_SHOW.map(at)];
-  };
-  const level = (n) => levels[Math.min(n, levels.length - 1)];
-  const split = SplitText.create(title, {
-    type: 'lines',
-    mask: 'lines',
-    autoSplit: true,
-    onSplit: (self) => {
-      gsap.killTweensOf(els(lines, masks));
-      lines = self.lines;
-      masks = self.masks;
-      measure();
-      // The masks clip with clip-path, reaching past the box for the overshoot and the press: padding with negative
-      // margins would add a line gap, since the margins of neighbouring masks collapse.
-      gsap.set(masks, { overflow: 'visible', clipPath: `inset(-${HIT_PAD}em -${HIT_PAD}em)`, y: 0 });
-      gsap.set(lines, { yPercent: level(hits) });
-    },
-  });
-  const set = (n, instant = false) => {
-    if (n === hits && !instant) return;
-    const prev = hits;
-    hits = n;
-    if (instant) {
-      gsap.killTweensOf(els(lines, masks));
-      gsap.set(lines, { yPercent: level(n) });
-      gsap.set(masks, { y: 0 });
-      return;
-    }
-    const up = n > prev;
-    if (level(n) !== level(prev)) {
-      const full = n >= HIT_SHOW.length;
-      gsap.to(lines, {
-        yPercent: level(n),
-        duration: up ? (full ? 0.75 : 0.55) : 0.35,
-        ease: up ? (full ? 'back.out(2)' : 'power3.out') : 'power2.in',
-        // Lines carry only this tween.
-        overwrite: true,
-      });
-    }
-    // A press only for a single hit on the revealed heading (a jump over several hits just reveals it). It moves the
-    // first line's mask, not the line: two transform tweens on one element would overwrite each other.
-    if (up && n === prev + 1 && prev >= HIT_SHOW.length) {
-      const d = HIT_PRESS[Math.min(n - HIT_SHOW.length, HIT_PRESS.length) - 1] * lines[0].offsetHeight;
-      gsap.killTweensOf(masks[0]);
-      gsap
-        .timeline()
-        .to(masks[0], { y: d, duration: 0.08, ease: 'power2.out' })
-        .to(masks[0], { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.35)' });
-    }
-  };
-  // Document x where the first line's glyphs end, without the heading's own GSAP x.
-  const lineEnd = () => {
-    const r = document.createRange();
-    r.selectNodeContents(lines[0] || title);
-    return r.getBoundingClientRect().right + scrollX - gsap.getProperty(heading, 'x');
-  };
-  return { set, lineEnd, revert: () => split.revert() };
+  const r = document.createRange();
+  r.selectNodeContents(title);
+  const rects = [...r.getClientRects()].filter((x) => x.width);
+  if (!rects.length) return Infinity;
+  const top = rects[0].top;
+  const right = Math.max(...rects.filter((x) => Math.abs(x.top - top) < 2).map((x) => x.right));
+  return right + scrollX - gsap.getProperty(heading, 'x');
 }
 
 /**
  * A ball lands on the first line of a ui block's heading (≥992; live: a two-hop `bounce` ease; motion video: the ball
  * ends in the first dot right of the heading). It falls onto the line, bounces along it in shrinking hops (gravity
  * parabolas, so a steady scroll reads as physics) and the last hop carries it off the line into the first dot (5/6 vw),
- * easing to a stop there; every contact knocks the heading lines up (initHeadingHits()). Own scrubbed trigger, which
+ * easing to a stop there. Own scrubbed trigger, which
  * ends UI_LAND units into the block's pin; while the block is pinned its heading stands still on screen, so the ball's
  * document y follows the pin. The landing owns the hand-over to the dot (progress 1).
  *   origin()       document point of the ball's translate (0, 0)
  *   from(), land() start and the first dot, translate space
  *   start(), end() scroll range; pinStart() the scroll where the block pins
  *   carry          the ball starts standing still on screen: its fall takes the scroll's speed
- *   idle()         at progress 0 the ball still belongs to whoever brought it (nothing is set, no hits)
+ *   idle()         at progress 0 the ball still belongs to whoever brought it (nothing is set)
  */
 function initBallLanding({ ball, block, origin, from, land, start, end, pinStart, carry = false, idle = () => false, onUpdate }) {
   const heading = q('ui-text', block);
-  const hits = heading && initHeadingHits(heading);
   const sineInOut = gsap.parseEase('sine.inOut');
   const power2Out = gsap.parseEase('power2.out');
 
@@ -696,18 +615,16 @@ function initBallLanding({ ball, block, origin, from, land, start, end, pinStart
         },
       });
     };
-    // Contacts with the line, in trajectory time: the start if it is already on the line, then every fall's end.
-    const contacts = segs.length ? [] : [0];
     LAND_HOPS.forEach((h, i) => hop(i === 0 && !segs.length ? p0.y : floor, floor - h * vw, floor));
-    segs.reduce((a, s) => (contacts.push(a + s.T), a + s.T), 0);
-    const bounceT = contacts[contacts.length - 1];
+    // The last contact with the line, in trajectory time.
+    const bounceT = segs.reduce((a, s) => a + s.T, 0);
     // The hop off the line: up like the others, then eased into the dot so the swap to the dot does not jump.
     hop(floor, floor - LAND_LAST * vw, d.y, 1.4, sineInOut);
     const T = segs.reduce((a, s) => a + s.T, 0);
     // The bounces stay over the first line's glyphs.
-    const right = hits ? hits.lineEnd() - o.x - ball.offsetWidth / 2 : Infinity;
+    const right = firstLineEnd(heading) - o.x - ball.offsetWidth / 2;
     const xc = Math.min(p0.x + (d.x - p0.x) * LAND_CONTACT, Math.max(right, p0.x));
-    return { segs, T, bounceT, x0: p0.x, xc, dx: d.x, hits: contacts.map((t) => t / T) };
+    return { segs, T, bounceT, x0: p0.x, xc, dx: d.x };
   };
   const measure = () => {
     let g = build(0);
@@ -742,39 +659,26 @@ function initBallLanding({ ball, block, origin, from, land, start, end, pinStart
     gsap.set(ball, { x: p.x, y: p.y + Math.max(0, scroll - pinStart()) });
   };
 
-  // Hits so far knock the heading lines up (none while the ball still belongs to the previous animation).
-  const knock = (instant = false) => {
-    if (!hits) return;
-    // Hit times come from the trajectory apply() measured; until it has, only "not landing yet" is known.
-    if (proxy.u <= 0 && idle()) hits.set(0, instant);
-    else if (geo) hits.set(geo.hits.filter((h) => proxy.u >= h - 1e-6).length, instant);
-  };
-
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
     scrollTrigger: { start, end, scrub: true, invalidateOnRefresh: true },
     onUpdate: () => {
       apply();
-      knock();
       onUpdate?.();
     },
   });
   tl.fromTo(proxy, { u: 0 }, { u: 1, duration: 1, immediateRender: false });
-  knock(true);
 
   const reset = () => (geo = null);
   ScrollTrigger.addEventListener('refreshInit', reset);
   return {
     progress: () => tl.progress(),
-    knock: () => knock(),
     resync: () => {
       geo = null;
       apply();
-      knock(true);
     },
     kill: () => {
       ScrollTrigger.removeEventListener('refreshInit', reset);
-      hits?.revert();
     },
   };
 }

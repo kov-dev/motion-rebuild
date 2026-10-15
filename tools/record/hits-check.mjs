@@ -1,3 +1,4 @@
+// NOTE: the hit reveal was removed in session 47 (user); kept for the git history, revive with 688f7b8.
 // Ball-hit heading states with the local src/motion.js: jump past the landing, scroll back above it, resize across 992,
 // 375 and reduced motion (no split there). Line values = translateY px (line box ≈ 80 px at 1440: −89 hidden above, −31 ≈ hit 1, 0 shown).
 // Usage: node hits-check.mjs
