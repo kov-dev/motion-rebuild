@@ -14,10 +14,11 @@ import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/+esm';
 import { CustomEase } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/CustomEase/+esm';
 import { ScrollTrigger } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/ScrollTrigger/+esm';
 import { MotionPathPlugin } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/MotionPathPlugin/+esm';
+import { SplitText } from 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/SplitText/+esm';
 // Its base CSS (dist/lenis.css of the same version) lives in src/styles-rem.html.
 import Lenis from 'https://cdn.jsdelivr.net/npm/lenis@1.3.26/+esm';
 
-gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin);
+gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin, SplitText);
 
 // Landing eases of the live site (script.v33 block C), used by intro and ui.
 CustomEase.create('bounce', 'M0,0 C0.05222,-0.59802 0.31828,-1.38625 0.55039,0 0.65208,-0.78892 0.94566,-0.58262 1,1');
@@ -387,6 +388,62 @@ export function initHero() {
     end: point,
     onEnter: collapse,
     onLeaveBack: expand,
+  });
+}
+
+// Scroll paint of the Hero statement (session 49, user idea; not on the live site): the words start grey and turn
+// white one by one, in reading order, as their line rises through the lower half of the viewport. The upper half is
+// behind the black plate over the Hero axis, so a line is fully white well before it goes under it.
+const TITLE_PAINT = {
+  dim: 0.2, // opacity of a word not yet painted
+  front: 0.85, // a line starts to paint when its top reaches this share of the viewport height…
+  band: 0.2, // …and is white after rising this share of the viewport height (at least one line height)
+  word: 0.4, // one word's fade, as a share of the band; the rest staggers the words left to right
+};
+
+export function initHeroTitle() {
+  const title = q('hero-title');
+  if (!title || reducedMotion()) return;
+  // autoSplit: re-split (and rebuild the timeline returned from onSplit) once the fonts load and on width changes.
+  SplitText.create(title, {
+    type: 'words',
+    autoSplit: true,
+    onSplit({ words }) {
+      if (!words.length) return;
+      gsap.set(words, { opacity: TITLE_PAINT.dim });
+      const top = title.getBoundingClientRect().top;
+      const lineH = parseFloat(getComputedStyle(title).lineHeight) || words[0].offsetHeight;
+      const band = Math.max(lineH, innerHeight * TITLE_PAINT.band);
+      // Timeline time = scroll px past the start, so every word is placed by its own geometry.
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: title,
+          start: () => `top ${TITLE_PAINT.front * 100}%`,
+          end: () => `+=${title.offsetHeight + band}`,
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
+      });
+      // Lines of the centred text: each word is staggered by its place inside its own line.
+      const lines = new Map();
+      for (const w of words) {
+        const r = w.getBoundingClientRect();
+        const key = Math.round(r.top - top);
+        if (!lines.has(key)) lines.set(key, []);
+        lines.get(key).push({ w, l: r.left, r: r.right });
+      }
+      for (const [y, ws] of lines) {
+        const left = ws[0].l;
+        const width = ws.at(-1).r - left || 1;
+        for (const { w, l } of ws) {
+          const f = (l - left) / width;
+          tl.to(w, { opacity: 1, duration: band * TITLE_PAINT.word }, y + f * band * (1 - TITLE_PAINT.word));
+        }
+      }
+      tl.set({}, {}, title.offsetHeight + band); // timeline length = trigger length: 1 px of scroll = 1 unit
+      return tl;
+    },
   });
 }
 
@@ -2457,6 +2514,7 @@ async function init() {
   const reveal = await initPreloader({ lenis, deep });
   // Created in DOM order, so every trigger below a pin already knows its spacer.
   initHero();
+  initHeroTitle();
   initIntro();
   initUi();
   initInteractive();
