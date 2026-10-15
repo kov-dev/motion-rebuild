@@ -555,19 +555,17 @@ const LAND_HOPS = [0.085, 0.038, 0.017];
 const LAND_LAST = 0.03;
 const LAND_CONTACT = 0.62;
 
-// Heading lines rise out of their masks on the ball's hits (user idea, sessions 46–47): the share of the cap height
-// shown after hit 1, 2, 3; every next line lags by HIT_CASCADE of it and starts HIT_STAGGER s later. Hits past the
-// reveal press the line under the ball down by a share of its height. HIT_PAD: room above and below a line's mask
-// for the overshoot and the press, × font size.
-const HIT_SHOW = [0.5, 0.8, 1];
-const HIT_CASCADE = 0.08;
-const HIT_STAGGER = 0.11;
-const HIT_PRESS = [0.07];
+// Heading lines drop into their masks from above on the ball's hits, all lines at once (user, sessions 46–47: the ball
+// knocks the text down): the share of the cap height shown after hit 1, 2. Hits past the reveal press the line under
+// the ball down by a share of its height. HIT_PAD: room above and below a line's mask for the overshoot and the press,
+// × font size.
+const HIT_SHOW = [0.7, 1];
+const HIT_PRESS = [0.07, 0.035];
 const HIT_PAD = 0.12;
 
 /**
- * A ui heading split into masked lines that the landing ball knocks up: every line slides up from under its mask like
- * the Intro pills, line by line from the top. `set(n)` takes the number of hits so far; a new hit animates (hits past
+ * A ui heading split into masked lines that the landing ball knocks down: every line drops into its mask from above,
+ * its top edge showing first, so the cut runs where the ball hits. `set(n)` takes the number of hits so far; a new hit animates (hits past
  * the reveal press the first line, where the ball stands), a lower count or `instant` only re-states.
  */
 function initHeadingHits(heading) {
@@ -575,8 +573,8 @@ function initHeadingHits(heading) {
   let hits = 0;
   let lines = [];
   let masks = [];
-  let levels = []; // yPercent per hit count (0 = hidden) and line
-  // yPercent that leaves `show` of the cap height above the mask bottom.
+  let levels = []; // yPercent per hit count (0 = hidden)
+  // yPercent (negative: above) that leaves `show` of the cap height, from the cap bottom up, below the clip top.
   const measure = () => {
     const cs = getComputedStyle(title);
     const ctx = document.createElement('canvas').getContext('2d');
@@ -585,8 +583,11 @@ function initHeadingHits(heading) {
     const L = lines[0]?.offsetHeight || parseFloat(cs.lineHeight);
     const fs = parseFloat(cs.fontSize);
     const capTop = (L - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent;
-    const at = (show) => (show >= 1 ? 0 : gsap.utils.clamp(0, 100, ((L + HIT_PAD * fs - capTop - show * m.actualBoundingBoxAscent) / L) * 100));
-    levels = [lines.map(() => 100), ...HIT_SHOW.map((s) => lines.map((_, i) => at(s >= 1 ? 1 : s - i * HIT_CASCADE * s)))];
+    const pad = HIT_PAD * fs;
+    const capH = m.actualBoundingBoxAscent;
+    const at = (show) => (show >= 1 ? 0 : -((capTop + capH + pad - show * capH) / L) * 100);
+    // Hidden: the whole line box above the clip, padding included.
+    levels = [-((L + pad) / L) * 100, ...HIT_SHOW.map(at)];
   };
   const level = (n) => levels[Math.min(n, levels.length - 1)];
   const split = SplitText.create(title, {
@@ -601,7 +602,7 @@ function initHeadingHits(heading) {
       // The masks clip with clip-path, reaching past the box for the overshoot and the press: padding with negative
       // margins would add a line gap, since the margins of neighbouring masks collapse.
       gsap.set(masks, { overflow: 'visible', clipPath: `inset(-${HIT_PAD}em -${HIT_PAD}em)`, y: 0 });
-      gsap.set(lines, { yPercent: (i) => level(hits)[i] });
+      gsap.set(lines, { yPercent: level(hits) });
     },
   });
   const set = (n, instant = false) => {
@@ -610,7 +611,7 @@ function initHeadingHits(heading) {
     hits = n;
     if (instant) {
       gsap.killTweensOf(els(lines, masks));
-      gsap.set(lines, { yPercent: (i) => level(n)[i] });
+      gsap.set(lines, { yPercent: level(n) });
       gsap.set(masks, { y: 0 });
       return;
     }
@@ -618,11 +619,10 @@ function initHeadingHits(heading) {
     if (level(n) !== level(prev)) {
       const full = n >= HIT_SHOW.length;
       gsap.to(lines, {
-        yPercent: (i) => level(n)[i],
+        yPercent: level(n),
         duration: up ? (full ? 0.75 : 0.55) : 0.35,
         ease: up ? (full ? 'back.out(2)' : 'power3.out') : 'power2.in',
-        stagger: { each: up ? HIT_STAGGER : 0.04, from: up ? 'start' : 'end' },
-        // Lines carry only this tween; true also drops the not yet started staggered parts of the previous one.
+        // Lines carry only this tween.
         overwrite: true,
       });
     }
