@@ -9,7 +9,8 @@ import { chromium } from 'playwright';
 import fs from 'node:fs';
 
 const ROOT = '/Users/mac/Claude/Projects/Motion';
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const args = process.argv.slice(2);
 const published = args.includes('--live');
 const snapOff = args.includes('--snap-off');

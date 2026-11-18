@@ -6,7 +6,8 @@
 // Usage: node styleguide-check.mjs [1440|768|600|375 ...] (default all)
 import { chromium } from 'playwright';
 
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL?.replace(/\/$/, '') || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io';
 const OUT = process.env.OUT || '.';
 const only = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const VPS = [

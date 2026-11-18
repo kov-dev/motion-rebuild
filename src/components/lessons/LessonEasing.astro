@@ -1,0 +1,357 @@
+---
+// Markup as published by the Webflow build (ported 2026-11-18).
+---
+
+<section id="easing" data-motion="lesson" data-theme="color" data-wf--lesson-section--variant="easing" class="lesson-section">
+  <div class="lesson-hero">
+    <div aria-hidden="true" class="lesson-visual-row">
+      <div class="lesson-star is-left"></div>
+      <div data-src="/assets/1_easing_visual.json" data-motion="lesson-visual" data-kind="lottie" class="lesson-visual"></div>
+      <div class="lesson-star is-right"></div>
+    </div>
+    <div class="lesson-head">
+      <div class="lesson-heading">
+        <div class="lesson-number"><div class="heading-md">1</div></div>
+        <div class="lesson-title"><h2 class="heading-md">The Basics of Easing</h2></div>
+      </div>
+      <div class="lesson-desc">
+        <p class="body-md">
+          In nature, the speed of movement is never linear: objects gain speed as they begin to move, and slow as they come to a halt. Easing is the technique
+          that allows us to convey this.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div data-motion="lesson-schemes" class="lesson-schemes">
+      <div class="lesson-schemes-stage">
+        <div data-motion="schemes-track" class="lesson-schemes-track">
+          <div
+            data-text="With linear easing, the object travels at a constant speed, without acceleration or deceleration."
+            data-motion="scheme"
+            class="lesson-scheme is-active"
+          >
+            <div aria-hidden="true" data-motion="scheme-lottie" data-src="/assets/linear.json" class="lesson-scheme-lottie"></div>
+            <div class="lesson-scheme-label">Linear</div>
+          </div>
+          <div data-text="Here the object accelerates slightly at the beginning and decelerates slightly at the end" data-motion="scheme" class="lesson-scheme">
+            <div aria-hidden="true" data-motion="scheme-lottie" data-src="/assets/ease.json" class="lesson-scheme-lottie"></div>
+            <div class="lesson-scheme-label">Ease</div>
+          </div>
+          <div data-text="Starts its movement slowly, but accelerates as it continues." data-motion="scheme" class="lesson-scheme">
+            <div aria-hidden="true" data-motion="scheme-lottie" data-src="/assets/ease_in.json" class="lesson-scheme-lottie"></div>
+            <div class="lesson-scheme-label">Ease-in</div>
+          </div>
+          <div data-text="The opposite of ease-in - starts moving quickly and then slows down smoothly at the end." data-motion="scheme" class="lesson-scheme">
+            <div aria-hidden="true" data-motion="scheme-lottie" data-src="/assets/ease_out.json" class="lesson-scheme-lottie"></div>
+            <div class="lesson-scheme-label">Ease-out</div>
+          </div>
+          <div
+            data-text="Cubic is similar to ease, but due to longer periods of acceleration and deceleration, the middle part of the path appears to pass more quickly."
+            data-motion="scheme"
+            class="lesson-scheme"
+          >
+            <div aria-hidden="true" data-motion="scheme-lottie" data-src="/assets/cubic.json" class="lesson-scheme-lottie"></div>
+            <div class="lesson-scheme-label">Cubic</div>
+          </div>
+        </div>
+        <div class="lesson-schemes-arrows">
+          <button type="button" aria-label="Previous scheme" data-motion="schemes-prev" disabled="" class="lesson-schemes-arrow">
+            <div class="lesson-schemes-icon w-embed">
+              <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M14.8812 0L0 16L14.8812 32L17.0745 29.9594L5.48433 17.498H32V14.502H5.48433L17.0745 2.04055L14.8812 0Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div></button
+          ><button type="button" aria-label="Next scheme" data-motion="schemes-next" class="lesson-schemes-arrow">
+            <div class="lesson-schemes-icon w-embed">
+              <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M17.1188 0L32 16L17.1188 32L14.9255 29.9594L26.5157 17.498H0V14.502H26.5157L14.9255 2.04055L17.1188 0Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+          </button>
+        </div>
+        <div aria-hidden="true" class="lesson-schemes-divider"></div>
+      </div>
+      <div class="lesson-schemes-caption">
+        <p aria-live="polite" data-motion="schemes-text" class="body-md">
+          With linear easing, the object travels at a constant speed, without acceleration or deceleration.
+        </p>
+      </div>
+    </div>
+    <div data-motion="lesson-examples" class="lesson-examples">
+      <div class="lesson-examples-sticky">
+        <div aria-hidden="true" class="lesson-examples-stars">
+          <div data-motion="examples-star" class="lesson-examples-star"></div>
+          <div data-motion="examples-star" class="lesson-examples-star is-even"></div>
+          <div data-motion="examples-star" class="lesson-examples-star"></div>
+          <div data-motion="examples-star" class="lesson-examples-star is-even"></div>
+          <div data-motion="examples-star" class="lesson-examples-star"></div>
+        </div>
+        <div data-motion="examples-line" class="lesson-examples-line"><h3 class="lesson-examples-title">Let&#x27;s look at an example</h3></div>
+      </div>
+    </div>
+    <div data-theme="dark" data-motion="lesson-demo" class="lesson-demo">
+      <div class="lesson-demo-sticky">
+        <div class="lesson-demo-media">
+          <video
+            data-motion="demo-video"
+            data-src="https://cdn.zajno.com/dev/motion/videos/examples/example-1.mp4"
+            data-src-tablet="https://cdn.zajno.com/dev/motion/videos/examples/tablet/example-1-tablet.mp4"
+            data-src-mobile="https://cdn.zajno.com/dev/motion/videos/examples/mobile/example-1-mobile.mp4"
+            muted=""
+            loop=""
+            playsinline="playsinline"
+            preload="none"
+            aria-hidden="true"
+            class="lesson-demo-video is-active"
+          ></video
+          ><video
+            data-motion="demo-video"
+            data-src="https://cdn.zajno.com/dev/motion/videos/examples/example-2.mp4"
+            data-src-tablet="https://cdn.zajno.com/dev/motion/videos/examples/tablet/example-2-tablet.mp4"
+            data-src-mobile="https://cdn.zajno.com/dev/motion/videos/examples/mobile/example-2-mobile.mp4"
+            muted=""
+            loop=""
+            playsinline="playsinline"
+            preload="none"
+            aria-hidden="true"
+            class="lesson-demo-video"
+          ></video
+          ><video
+            data-motion="demo-video"
+            data-src="https://cdn.zajno.com/dev/motion/videos/examples/example-3.mp4"
+            data-src-tablet="https://cdn.zajno.com/dev/motion/videos/examples/tablet/example-3-tablet.mp4"
+            data-src-mobile="https://cdn.zajno.com/dev/motion/videos/examples/mobile/example-3-mobile.mp4"
+            muted=""
+            loop=""
+            playsinline="playsinline"
+            preload="none"
+            aria-hidden="true"
+            class="lesson-demo-video"
+          ></video
+          ><video
+            data-motion="demo-video"
+            data-src="https://cdn.zajno.com/dev/motion/videos/examples/example-4.mp4"
+            data-src-tablet="https://cdn.zajno.com/dev/motion/videos/examples/tablet/example-4-tablet.mp4"
+            data-src-mobile="https://cdn.zajno.com/dev/motion/videos/examples/mobile/example-4-mobile.mp4"
+            muted=""
+            loop=""
+            playsinline="playsinline"
+            preload="none"
+            aria-hidden="true"
+            class="lesson-demo-video"
+          ></video
+          ><video
+            data-motion="demo-video"
+            data-src="https://cdn.zajno.com/dev/motion/videos/examples/example-5.mp4"
+            data-src-tablet="https://cdn.zajno.com/dev/motion/videos/examples/tablet/example-5-tablet.mp4"
+            data-src-mobile="https://cdn.zajno.com/dev/motion/videos/examples/mobile/example-5-mobile.mp4"
+            muted=""
+            loop=""
+            playsinline="playsinline"
+            preload="none"
+            aria-hidden="true"
+            class="lesson-demo-video"
+          ></video
+          ><video
+            data-motion="demo-video"
+            data-src="https://cdn.zajno.com/dev/motion/videos/examples/example-6.mp4"
+            data-src-tablet="https://cdn.zajno.com/dev/motion/videos/examples/tablet/example-6-tablet.mp4"
+            data-src-mobile="https://cdn.zajno.com/dev/motion/videos/examples/mobile/example-6-mobile.mp4"
+            muted=""
+            loop=""
+            playsinline="playsinline"
+            preload="none"
+            aria-hidden="true"
+            class="lesson-demo-video"
+          ></video>
+        </div>
+        <div class="lesson-demo-progress">
+          <div class="lesson-demo-steps">
+            <div data-motion="demo-step" class="lesson-demo-step is-active"><p class="body-sm">Missing easing &amp; delay</p></div>
+            <div data-motion="demo-step" class="lesson-demo-step"><p class="body-sm">Correct easing</p></div>
+            <div data-motion="demo-step" class="lesson-demo-step"><p class="body-sm">Correct delay &amp; animation</p></div>
+          </div>
+          <div aria-hidden="true" class="lesson-demo-ticks">
+            <div class="lesson-demo-tick is-edge"></div>
+            <div class="lesson-demo-tick"><div data-motion="demo-tick" class="lesson-demo-tick-fill is-on"></div></div>
+            <div class="lesson-demo-tick is-large"><div data-motion="demo-tick" class="lesson-demo-tick-fill"></div></div>
+            <div class="lesson-demo-tick"><div data-motion="demo-tick" class="lesson-demo-tick-fill"></div></div>
+            <div class="lesson-demo-tick is-large"><div data-motion="demo-tick" class="lesson-demo-tick-fill"></div></div>
+            <div class="lesson-demo-tick"><div data-motion="demo-tick" class="lesson-demo-tick-fill"></div></div>
+            <div class="lesson-demo-tick is-edge"></div>
+          </div>
+          <div aria-hidden="true" class="lesson-demo-line"><div data-motion="demo-line" class="lesson-demo-line-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div data-motion="lesson-cases" class="lesson-cases">
+    <div data-motion="lesson-cases-head" class="lesson-cases-head"><h3 class="heading-xl">Implementation examples</h3></div>
+    <div class="lesson-cases-pin">
+      <div data-motion="lesson-track" class="lesson-cases-track">
+        <a
+          data-motion="lesson-card"
+          href="https://dribbble.com/shots/19273514-Fly-Dashboard-Design-for-NFT-Creators"
+          target="_blank"
+          class="lesson-card w-inline-block"
+          ><div class="lesson-card-media">
+            <video
+              data-motion="lesson-video"
+              data-src="https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/Fly_Dashboard_desktop_H.264.mp4"
+              muted=""
+              loop=""
+              playsinline="playsinline"
+              preload="none"
+              aria-hidden="true"
+              class="lesson-card-video"
+            ></video
+            ><img src="/assets/Fly_Dashboard_desktop_00000.png" loading="lazy" alt="" class="lesson-card-poster" />
+          </div>
+          <div class="lesson-card-body">
+            <div class="lesson-card-text">
+              <p class="body-sm">Ease-in/ease-out can also be applied to camera movements and transformation of interface objects.</p>
+            </div>
+            <div class="lesson-card-btn">
+              <div>View</div>
+              <div class="lesson-card-icon w-embed">
+                <svg width="100%" height="100%" viewBox="0 0 13 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M0.5 12.1338H11.5M11.5 12.1338L8.15217 9.13379M11.5 12.1338L8.15217 15.1338" stroke="currentColor" />
+                </svg>
+              </div>
+            </div></div></a
+        ><a data-motion="lesson-card" href="https://dribbble.com/shots/18163851-Keep-Website" target="_blank" class="lesson-card w-inline-block"
+          ><div class="lesson-card-media">
+            <video
+              data-motion="lesson-video"
+              data-src="https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/Keep Website_desktop_H.264.mp4"
+              muted=""
+              loop=""
+              playsinline="playsinline"
+              preload="none"
+              aria-hidden="true"
+              class="lesson-card-video"
+            ></video
+            ><img src="/assets/Keep-Website_desktop_00000.png" loading="lazy" alt="" class="lesson-card-poster" />
+          </div>
+          <div class="lesson-card-body">
+            <div class="lesson-card-text"><p class="body-sm">Wonder at how smoothly our text content glides into view!</p></div>
+            <div class="lesson-card-btn">
+              <div>View</div>
+              <div class="lesson-card-icon w-embed">
+                <svg width="100%" height="100%" viewBox="0 0 13 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M0.5 12.1338H11.5M11.5 12.1338L8.15217 9.13379M11.5 12.1338L8.15217 15.1338" stroke="currentColor" />
+                </svg>
+              </div>
+            </div></div></a
+        ><a data-motion="lesson-card" href="https://dribbble.com/shots/19220690-PalmPalm-Website-Animation" target="_blank" class="lesson-card w-inline-block"
+          ><div class="lesson-card-media">
+            <video
+              data-motion="lesson-video"
+              data-src="https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/PalmPalm Website_desktop_H.264.mp4"
+              muted=""
+              loop=""
+              playsinline="playsinline"
+              preload="none"
+              aria-hidden="true"
+              class="lesson-card-video"
+            ></video
+            ><img src="/assets/PalmPalm-Website_desktop_00000.png" loading="lazy" alt="" class="lesson-card-poster" />
+          </div>
+          <div class="lesson-card-body">
+            <div class="lesson-card-text">
+              <p class="body-sm">Here we see how the guide controls the appearance of content and the animation of icons and visuals.</p>
+            </div>
+            <div class="lesson-card-btn">
+              <div>View</div>
+              <div class="lesson-card-icon w-embed">
+                <svg width="100%" height="100%" viewBox="0 0 13 25" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M0.5 12.1338H11.5M11.5 12.1338L8.15217 9.13379M11.5 12.1338L8.15217 15.1338" stroke="currentColor" />
+                </svg>
+              </div>
+            </div></div
+        ></a>
+      </div>
+    </div>
+    <div aria-hidden="true" data-motion="lesson-overlay" class="lesson-cases-overlay"></div>
+  </div>
+  <div>
+    <div data-motion="lesson-classic" data-wf--lesson-classic--variant="easing" class="lesson-classic">
+      <div class="lesson-classic-mask">
+        <div aria-hidden="true" class="lesson-classic-film is-left"></div>
+        <div class="lesson-classic-body">
+          <div class="lesson-classic-head">
+            <div class="lesson-classic-title"><h3 class="heading-lg">An example from classic animation</h3></div>
+            <div class="lesson-classic-list">
+              <div class="lesson-classic-media">
+                <video
+                  data-motion="lesson-video"
+                  data-src="https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/1_CAR_CURVE_DEMO_FULL_2х_H.264.mp4"
+                  muted=""
+                  loop=""
+                  playsinline="playsinline"
+                  preload="none"
+                  aria-hidden="true"
+                  class="lesson-classic-video"
+                ></video
+                ><img
+                  src="/assets/1_CAR_CURVE_DEMO_FULL_00000.webp"
+                  loading="lazy"
+                  alt=""
+                  sizes="100vw"
+                  srcset="/assets/1_CAR_CURVE_DEMO_FULL_00000-p-500.png 500w, /assets/1_CAR_CURVE_DEMO_FULL_00000.webp 640w"
+                  class="lesson-classic-poster"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="lesson-classic-steps">
+            <div class="lesson-classic-sticky">
+              <div class="lesson-classic-step">
+                <div class="lesson-classic-text">
+                  <p class="body-sm is-strong">Slow in and slow out</p>
+                  <p class="body-sm">
+                    Think about how a car starts and stops. At first, it moves slowly before gaining momentum and speeding up. When the car brakes, the process
+                    reverses.
+                  </p>
+                </div>
+              </div>
+              <div class="lesson-classic-step">
+                <div class="lesson-classic-media">
+                  <video
+                    data-motion="lesson-video"
+                    data-src="https://cdn.zajno.com/dev/motion/videos/Lessons/lesson-1/1_CAR_EASING_COMPARISON_2х_H.264.mp4"
+                    muted=""
+                    loop=""
+                    playsinline="playsinline"
+                    preload="none"
+                    aria-hidden="true"
+                    class="lesson-classic-video"
+                  ></video
+                  ><img src="/assets/1_CAR_EASING_COMPARISON_00000.webp" loading="lazy" alt="" class="lesson-classic-poster" />
+                </div>
+                <div class="lesson-classic-text">
+                  <p class="body-sm">
+                    In animation, this effect is achieved by adding more frames at the beginning and end of an action sequence. Applying this principle gives
+                    your objects more life.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div aria-hidden="true" class="lesson-classic-film is-right"></div>
+      </div>
+    </div>
+  </div>
+</section>

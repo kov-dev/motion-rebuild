@@ -14,7 +14,8 @@ import { chromium } from 'playwright';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 const [out, mode, ...rest] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const VPS = { 1440: { w: 1440, h: 900, m: false }, 768: { w: 768, h: 1024, m: true }, 600: { w: 600, h: 900, m: true }, 375: { w: 375, h: 812, m: true } };
 const bandsOf = (a) => (a.length ? a : ['1440', '768', '600', '375']);

@@ -6,3 +6,11 @@ reference/recordings/
 # Reference renders from the designer (large, not for the public repo)
 *.mp4
 media-faststart/
+
+# Astro build
+dist/
+.astro/
+tools/migrate/.tmp/
+
+# Licensed font files: kept out of the public repository (see PLAN.md, stage 7)
+public/fonts/

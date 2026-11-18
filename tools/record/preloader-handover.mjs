@@ -7,7 +7,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const live = process.argv.includes('--live');
 const VIEWPORTS = [
   { w: 1440, h: 750 },
@@ -26,7 +27,7 @@ for (const vp of VIEWPORTS) {
   if (!live) {
     const js = readFileSync(`${root}/src/motion.js`, 'utf8');
     await p.route(STAGING + '*', async (route) => {
-      if (!/webflow\.io\/(\?|$)/.test(route.request().url())) return route.continue();
+      if (!/^https?:\/\/[^\/]+\/(\?|$)/.test(route.request().url())) return route.continue();
       const res = await route.fetch();
       let html = await res.text();
       html = html.replace(/<script type="module" src="[^"]*motion\.js"><\/script>/, '');

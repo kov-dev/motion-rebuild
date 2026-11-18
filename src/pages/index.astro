@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteSound from '../components/SiteSound.astro';
+import Preloader from '../components/Preloader.astro';
+import Hero from '../components/Hero.astro';
+import Intro from '../components/Intro.astro';
+import Interactive from '../components/Interactive.astro';
+import Techniques from '../components/Techniques.astro';
+import LessonEasing from '../components/lessons/LessonEasing.astro';
+import LessonDelay from '../components/lessons/LessonDelay.astro';
+import LessonFade from '../components/lessons/LessonFade.astro';
+import LessonMorph from '../components/lessons/LessonMorph.astro';
+import LessonMasking from '../components/lessons/LessonMasking.astro';
+import LessonDimension from '../components/lessons/LessonDimension.astro';
+import LessonParallax from '../components/lessons/LessonParallax.astro';
+import LessonZoom from '../components/lessons/LessonZoom.astro';
+import Resources from '../components/Resources.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import CtaModal from '../components/CtaModal.astro';
+---
+
+<Base
+  title="Motion Graphic Design & Animation Principles Website - Zajno Digital Studio"
+  description="Motion is a website that showcases the power of UI/UX animation in conveying the mood and character of a brand."
+>
+  <SiteNav />
+  <SiteSound />
+  <Preloader />
+  <div class="main">
+    <Hero />
+    <Intro />
+    <Interactive />
+    <Techniques />
+    <div class="section-lessons">
+      <LessonEasing />
+      <LessonDelay />
+      <LessonFade />
+      <LessonMorph />
+      <LessonMasking />
+      <LessonDimension />
+      <LessonParallax />
+      <LessonZoom />
+    </div>
+    <Resources />
+    <SiteFooter />
+  </div>
+  <CtaModal />
+</Base>

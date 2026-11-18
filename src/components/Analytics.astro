@@ -1,0 +1,33 @@
+---
+// GA4 and the X (Twitter) pixel of the live site. Rendered only when the build is told so
+// (PUBLIC_ANALYTICS=on, production only): staging and local runs must not feed the live counters.
+const GA_ID = 'G-CP1VPL4VKN';
+const TWQ_ID = 'ocd0n';
+---
+
+<script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+<script is:inline define:vars={{ GA_ID, TWQ_ID }}>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', GA_ID);
+
+  !(function (e, t, n, s, u, a) {
+    e.twq ||
+      ((s = e.twq =
+        function () {
+          s.exe ? s.exe.apply(s, arguments) : s.queue.push(arguments);
+        }),
+      (s.version = '1.1'),
+      (s.queue = []),
+      (u = t.createElement(n)),
+      (u.async = !0),
+      (u.src = 'https://static.ads-twitter.com/uwt.js'),
+      (a = t.getElementsByTagName(n)[0]),
+      a.parentNode.insertBefore(u, a));
+  })(window, document, 'script');
+  twq('config', TWQ_ID);
+</script>

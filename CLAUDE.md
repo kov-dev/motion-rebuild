@@ -5,6 +5,24 @@
 [PLAN.md](PLAN.md) (етапи, статус). Базові правила збірки —
 [../_base/WEBFLOW-BASE.md](../_base/WEBFLOW-BASE.md).
 
+## Стан з 2026-11-18: сайт переноситься з Webflow на власну збірку (Astro)
+
+Рішення команди (сесія 53): сайт іде з Webflow. Джерело правди відтепер — **код у цьому репо**
+(Astro в корені: `astro.config.mjs`, `src/pages`, `src/layouts`, `src/components`, `public/`).
+Webflow-копія лишається **замороженим еталоном вигляду** (staging webflow.io), нові правки в неї
+не вносимо — лише в код. План і статус — [PLAN.md](PLAN.md) «Етап 7».
+
+- `npm run dev` / `npm run build` / `npm run preview` (порт 4321).
+- Статика проти staging: `node tools/migrate/dom-diff.mjs` (4 смуги, має бути 0 прапорців).
+- Анімації: `MOTION_URL=http://localhost:4321/ node tools/record/<x>-run.mjs … --live`.
+- `src/motion.js` і `src/sphere.js` імпортують бібліотеки за URL jsDelivr — так треба: збірка
+  підміняє їх npm-пакетами (`cdnToNpm` в `astro.config.mjs`), а Webflow-staging вантажить ті самі
+  файли напряму. Не переписувати на голі імена пакетів, поки staging-еталон живий.
+- CMS немає: контент у файлах репо. Аналітика — лише при `PUBLIC_ANALYTICS=on` (продакшн).
+- Перед будь-яким деплоєм — навичка `security-check`.
+
+Правила нижче про Webflow чинні для оригіналу (тільки читання) і для копії-еталона.
+
 ## Залізні правила
 
 1. **Оригінальний сайт `Motion` (`6384fe1e68c38ac8097a7e47`) — тільки читання.**

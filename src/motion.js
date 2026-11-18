@@ -1400,7 +1400,8 @@ function initUiIdle(blocks) {
 /* ---------- interactive (script.v33 blocks F and G, docs/sections/interactive.md) ---------- */
 
 // Pinned: loaded on demand, near the section only.
-const LOTTIE_URL = 'https://cdn.jsdelivr.net/npm/lottie-web@5.13.0/build/player/lottie_light.min.js/+esm';
+// A literal specifier (not a constant): the Astro build maps it to the npm package and bundles the player as its own chunk.
+const importLottie = () => import('https://cdn.jsdelivr.net/npm/lottie-web@5.13.0/build/player/lottie_light.min.js/+esm');
 const LOTTIE_RUN = 3.43; // live IX2: one pass over the whole file (206 frames at 60 fps)
 
 // Sound state lives in the DOM: the mute line of the Sound button carries `is-on` while the sound plays (initSound()).
@@ -1464,7 +1465,7 @@ async function initInteractiveLottie() {
   const zone = q('interactive-hover');
   if (!box?.dataset.src || box.dataset.ready) return;
   box.dataset.ready = '1';
-  const { default: lottie } = await import(LOTTIE_URL);
+  const { default: lottie } = await importLottie();
   const anim = lottie.loadAnimation({ container: box, renderer: 'svg', loop: false, autoplay: false, path: box.dataset.src });
   await new Promise((resolve) => anim.addEventListener('DOMLoaded', resolve));
   if (!zone) return;
@@ -1566,7 +1567,7 @@ const CLASSIC_WINDOWS = [[0.18, 0.24], [0.24, 0.3]];
 
 const loadLottie = (() => {
   let p = null;
-  return () => (p ||= import(LOTTIE_URL).then((m) => m.default));
+  return () => (p ||= importLottie().then((m) => m.default));
 })();
 
 // One file per band in the demo (data-src-tablet / data-src-mobile), one file elsewhere.

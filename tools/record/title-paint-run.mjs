@@ -12,7 +12,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const args = process.argv.slice(2);
 const reduce = args.includes('--reduce');
 const published = args.includes('--published');

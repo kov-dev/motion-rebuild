@@ -10,7 +10,8 @@ import { readFileSync } from 'node:fs';
 const args = process.argv.slice(2);
 const live = args.includes('--live');
 const [root, out, only = '1440'] = args.filter((a) => !a.startsWith('--'));
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const LIVE_SHIFT = { 1440: 852, 768: 1224, 375: 827 };
 const VPS = {

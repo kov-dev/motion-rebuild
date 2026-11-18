@@ -403,6 +403,41 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 
 ## Журнал
 
+### 2026-11-18 (сесія 53) — рішення піти з Webflow; каркас Astro, дослівний перенос, звірка
+
+- **Рішення (команда + користувач):** сайт переноситься з Webflow на власну збірку. CMS не робимо (списки
+  Resources ніхто не править → контент у файлах репо), Designer не потрібен, staging — Cloudflare-акаунт
+  користувача, продакшн — одразу акаунт студії. Webflow-копія відтепер — заморожений еталон вигляду.
+- **Що зі staging узято:** сторінка чиста — IX3 / `data-w-id` 0, з Webflow лишались тільки jQuery + webflow.js
+  (потрібні лише формі), 2 Collection List (14 айтемів уже в розмітці), нативна форма «Project request».
+- **Каркас:** Astro 7 у корені репо (`package.json`, `astro.config.mjs`, `src/layouts/Base.astro`,
+  `src/pages/index.astro`). `tools/migrate/from-staging.py` — одноразовий перенос: ассети CDN Webflow →
+  `public/assets` (118) і `public/fonts` (4, поза git — репо публічний), URL у розмітці й CSS → локальні,
+  body → 18 компонентів `src/components/*.astro` (уроки — `lessons/Lesson<Id>.astro`), формат prettier.
+- **Стилі:** опублікований CSS → `src/styles/site.css` (як є, з базовими `w-*`); rem-ембед, гейт і CSS
+  прелоадера беруться з канонічних `src/styles-rem.html` / `preloader-gate.js` / `preloader.css` (одне джерело
+  з Webflow); URL текстури в rem-ембеді підміняється на локальний у `Base.astro`.
+- **Код:** `src/motion.js` без змін у логіці; імпорт Lottie став літеральним (`importLottie()`), щоб збирач його
+  бачив. Плагін `cdnToNpm` (`astro.config.mjs`) підміняє URL jsDelivr npm-пакетами тих самих версій → один
+  бандл (211 KB) + чанки `sphere` і `lottie_light`, у рантаймі жодного стороннього CDN, крім медіа `cdn.zajno.com`.
+- **Аналітика:** GA4 `G-CP1VPL4VKN` і X pixel `ocd0n` — `src/components/Analytics.astro`, лише при
+  `PUBLIC_ANALYTICS=on` (staging і локальні запуски не сиплють у живі лічильники). Сміттєві `link rel="noopener"`
+  з head не перенесено.
+- **Звірка статики:** `tools/migrate/dom-diff.mjs` (скрипти вимкнено з обох боків) — 1162 елементи, порядок,
+  атрибути, текст і бокси на 1440 / 1024 / 768 / 375: Δ 0.00 px, висоти сторінки рівні, 0 прапорців.
+- **Звірка анімацій:** у 24 скриптах `tools/record` адреса сторінки тепер із `MOTION_URL` (за замовчуванням
+  staging); у 7 — впізнавання документа сторінки без прив'язки до webflow.io. На локальній збірці 1440 і 375:
+  preloader-handover, title-paint, ui, interactive, techniques, lessons, demo, snap, resources, footer, sound,
+  lenis — 0 прапорців. `nav-run` — єдиний прапорець штучний (перевірка імпортує свій екземпляр lottie з jsDelivr,
+  анімації бандла в ньому не зареєстровані; svg очей на місці). `cta-run` — усе до відправки ✓, на відправці
+  падає (підміна jQuery.ajax) — форма ще вебфлоівська розмітка без обробника.
+- **Не зроблено / далі:** власна форма (Worker), Resources з JSON, один компонент уроку, чистка `w-*` CSS,
+  редиректи `/lesson/*`, 404 / robots / sitemap, деплой staging — PLAN.md «Етап 7».
+- **Пастки:** імена файлів на CDN Webflow містять дужки й пробіли (`…00000 (1).png`) — регулярка URL для HTML
+  не має обрізати на `(`; `curl -o` лишає обрізаний файл при збої → качати в `.part` і перейменовувати;
+  prettier переносить довгі абзаци (у DOM це лише пробіли — звірка нормалізує); фонові команди довше 10 хв —
+  пускати `run_in_background`.
+
 ### 2026-11-18 (сесія 52) — хрестик на кнопці close у модалці, опис у 2 рядки, перезавантаження — з початку
 
 - **Запит користувача:** кнопка close у модалці `site-cta` — з хрестиком, як «close» у меню.

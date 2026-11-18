@@ -8,7 +8,8 @@ const args = process.argv.slice(2);
 const live = args.includes('--live');
 const [out, ...only] = args.filter((a) => a !== '--live');
 const LIVE = 'https://motion.zajno.com/';
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const VIEWPORTS = { 1440: { w: 1440, h: 900 }, 768: { w: 768, h: 1024 }, 375: { w: 375, h: 812, m: true } };
 const WORDS = ['It also', 'controls', 'your', 'attention'];
 

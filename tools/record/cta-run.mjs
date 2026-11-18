@@ -12,7 +12,8 @@ const proto = args.includes('--proto');
 const reduce = args.includes('--reduce');
 const [root, out, only = '1440'] = args.filter((a) => !a.startsWith('--'));
 mkdirSync(out, { recursive: true });
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io/';
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const VPS = { 1440: { w: 1440, h: 900, m: false }, 768: { w: 768, h: 1024, m: true }, 600: { w: 600, h: 900, m: true }, 375: { w: 375, h: 812, m: true } };
 const vp = VPS[only];
@@ -49,7 +50,7 @@ p.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m
 if (!live) {
   const js = src('motion.js');
   await p.route(STAGING + '*', async (route) => {
-    if (!/webflow\.io\/(\?|$)/.test(route.request().url())) return route.continue();
+    if (!/^https?:\/\/[^\/]+\/(\?|$)/.test(route.request().url())) return route.continue();
     const res = await route.fetch();
     let html = await res.text();
     html = html.replace(/<script type="module" src="[^"]*motion\.js"><\/script>/, '');

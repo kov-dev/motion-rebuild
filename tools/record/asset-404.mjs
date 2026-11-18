@@ -2,7 +2,8 @@
 // Usage: node asset-404.mjs <deleted-ids.json>  (session 40, asset wave 2)
 // Also flags any reference to the wave-2 deleted IDs.
 import { readFileSync } from 'node:fs';
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL?.replace(/\/$/, '') || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io';
 const PAGES = ['/', '/styleguide', '/lesson/parallax', '/lesson/the-basics-of-easing', '/lesson/transform-morph', '/this-page-does-not-exist-404'];
 const deleted = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const URL_RE = /https?:\/\/(?:[^\s"'()<>\\]|\(\d+\))+/g; // '(1)' allowed: asset names like '… (1).webp'; other parens end the URL (CSS url())

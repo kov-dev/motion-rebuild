@@ -3,7 +3,8 @@
 // without --none the proposed CSS is injected on top (prototype mode). Usage: node cards-center.mjs [--none]
 
 import { chromium } from 'playwright';
-const STAGING = 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io';
+// MOTION_URL: another build of the same page (the Astro build: http://localhost:4321/), used with --live.
+const STAGING = process.env.MOTION_URL?.replace(/\/$/, '') || 'https://motion-9888c6-7b0bf3d1442cd845b427c83cc.webflow.io';
 const CSS = process.argv.includes('--none') ? '' : `.lesson-cases-pin{top:max(1.02rem,calc(50svh - 2.575rem))}
 @media (max-width:991px){.lesson-cases-pin{top:max(1.94rem,calc(50svh - 2.155rem))}}
 @media (max-width:479px){.lesson-cases-pin{top:max(1.6rem,calc(50svh - 1.82rem))}}`;

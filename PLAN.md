@@ -118,6 +118,32 @@
 - [ ] Site plan на копії; домен переноситься; SSL
 - [ ] Старий сайт — архів (не видаляти ≥1 місяць)
 
+## Етап 7 — Перенесення з Webflow на власну збірку (Astro) 🟨 (рішення 2026-11-18, сесія 53)
+
+Рішення команди й користувача: сайт іде з Webflow (без щомісячної плати й залежності від платформи).
+CMS не робимо — списки Resources ніхто не править, контент у файлах репо. Designer дизайнерам не
+потрібен. Staging — на Cloudflare-акаунті користувача, продакшн — одразу на акаунті студії.
+Webflow-копія — заморожений еталон вигляду; нові правки (зокрема за відгуком арт-директора на CTA) — лише в код.
+
+- [x] Каркас Astro 7 у корені репо (`astro.config.mjs`, `src/layouts/Base.astro`, `src/pages/index.astro`) — сесія 53
+- [x] Розмітка staging → 18 компонентів `src/components/*.astro` (дослівно, `tools/migrate/from-staging.py`) — сесія 53
+- [x] Стилі: опублікований CSS Webflow → `src/styles/site.css`; rem-ембед і прелоадер — з канонічних `src/styles-rem.html`, `src/preloader.css`, `src/preloader-gate.js` — сесія 53
+- [x] Ассети з CDN Webflow → `public/assets` (118 файлів) і `public/fonts` (4 woff2, поза git) — сесія 53
+- [x] Бібліотеки (GSAP, Lenis, Matter, Lottie) — у бандлі, без jsDelivr у рантаймі; jQuery і webflow.js немає — сесія 53
+- [x] Статика проти staging: `tools/migrate/dom-diff.mjs` — 1162 елементи, 4 смуги, Δ 0.00 px, 0 прапорців — сесія 53
+- [x] Анімаційні перевірки на локальній збірці (`MOTION_URL=http://localhost:4321/ … --live`, 1440 і 375): preloader-handover, title-paint, ui, interactive, techniques, lessons, demo, snap, resources, footer, sound, lenis — 0 прапорців; сторінка з повним скролом — 0 битих запитів, хости лише свій і cdn.zajno.com — сесія 53
+- [ ] `nav-run`: перевірка Lottie очей / карток бере другий екземпляр плеєра з jsDelivr і не бачить анімацій із бандла (на сторінці вони є) — переписати перевірку; `cta-run`: падає на кроці відправки (підміняє jQuery.ajax) — оновити разом із власною формою
+- [ ] Форма «Project request»: власний обробник (Worker + захист від ботів) і відправка з `initCta()` — куди слати заявки, вирішує користувач
+- [ ] Resources: два списки з файлу даних (`src/data/…json`) замість дослівної розмітки
+- [ ] `lesson-section`: один компонент з пропсами замість 8 дослівних файлів (dist без змін)
+- [ ] CSS: прибрати базові правила Webflow (`w-*`, ~25 KB), дати варіантам уроків читабельні імена замість `w-variant-<uuid>`
+- [ ] `/lesson/<slug>` → `/#<секція>` (редиректи хостингу), 404, robots.txt, sitemap
+- [ ] Styleguide: переносити чи ні (довідник системи для Designer — у коді, ймовірно, не потрібен)
+- [ ] Шрифти: репо публічний, файли шрифтів у git не кладемо — вирішити: приватний репо чи шрифти окремо
+- [ ] Staging на Cloudflare (акаунт користувача): `security-check` → деплой → перевірка `MOTION_URL=<staging>`
+- [ ] Продакшн на акаунті студії: DNS motion.zajno.com, `PUBLIC_ANALYTICS=on`, перевірка GA4 / X pixel, скасувати Site plan Webflow, оригінал — архів ≥ 1 місяць
+- [ ] Етапи 5–6 (перформанс, faststart-відео, SEO) — далі вже на власній збірці
+
 ## Відкриті питання
 
 - ~~Доступ Figma MCP~~ — є (сесія 4).
