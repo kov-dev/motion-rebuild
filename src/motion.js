@@ -1922,6 +1922,9 @@ export function initLessonSchemes() {
 /* ---------- resources (script.v33 block E, IX2 e-664; docs/sections/resources.md «План анімації») ---------- */
 
 const RESOURCES_SCRUB = 3;
+// Scroll length of the arrow (shutter) phase per shutter, in viewport widths. Live: 1.5 — with the stagger the phase ran
+// 2.25·vw (≈ 3 200 px on 1440), too many wheel turns before the track moves (user, session 51).
+const RES_ARROWS = 0.5;
 // IX2 e-664 (≥992 only): smoothing 90, start 20 % before the pin top enters, keys 0 → 40 % of the progress.
 const RES_CLOUDS_SCRUB = 1;
 const RES_CLOUDS_Y = [1.2, 1, 2]; // rem: second, third, fourth cloud (the first one stands)
@@ -1973,7 +1976,7 @@ export function initResources() {
       ({ conditions: c }) => {
         // Measured once per build (a width change rebuilds, see below): the phase lengths are whole percents.
         const vw = innerWidth;
-        const arrows = 1.5 * vw;
+        const arrows = RES_ARROWS * vw;
         const shift = Math.max(0, track.offsetWidth - vw);
         const listsH = lists.getBoundingClientRect().height;
         const total = arrows + shift + listsH;
@@ -2111,6 +2114,9 @@ function initResourcesStack(pin, listEls) {
 // Same catch-up as Techniques: the footer trigger has IX2 smoothing 90.
 const FOOTER_SCRUB = 1;
 const FOOTER_CLOUDS_Y = [1.2, 1, 2]; // rem: second, third, fourth cloud (the first one is the footer's own top edge)
+// ≥992 the studio call stands between the back clouds and the footer's own edge (session 51): a middle layer, it
+// starts this much higher and settles into its place at the clouds' end, slower than the edge, faster than the clouds.
+const FOOTER_CTA_Y = -0.4; // rem
 // Distance of the footer top from the viewport top at progress 0 (the live −15 % offset is of the footer height).
 const footerSpan = (footer) => innerHeight + 0.15 * footer.offsetHeight;
 
@@ -2124,7 +2130,12 @@ export function initFooter() {
   if (!footer) return;
   const overlay = q('res-overlay');
   const clouds = qa('ft-cloud', footer);
+  const cta = q('ft-cta', footer);
   const rem = (v) => () => v * remPx();
+
+  // The year of the copyright line follows the calendar (the markup carries the current one as a fallback).
+  const copy = q('ft-copy', footer);
+  if (copy) copy.textContent = copy.textContent.replace(/\b(19|20)\d{2}\b/, String(new Date().getFullYear()));
 
   // Lesson links → their sections, as the menu cards.
   footer.querySelectorAll('a[href^="#"]').forEach((link) =>
@@ -2139,7 +2150,7 @@ export function initFooter() {
 
   gsap.matchMedia().add(
     // Every band is listed: matchMedia() skips the callback when no condition matches.
-    { any: '(min-width: 0px)', reduce: '(prefers-reduced-motion: reduce)' },
+    { any: '(min-width: 0px)', large: '(min-width: 992px)', reduce: '(prefers-reduced-motion: reduce)' },
     ({ conditions: c }) => {
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
@@ -2157,6 +2168,7 @@ export function initFooter() {
       // Positions and durations are fractions of the progress (the timeline is padded to 1 below).
       if (overlay) tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0);
       if (!c.reduce) clouds.forEach((cloud, i) => FOOTER_CLOUDS_Y[i] && tl.fromTo(cloud, { y: 0 }, { y: rem(FOOTER_CLOUDS_Y[i]), duration: 0.72 }, 0));
+      if (!c.reduce && c.large && cta) tl.fromTo(cta, { y: rem(FOOTER_CTA_Y) }, { y: 0, duration: 0.72 }, 0);
       tl.set({}, {}, 1);
     }
   );

@@ -88,8 +88,10 @@ const state = () => p.evaluate(() => {
 // Model of the live timeline.
 const s0 = await state();
 const vw = vp.w;
-const shift = s0.trackW - vw, listsH = s0.listsH, total = 1.5 * vw + shift + listsH;
-const pA = Math.trunc((1.5 * vw / total) * 100), pT = Math.trunc((shift / total) * 100), pL = Math.trunc((2 * listsH / total) * 100);
+// Arrow phase per shutter in vw (src RES_ARROWS; live 1.5, session 51: 0.5).
+const ARROWS = 0.5;
+const shift = s0.trackW - vw, listsH = s0.listsH, total = ARROWS * vw + shift + listsH;
+const pA = Math.trunc((ARROWS * vw / total) * 100), pT = Math.trunc((shift / total) * 100), pL = Math.trunc((2 * listsH / total) * 100);
 const T = 1.5 * pA + pT + pL;
 const arrowEnd = (vw <= 479 ? 0.78 : 0.84) * vw;
 const clamp = (v) => Math.min(1, Math.max(0, v));
@@ -103,7 +105,8 @@ const model = (f) => {
 };
 console.log(`== ${only}: total ${total.toFixed(0)} (pA ${pA} pT ${pT} pL ${pL}, T ${T}), shift ${shift}, lists ${listsH.toFixed(1)}, counts ${s0.counts}`);
 const L = LIVE[only];
-if (L) flag(Math.abs(total - L.total) <= 2 && Math.abs(shift - L.shift) <= 1, `pin vs live: total ${total.toFixed(0)} / ${L.total}, shift ${shift} / ${L.shift}`);
+// The live pin is (1.5 − ARROWS)·vw longer: only the arrow phase was shortened.
+if (L) flag(Math.abs(total + (1.5 - ARROWS) * vw - L.total) <= 2 && Math.abs(shift - L.shift) <= 1, `pin vs live (arrows ${ARROWS} vs 1.5 vw): total ${total.toFixed(0)} / ${L.total}, shift ${shift} / ${L.shift}`);
 flag(s0.counts.join() === '10,4', `counters ${s0.counts}`);
 
 // Clouds (before the pin): IX2 0 → 40 % from pin top at 1.2·vh, ≥992 only.
