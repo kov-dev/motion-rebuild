@@ -1,0 +1,89 @@
+<!--
+  CTA prototype fragments (session 50). Injected into the staging page by tools/record/cta-run.mjs --proto;
+  the Webflow build repeats this markup 1:1. Each <template data-into> says where a fragment goes.
+-->
+
+<!-- 1. Navbar bubble: before the menu toggle inside nb-panel (≥768) -->
+<template data-into="nav">
+  <div class="nb-cta">
+    <button class="nb-pill is-invert" type="button" data-motion="cta-open" data-cta-source="nav" aria-haspopup="dialog">
+      <span class="nb-cta-label-wrap">
+        <span class="nb-cta-label" data-motion="cta-label">made by zajno</span>
+        <span class="nb-cta-label is-alt" aria-hidden="true">let’s talk</span>
+      </span>
+    </button>
+  </div>
+</template>
+
+<!-- 1b. The same bubble for ≤767, on the Sound line (inside site-sound, so it takes the scheme of that line) -->
+<template data-into="sound">
+  <div class="cta-float" data-motion="cta-float">
+    <button class="nb-pill is-invert" type="button" data-motion="cta-open" data-cta-source="float" aria-haspopup="dialog">made by zajno</button>
+  </div>
+</template>
+
+<!-- 2. Menu: after the last card inside nb-cards -->
+<template data-into="menu">
+  <div class="nb-end" data-motion="nb-end">
+    <p class="heading-sm">Want motion like this in your product?</p>
+    <p class="body-md nb-end-text">We are Zajno, the studio behind this guide. Let’s make your product move.</p>
+    <button class="nb-pill is-invert" type="button" data-motion="cta-open" data-cta-source="menu" aria-haspopup="dialog">let’s talk</button>
+  </div>
+</template>
+
+<!-- 3. Footer: first inside ft-content -->
+<template data-into="footer">
+  <div class="ft-cta">
+    <p class="heading-md ft-cta-title">Want motion like this in your product?</p>
+    <div class="ft-cta-side">
+      <p class="body-md">We are Zajno, the studio behind this guide. Let’s make your product move.</p>
+      <button class="nb-pill is-invert" type="button" data-motion="cta-open" data-cta-source="footer" aria-haspopup="dialog">let’s talk</button>
+    </div>
+  </div>
+</template>
+
+<!-- 4. Modal: last in Body -->
+<template data-into="body">
+  <div class="cta-modal" data-motion="cta-modal" role="dialog" aria-modal="true" aria-labelledby="cta-title">
+    <div class="cta-backdrop" data-motion="cta-backdrop"></div>
+    <div class="cta-panel" data-motion="cta-panel" data-lenis-prevent>
+      <div class="cta-head">
+        <p class="text-label cta-kicker">Zajno × motion.ed</p>
+        <button class="nb-pill" type="button" data-motion="cta-close" aria-label="Close">close</button>
+      </div>
+      <h2 class="heading-sm cta-title" id="cta-title">Want motion like this in your product?</h2>
+      <p class="body-md cta-text">We are Zajno, the studio behind this guide. Tell us about your project and we will get back to you.</p>
+      <div class="cta-form-block w-form">
+        <form class="cta-form" name="wf-form-Project-request" data-name="Project request" method="post" data-motion="cta-form">
+          <div class="cta-row">
+          <div class="cta-field">
+            <label class="text-label cta-label" for="cta-name">Name</label>
+            <input class="cta-input w-input" id="cta-name" name="Name" data-name="Name" type="text" maxlength="256" autocomplete="name" required>
+          </div>
+          <div class="cta-field">
+            <label class="text-label cta-label" for="cta-email">Email</label>
+            <input class="cta-input w-input" id="cta-email" name="Email" data-name="Email" type="email" maxlength="256" autocomplete="email" required>
+          </div>
+          </div>
+          <div class="cta-field">
+            <label class="text-label cta-label" for="cta-company">Company or website</label>
+            <input class="cta-input w-input" id="cta-company" name="Company" data-name="Company" type="text" maxlength="256" autocomplete="organization">
+          </div>
+          <div class="cta-field">
+            <label class="text-label cta-label" for="cta-message">About the project</label>
+            <textarea class="cta-input is-area w-input" id="cta-message" name="Message" data-name="Message" maxlength="5000" required></textarea>
+          </div>
+          <input type="hidden" name="Source" data-name="Source" data-motion="cta-source"><input type="text" name="Check" data-name="Check" data-motion="cta-trap" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+          <input class="nb-pill is-invert w-button" type="submit" value="send request" data-wait="sending…">
+        </form>
+        <div class="cta-done w-form-done" tabindex="-1">
+          <p class="heading-sm cta-done-title">Thank you!</p>
+          <p class="body-md">We have your request and will be in touch soon.</p>
+        </div>
+        <div class="cta-fail w-form-fail">
+          <p class="body-sm">Something went wrong while sending the form. Please try again.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

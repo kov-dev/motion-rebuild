@@ -2412,7 +2412,7 @@ export function initNav() {
   els(q('nb-logo', root), q('nb-home', root), toggle).forEach((el) => el.addEventListener('click', () => playSound('click')));
   ['pointerenter', 'focus'].forEach((t) => toggle.addEventListener(t, loadCards, { once: true }));
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape' || !navMenuOpen) return;
+    if (e.key !== 'Escape' || !navMenuOpen || ctaOpen) return; // the request modal above the menu closes first
     setOpen(false);
     toggle.focus();
   });
@@ -2541,6 +2541,190 @@ export function initSound() {
   });
 }
 
+/* ---------- CTA: the project-request modal and its openers (session 50; docs/sections/cta.md) ---------- */
+
+// Studio curves (motion designer): things appearing, things leaving, things moving in view.
+const EASE = { enter: bez(0.17, 0.17, 0.43, 1), exit: bez(0.57, 0, 0.83, 0.83), move: bez(0.57, 0, 0.43, 1) };
+const CTA = { minFill: 1.5, dim: 0.6, backdrop: 0.36, panel: 0.6, item: 0.5, itemY: 0.24, stagger: 0.05, out: 0.3, label: 0.3, endItem: 0.6, endStagger: 0.08 };
+
+let ctaOpen = false;
+
+/**
+ * Lead form of the studio. Openers ([data-motion="cta-open"], data-cta-source = nav / float / menu / footer) show one
+ * modal: a light sheet from the right (from the bottom on phones) over a dimmed page. The form itself is a native
+ * Webflow form (webflow.js submits it and swaps in the success block); here only the open / close motion, the page
+ * lock, focus, the Source field and the analytics events.
+ */
+export function initCta() {
+  const modal = q('cta-modal');
+  const panel = modal && q('cta-panel', modal);
+  const openers = qa('cta-open');
+  initCtaBubbles(openers);
+  initMenuEnd();
+  if (!panel || !openers.length) return;
+  const backdrop = q('cta-backdrop', modal);
+  const form = q('cta-form', modal);
+  const source = q('cta-source', modal);
+  const items = [...panel.children];
+  const html = document.documentElement;
+  const track = (name, label) => typeof window.gtag === 'function' && window.gtag('event', name, { event_category: 'CTA', event_label: label });
+  // Phones: a bottom sheet. Elsewhere: a sheet from the right, a little past its own width (the inset to the edge).
+  const away = () => (band() === 'mobile' ? { xPercent: 0, yPercent: 105 } : { xPercent: 105, yPercent: 0 });
+  let opener = null;
+  let openedAt = Infinity;
+
+  gsap.set(modal, { display: 'none' });
+  panel.setAttribute('tabindex', '-1');
+
+  const focusables = () =>
+    [...panel.querySelectorAll('a[href], button, input:not([type="hidden"]), textarea, select, [tabindex]:not([tabindex="-1"])')].filter(
+      (el) => !el.disabled && el.offsetParent !== null
+    );
+
+  const setOpen = (open, from = null) => {
+    if (open === ctaOpen) return;
+    ctaOpen = open;
+    const d = reducedMotion() ? 0 : 1;
+    gsap.killTweensOf([backdrop, panel, ...items]);
+    if (open) {
+      opener = from;
+      openedAt = performance.now();
+      const label = from?.dataset.ctaSource || 'unknown';
+      if (source) source.value = label;
+      track('cta_open', label);
+      if (lenis) lenis.stop();
+      else html.style.overflow = 'hidden';
+      gsap.set(modal, { display: 'block' });
+      panel.scrollTop = 0;
+      gsap.fromTo(backdrop, { opacity: 0 }, { opacity: CTA.dim, duration: CTA.backdrop * d, ease: EASE.enter });
+      gsap.fromTo(panel, d ? away() : { xPercent: 0, yPercent: 0 }, { xPercent: 0, yPercent: 0, duration: CTA.panel * d, ease: EASE.enter });
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: () => CTA.itemY * remPx() * d },
+        { opacity: 1, y: 0, duration: CTA.item * d, ease: EASE.enter, stagger: CTA.stagger * d, delay: 0.18 * d, clearProps: 'transform' }
+      );
+      // A fine pointer goes straight to the first field; on touch that would raise the keyboard over the sheet.
+      const first = matchMedia('(pointer: fine)').matches && focusables().find((el) => el.matches('input, textarea'));
+      (first || panel).focus({ preventScroll: true });
+    } else {
+      // The menu may still be open underneath: it keeps the page locked.
+      if (!navMenuOpen) {
+        if (lenis) lenis.start();
+        else html.style.removeProperty('overflow');
+      }
+      gsap.to(backdrop, { opacity: 0, duration: CTA.out * d, ease: EASE.exit });
+      gsap.to(panel, { ...(d ? away() : {}), duration: CTA.out * d, ease: EASE.exit, onComplete: () => !ctaOpen && gsap.set(modal, { display: 'none' }) });
+      opener?.focus({ preventScroll: true });
+      opener = null;
+    }
+  };
+
+  openers.forEach((btn) =>
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      playSound('click');
+      setOpen(true, btn);
+    })
+  );
+  els(q('cta-close', modal), backdrop).forEach((el) => el.addEventListener('click', () => setOpen(false)));
+  if (form) {
+    // Webflow gives every new input the placeholder "Example Text" and offers no setting to clear it.
+    form.querySelectorAll('[placeholder="Example Text"]').forEach((el) => el.removeAttribute('placeholder'));
+    // webflow.js hides the form for its success block: the invitation above (title, text) has done its job then.
+    new MutationObserver(() => {
+      if (getComputedStyle(form).display !== 'none') return;
+      gsap.set(items.slice(1, -1), { display: 'none' });
+      panel.scrollTop = 0;
+    }).observe(form, { attributes: true, attributeFilter: ['style'] });
+  }
+  // Bot guard, before webflow.js sees the submit (it listens on document, bubbling): a real person presses the button
+  // (trusted event), leaves the trap field empty and needs more than a moment after the sheet opened. Bots posting
+  // straight to the Webflow endpoint are for Webflow's own spam filter (Site settings → Forms).
+  form?.addEventListener(
+    'submit',
+    (e) => {
+      const trap = q('cta-trap', form);
+      if (e.isTrusted && !trap?.value && performance.now() - openedAt > CTA.minFill * 1000) return track('cta_submit', source?.value || 'unknown');
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    },
+    { capture: true }
+  );
+  document.addEventListener('keydown', (e) => {
+    if (!ctaOpen) return;
+    if (e.key === 'Escape') return setOpen(false);
+    if (e.key !== 'Tab') return;
+    // Focus stays inside the sheet.
+    const f = focusables();
+    if (!f.length) return e.preventDefault();
+    const first = f[0];
+    const last = f[f.length - 1];
+    const at = document.activeElement;
+    if (e.shiftKey && (at === first || at === panel || !panel.contains(at))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (at === last || !panel.contains(at))) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+  // Neither the wheel nor touches on the dimmed page reach the menu track or the page underneath.
+  ['wheel', 'touchmove'].forEach((t) => backdrop?.addEventListener(t, (e) => e.cancelable && e.preventDefault(), { passive: false }));
+}
+
+/**
+ * The "made by zajno" bubbles: the navbar one swaps its label for the call on hover (the toggle's menu / close move);
+ * the floating one (narrow bands, on the Sound line) hides over the footer together with the Sound button.
+ */
+function initCtaBubbles(openers) {
+  const hoverable = matchMedia('(pointer: fine)');
+  openers.forEach((btn) => {
+    const label = q('cta-label', btn);
+    if (!label) return;
+    const labels = [...label.parentElement.children];
+    const swap = (on) => gsap.to(labels, { yPercent: on ? -104 : 0, duration: reducedMotion() ? 0 : CTA.label, ease: EASE.move, overwrite: true });
+    btn.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && hoverable.matches && swap(true));
+    btn.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && swap(false));
+    btn.addEventListener('focus', () => btn.matches(':focus-visible') && swap(true));
+    btn.addEventListener('blur', () => swap(false));
+  });
+
+  const float = q('cta-float');
+  const footer = q('footer');
+  if (!float || !footer) return;
+  ScrollTrigger.create({
+    trigger: footer,
+    start: 'top bottom',
+    end: 'bottom top',
+    refreshPriority: -1,
+    onToggle: (st) => {
+      const d = reducedMotion() ? 0 : 1;
+      gsap.to(float, { autoAlpha: +!st.isActive, scale: +!st.isActive, duration: SOUND_HIDE.scale * d, ease: st.isActive ? EASE.exit : EASE.enter, overwrite: true });
+    },
+  });
+}
+
+// The call after the last menu card: its lines come up each time the track brings it into view.
+function initMenuEnd() {
+  const end = q('nb-end');
+  const track = q('nb-track');
+  if (!end || !track || reducedMotion()) return;
+  const items = [...end.children];
+  gsap.set(items, { opacity: 0 });
+  new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: () => CTA.itemY * remPx() },
+          { opacity: 1, y: 0, duration: CTA.endItem, ease: EASE.enter, stagger: CTA.endStagger, overwrite: true }
+        );
+      } else gsap.set(items, { opacity: 0 });
+    },
+    { root: track, threshold: 0.35 }
+  ).observe(end);
+}
+
 /* ---------- boot ---------- */
 
 async function init() {
@@ -2561,6 +2745,7 @@ async function init() {
   initResources();
   initFooter();
   initSound();
+  initCta();
   // Last: its triggers measure every pin above.
   initTheme();
   ScrollTrigger.refresh();

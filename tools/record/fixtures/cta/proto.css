@@ -1,0 +1,69 @@
+/* CTA prototype CSS (session 50) — becomes Designer classes 1:1. rem = 100 px of the layout width per band. */
+
+/* ---- pills ---- */
+.nb-pill { cursor: pointer; }
+/* the scheme inverted: the call-to-action pill */
+.nb-pill.is-invert { border-color: var(--_semantic---foreground); background-color: var(--_semantic---foreground); color: var(--_semantic---bg); }
+
+/* ---- navbar bubble ---- */
+.nb-cta { margin-left: auto; margin-right: .08rem; pointer-events: auto; }
+.nb-cta-label-wrap { display: block; position: relative; overflow: hidden; }
+.nb-cta-label { display: block; }
+.nb-cta-label.is-alt { position: absolute; top: 104%; left: 0; right: 0; text-align: center; }
+@media screen and (max-width: 767px) { .nb-cta { display: none; } }
+
+/* ---- floating bubble (≤767), child of site-sound ---- */
+.cta-float { display: none; position: fixed; left: .24rem; bottom: .33rem; }
+@media screen and (max-width: 767px) { .cta-float { display: block; } }
+@media screen and (max-width: 479px) { .cta-float { left: .22rem; } }
+
+/* ---- menu end ---- */
+.nb-end { flex: none; align-self: stretch; width: 5.2rem; padding-left: .4rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; row-gap: .24rem; }
+.nb-end-text { max-width: 3.6rem; opacity: .7; }
+@media screen and (max-width: 479px) { .nb-end { width: 3.05rem; padding-left: .1rem; row-gap: .16rem; } }
+
+/* ---- footer ---- */
+.ft-cta { display: flex; justify-content: space-between; align-items: flex-end; padding-top: .16rem; padding-bottom: .4rem; border-bottom: var(--_core---border-1) solid rgba(253, 252, 250, .2); }
+.ft-cta-title { width: 10.3rem; }
+.ft-cta-side { display: flex; flex-direction: column; align-items: flex-start; row-gap: .24rem; width: 2.9rem; }
+@media screen and (max-width: 991px) {
+  .ft-cta { flex-direction: column; align-items: flex-start; row-gap: .24rem; padding-top: .16rem; padding-bottom: .4rem; }
+  .ft-cta-title { width: auto; }
+  .ft-cta-side { width: 4.2rem; }
+}
+@media screen and (max-width: 479px) { .ft-cta { padding-top: .08rem; padding-bottom: .4rem; } .ft-cta-side { width: auto; } }
+
+/* ---- modal ---- */
+.cta-modal { z-index: 30; position: fixed; inset: 0; display: none; }
+.cta-backdrop { position: absolute; inset: 0; background-color: var(--_core---neutral-1000); } /* dimmed by initCta(): opacity 0 → 0.6 */
+.cta-panel { position: absolute; top: .16rem; right: .16rem; bottom: .16rem; width: 6.4rem; overflow: auto; overscroll-behavior: contain; border-radius: .24rem; padding: .32rem .4rem .4rem; display: flex; flex-direction: column;
+  --_semantic---bg: var(--_core---neutral-0); --_semantic---foreground: var(--_core---neutral-1000); --_semantic---border: var(--_core---neutral-1000);
+  background-color: var(--_semantic---bg); color: var(--_semantic---foreground); }
+.cta-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; }
+.cta-title { margin-bottom: .16rem; }
+.cta-text { max-width: 4.6rem; margin-bottom: .32rem; }
+.cta-form-block { margin: 0; }
+.cta-form { display: flex; flex-direction: column; align-items: flex-start; row-gap: .24rem; }
+.cta-row { align-self: stretch; display: flex; column-gap: .24rem; row-gap: .24rem; }
+.cta-field { align-self: stretch; flex: 1; display: flex; flex-direction: column; row-gap: .08rem; }
+.cta-label { display: block; margin: 0; font-weight: var(--_core---weight-regular); opacity: .6; }
+.cta-input { height: auto; margin: 0; padding: .06rem 0 .12rem; border: 0; border-bottom: var(--_core---border-1) solid rgba(12, 11, 11, .3); border-radius: 0; background-color: transparent; color: var(--_semantic---foreground);
+  font-family: var(--_core---font-display); font-size: .2rem; line-height: 1.4; letter-spacing: -.02em; transition: border-color .24s; }
+.cta-input:focus { border-color: var(--_semantic---border); outline: 0; }
+.cta-input.is-area { min-height: .72rem; resize: vertical; }
+.cta-done { padding: 0; background-color: transparent; text-align: left; }
+.cta-done-title { margin-bottom: .16rem; }
+.cta-fail { margin-top: .16rem; padding: .12rem .16rem; border-radius: .12rem; background-color: var(--_core---extra-lesson-dimension); }
+@media screen and (max-width: 991px) {
+  .cta-panel { width: 5.2rem; padding: .24rem .28rem .32rem; }
+  .cta-head { margin-bottom: .32rem; }
+}
+@media screen and (max-width: 479px) {
+  .cta-panel { top: auto; left: .08rem; right: .08rem; bottom: .08rem; width: auto; max-height: calc(100% - .7rem); padding: .2rem .2rem .28rem; }
+  .cta-head { margin-bottom: .32rem; }
+  .cta-text { margin-bottom: .28rem; }
+  .cta-form { row-gap: .2rem; }
+  .cta-row { flex-direction: column; row-gap: .2rem; }
+  .cta-input { font-size: max(16px, .16rem); }
+  .cta-input.is-area { min-height: .72rem; }
+}
