@@ -20,6 +20,12 @@ import Lenis from 'https://cdn.jsdelivr.net/npm/lenis@1.3.26/+esm';
 
 gsap.registerPlugin(CustomEase, ScrollTrigger, MotionPathPlugin, SplitText);
 
+// A reload always opens on Hero (session 52, user). Setting history.scrollRestoration alone is not enough:
+// ScrollTrigger remembers the value it found at registration ('auto') and puts it back after each refresh, so the
+// browser still restored the old position at load. clearScrollMemory('manual') makes 'manual' the value it keeps.
+// Deep links (/#zoom) are unaffected: init() jumps to them itself.
+ScrollTrigger.clearScrollMemory('manual');
+
 // Landing eases of the live site (script.v33 block C), used by intro and ui.
 CustomEase.create('bounce', 'M0,0 C0.05222,-0.59802 0.31828,-1.38625 0.55039,0 0.65208,-0.78892 0.94566,-0.58262 1,1');
 CustomEase.create('bounceSmall', 'M0,0,C0.052,-0.598,0.246,-0.72,0.336,0,0.498,-0.502,0.792,-0.482,1,1');
