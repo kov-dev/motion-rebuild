@@ -12,6 +12,7 @@
 | Той самий бабл ≤767 | `site-sound` (схема лінії Sound), fixed ліворуч унизу | `div.cta-float` (`cta-float`) > `button.nb-pill.is-invert` (source `float`); ховається над футером разом із кнопкою звуку |
 | Заклик у меню | `site-nav` → `nb-cards`, після 10-ї картки | `div.nb-end` (`nb-end`) > `p.heading-sm` + `p.body-md.nb-end-text` + кнопка (source `menu`); з'являється, коли трек довозить його у вікно |
 | Заклик над футером | `site-footer` → `ft-content`, першим (під хмарами, над `ft-main`) | `div.ft-cta` > `p.heading-md.ft-cta-title` + `div.ft-cta-side` > `p.body-md` + кнопка (source `footer`). Шари хмар не чіпали |
+| ↳ сесія 51 | ≥992 заклик стоїть **між хмарами**: задні `ft-cloud` → `ft-cta` → передня кромка `is-first` у `ft-edge` → `ft-main`; `ft-fill` + `ft-veil` у `ft-clouds`; ≤991 — кромка над закликом, як було | паралакс `FOOTER_CTA_Y` у `initFooter()`, журнал s51 |
 | Модалка | компонент **`site-cta`** `95860475-3ddf-60d4-62c9-b14c09d62291` (System), інстанс останнім у Body Home `84d4078e-7221-3564-9429-ae4ac71d9a74` | `div.cta-modal` (`cta-modal`, role dialog) > `cta-backdrop` + `cta-panel` (`data-lenis-prevent`, semantic: base = світла) > `cta-head` (підпис + `button.nb-pill` `cta-close`) · `h2#cta-title.heading-sm.cta-title` · `p.body-md.cta-text` · форма |
 
 Форма — **нативна Webflow** «Project request» (`form#cta-form.cta-form`, `cta-form`, method post): `cta-row` (Name*, Email*) ·
@@ -47,5 +48,5 @@ Company or website · About the project* (`cta-field` > `label.text-label.cta-la
 
 - Куди йдуть заявки: Site settings → Forms копії (пошта сповіщень, Bot protection / spam filtering) — крок користувача / студії.
 - Тексти (заголовок, кнопки, поля) і сам вигляд — на відгук арт-директора; згода на обробку даних / посилання на політику — питання до студії.
-- Футер виріс на ~3 rem: на низьких вікнах (≈2:1) останній екран починається з другого рядка заклику.
+- Футер 1440 тепер 911 px: на 1440×900 у кінці сторінки верх заклику (~10 px) під навбаром; по дорозі заклик видно цілим.
 - `site-cta` стоїть лише на Home; на Styleguide бабли є (інстанси `site-nav` / `site-sound`), але без модуля нічого не відкривають.
