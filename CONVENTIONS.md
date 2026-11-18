@@ -403,6 +403,28 @@ UI-слайдер — 12 класів `ui-*` вище + `ui-panel-body.is-first`
 
 ## Журнал
 
+### 2026-11-18 (сесія 50) — CTA студії: бабл «made by zajno», заклики в меню й над футером, модалка з формою
+
+- **Запит арт-директора** (через користувача): три точки входу до заявки + одна модалка. Усе — [docs/sections/cta.md](docs/sections/cta.md).
+- **Webflow (копія):** `site-nav` — `nb-cta` перед тоглом і `nb-end` після карток; `site-footer` — `ft-cta` першим у `ft-content`;
+  `site-sound` — `cta-float` (≤767); новий компонент **`site-cta`** `95860475-3ddf-60d4-62c9-b14c09d62291` останнім у Body Home з нативною
+  формою «Project request». ~25 нових класів. Head Home: модуль → `9714681`. Staging опубліковано агентом 3 рази
+  (`dcce8ec6…`, `98afa63c…`, `3cb0b172…`).
+- **Код:** `initCta()` + `initCtaBubbles()` + `initMenuEnd()`, константи `EASE` (криві студії) і `CTA`; Esc меню поступається модалці.
+- **Перевірка:** `tools/record/cta-run.mjs` — 1440 / 768 / 600 / 375, `--reduce`, `--live` 1440 / 375: 0 прапорців; `nav-run`, `footer-run`,
+  `sound-run` 1440 / 375 — 0. Прототип до збірки — `--proto` (фрагменти `tools/record/fixtures/cta/`).
+- **Безпека (security-check):** method post (без JS дані не потраплять в URL), пастка + мінімальний час + довірена подія, у gtag лише джерело.
+  Крок користувача: Site settings → Forms (пошта сповіщень, Bot protection).
+- **Webflow MCP 2.x** (нові `data_*` інструменти, Bridge App не потрібен — усе зроблено без відкритого Designer-моста):
+  (1) два класи на елементі = **комбо**: `["body-md","x"]` шукає `.body-md.x`, окремий глобальний `x` не підходить — створювати з
+  `parent_style_names`; (2) `color-mix(… var(--x) …)` у `property_value` мовчки стає **голою змінною** (20 % губиться) — писати `rgba()`
+  або opacity; (3) `Form` приходить з дефолтними полями й плейсхолдером «Example Text», атрибут `placeholder` через `set_attributes` — помилка,
+  налаштування немає → знімає код; ключі: input `name` / `required` / `type` / `domId`, кнопка `buttonText` / `loadingText`, форма `name` / `method`;
+  (4) після `transform_element_to_component` id елементів змінюються (нова `component`-частина) — шукати заново з `scope_component_id`;
+  (5) `set_text` на DOM `button` працює напряму; (6) ембед: ключ `code`; (7) id сесії MCP — у першому рядку виводу `webflow_guide_tool`.
+- **Відкладено за словом користувача (нагадати):** доопрацювати скрол-анімації й доскрол у кількох місцях; етап 5 — збірка / мініфікація
+  модуля; перезалити відео з faststart на S3 студії (сесія 44).
+
 ### 2026-10-15 (сесія 49) — Hero: фарбування заголовка на скрол (слова → літери)
 
 - **Ідея користувача (не з лайву):** h1 Hero «Good animation also makes…» — слова спочатку сірі (opacity 0.2) і по одному, в порядку
