@@ -39,9 +39,12 @@
 .cta-panel { position: absolute; top: .16rem; right: .16rem; bottom: .16rem; width: 6.4rem; overflow: auto; overscroll-behavior: contain; border-radius: .24rem; padding: .32rem .4rem .4rem; display: flex; flex-direction: column;
   --_semantic---bg: var(--_core---neutral-0); --_semantic---foreground: var(--_core---neutral-1000); --_semantic---border: var(--_core---neutral-1000);
   background-color: var(--_semantic---bg); color: var(--_semantic---foreground); }
+/* the close pill reuses the menu toggle: label + two lines held in a cross */
+.nb-toggle-line.is-x-top { transform: translate3d(0, .025rem, 0) rotate(45deg); }
+.nb-toggle-line.is-x-bottom { transform: translate3d(0, -.025rem, 0) rotate(-45deg); }
 .cta-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; }
 .cta-title { margin-bottom: .16rem; }
-.cta-text { max-width: 4.6rem; margin-bottom: .32rem; }
+.cta-text { max-width: 5rem; margin-bottom: .32rem; }
 .cta-form-block { margin: 0; }
 .cta-form { display: flex; flex-direction: column; align-items: flex-start; row-gap: .24rem; }
 .cta-row { align-self: stretch; display: flex; column-gap: .24rem; row-gap: .24rem; }
